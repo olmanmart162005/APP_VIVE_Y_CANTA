@@ -1,7 +1,12 @@
 import { Routes, Route } from "react-router-dom"
+import { useEffect, useState } from "react"
 
+import SplashScreen from "./components/SplashScreen"
+
+import EditProfile from "./pages/EditProfile"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
+import MemberDetails from "./pages/MemberDetails"
 import Activities from "./pages/Activities"
 import Finance from "./pages/Finance"
 import Profile from "./pages/Profile"
@@ -11,9 +16,38 @@ import Gallery from "./pages/Gallery"
 import Settings from "./pages/Settings"
 
 function App() {
+
+  const [loading,
+    setLoading] =
+    useState(true)
+
+  useEffect(() => {
+
+    const timer =
+      setTimeout(() => {
+
+        setLoading(false)
+
+      }, 2500)
+
+    return () =>
+      clearTimeout(timer)
+
+  }, [])
+
+  if (loading) {
+    return (
+      <SplashScreen />
+    )
+  }
+
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+
+      <Route
+        path="/"
+        element={<Login />}
+      />
 
       <Route
         path="/dashboard"
@@ -31,18 +65,28 @@ function App() {
       />
 
       <Route
+        path="/members"
+        element={<Members />}
+      />
+
+      <Route
+        path="/member/:id"
+        element={<MemberDetails />}
+      />
+
+      <Route
         path="/profile"
         element={<Profile />}
       />
 
       <Route
-        path="/notices"
-        element={<Notices />}
+        path="/profile/edit"
+        element={<EditProfile />}
       />
 
       <Route
-        path="/members"
-        element={<Members />}
+        path="/notices"
+        element={<Notices />}
       />
 
       <Route
@@ -54,6 +98,7 @@ function App() {
         path="/settings"
         element={<Settings />}
       />
+
     </Routes>
   )
 }

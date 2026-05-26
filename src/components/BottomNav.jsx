@@ -1,89 +1,97 @@
-import { useNavigate, useLocation } from "react-router-dom"
 import {
   Home,
   CalendarDays,
-  Bell,
   DollarSign,
+  Users,
   User,
 } from "lucide-react"
 
+import {
+  NavLink,
+} from "react-router-dom"
+
 function BottomNav() {
-  const navigate = useNavigate()
-  const location = useLocation()
 
-  const active =
-    "text-[#B8860B] scale-110"
-
-  const inactive =
-    "text-gray-400"
+  const navItems = [
+    {
+      icon: Home,
+      path:
+        "/dashboard",
+    },
+    {
+      icon:
+        CalendarDays,
+      path:
+        "/activities",
+    },
+    
+    {
+      icon:
+        DollarSign,
+      path:
+        "/finance",
+    },
+    {
+      icon:
+        Users,
+      path:
+        "/members",
+    },
+    {
+      icon: User,
+      path:
+        "/profile",
+    },
+  ]
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-white px-8 py-4 rounded-[30px] shadow-xl flex items-center gap-8 z-50">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-3 pb-[env(safe-area-inset-bottom)]">
 
-      <button
-        onClick={() =>
-          navigate("/dashboard")
-        }
-        className={
-          location.pathname === "/dashboard"
-            ? active
-            : inactive
-        }
-      >
-        <Home />
-      </button>
+      <div className="w-full max-w-[430px] px-4 pb-4">
 
-      <button
-        onClick={() =>
-          navigate("/activities")
-        }
-        className={
-          location.pathname === "/activities"
-            ? active
-            : inactive
-        }
-      >
-        <CalendarDays />
-      </button>
+        <div className="bg-white/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-gray-100 px-3 py-3 flex items-center justify-between">
 
-      <button
-        onClick={() =>
-          navigate("/notices")
-        }
-        className={
-          location.pathname === "/notices"
-            ? active
-            : inactive
-        }
-      >
-        <Bell />
-      </button>
+          {navItems.map(
+            (
+              item,
+              index
+            ) => {
 
-      <button
-        onClick={() =>
-          navigate("/finance")
-        }
-        className={
-          location.pathname === "/finance"
-            ? active
-            : inactive
-        }
-      >
-        <DollarSign />
-      </button>
+              const Icon =
+                item.icon
 
-      <button
-        onClick={() =>
-          navigate("/profile")
-        }
-        className={
-          location.pathname === "/profile"
-            ? active
-            : inactive
-        }
-      >
-        <User />
-      </button>
+              return (
+                <NavLink
+                  key={index}
+                  to={
+                    item.path
+                  }
+                  className={({
+                    isActive,
+                  }) =>
+                    `flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 ${
+                      isActive
+                        ? "bg-[#D4AF37] text-white scale-105 shadow-lg"
+                        : "text-gray-400 hover:text-[#B8860B]"
+                    }`
+                  }
+                >
+
+                  <Icon
+                    size={22}
+                    strokeWidth={
+                      2.3
+                    }
+                  />
+
+                </NavLink>
+              )
+            }
+          )}
+
+        </div>
+
+      </div>
 
     </div>
   )

@@ -1,23 +1,56 @@
 import { supabase } from "../lib/supabase"
 
-export const getCurrentUser = async () => {
+export async function login(
+  email,
+  password
+) {
+  const {
+    data,
+    error,
+  } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+  if (error)
+    throw error
+
+  return data.user
+}
+
+export async function getCurrentUser() {
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } =
+    await supabase.auth.getUser()
 
-  if (!user) return null
+  if (!user)
+    return null
 
-  const { data: profile, error } =
+  const {
+    data,
+    error,
+  } =
     await supabase
       .from("profiles")
       .select("*")
-      .eq("id", user.id)
+      .eq(
+        "id",
+        user.id
+      )
       .single()
 
-  if (error) {
-    console.log(error)
+  if (error)
     return null
-  }
 
-  return profile
+  return {
+    ...data,
+    email:
+      user.email,
+  }
+}
+
+export async function logout() {
+  await supabase.auth.signOut()
 }

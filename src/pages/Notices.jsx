@@ -7,7 +7,9 @@ import { canManageNotices } from "../services/permissions"
 import { supabase } from "../lib/supabase"
 
 function Notices() {
-  const [user, setUser] =
+
+  const [user,
+    setUser] =
     useState(null)
 
   const [records,
@@ -35,22 +37,55 @@ function Notices() {
     useState(false)
 
   useEffect(() => {
-    loadUser()
-    loadNotices()
+    initializePage()
   }, [])
 
-  const loadUser =
+  const initializePage =
     async () => {
+
       const profile =
         await getCurrentUser()
 
-      setUser(profile)
+      setUser(
+        profile
+      )
+
+      await markAsRead(
+        profile?.id
+      )
+
+      loadNotices()
+    }
+
+  const markAsRead =
+    async (
+      userId
+    ) => {
+
+      if (!userId)
+        return
+
+      await supabase
+        .from(
+          "profiles"
+        )
+        .update({
+          last_seen_notice:
+            new Date()
+              .toISOString(),
+        })
+        .eq(
+          "id",
+          userId
+        )
     }
 
   const loadNotices =
     async () => {
 
-      const { data } =
+      const {
+        data,
+      } =
         await supabase
           .from(
             "notices"
@@ -78,6 +113,7 @@ function Notices() {
 
   const clearForm =
     () => {
+
       setTitulo("")
       setMensaje("")
       setPrioridad(
@@ -155,6 +191,7 @@ function Notices() {
       }
 
       if (error) {
+
         console.log(
           error
         )
@@ -176,14 +213,18 @@ function Notices() {
     }
 
   const handleDelete =
-    async (id) => {
+    async (
+      id
+    ) => {
 
       const confirmDelete =
         confirm(
           "¿Eliminar aviso?"
         )
 
-      if (!confirmDelete)
+      if (
+        !confirmDelete
+      )
         return
 
       await supabase
@@ -191,13 +232,18 @@ function Notices() {
           "notices"
         )
         .delete()
-        .eq("id", id)
+        .eq(
+          "id",
+          id
+        )
 
       loadNotices()
     }
 
   const handleEdit =
-    (item) => {
+    (
+      item
+    ) => {
 
       setEditingId(
         item.id
@@ -230,9 +276,11 @@ function Notices() {
     (
       prioridad
     ) => {
+
       switch (
         prioridad
       ) {
+
         case "alta":
           return "bg-red-100 text-red-600"
 
@@ -248,20 +296,21 @@ function Notices() {
     }
 
   return (
-    <div className="min-h-screen bg-[#F8F4E9] p-5 pb-32">
+    <div className="page-container safe-bottom p-4 sm:p-5">
 
-      <h1 className="text-3xl font-bold text-[#B8860B]">
+      <h1 className="text-2xl sm:text-3xl font-bold text-[#B8860B]">
         Avisos
       </h1>
 
-      <p className="text-gray-500 mt-1">
+      <p className="text-gray-500 mt-1 text-sm sm:text-base">
         Comunicados del coro
       </p>
 
       {canManageNotices(
         user?.role
       ) && (
-        <div className="bg-white rounded-[35px] p-5 mt-5 shadow-card">
+
+        <div className="bg-white rounded-[30px] p-5 mt-5 shadow-lg overflow-hidden">
 
           <h2 className="font-bold text-lg mb-4">
             {editingId
@@ -275,11 +324,10 @@ function Notices() {
             value={titulo}
             onChange={(e) =>
               setTitulo(
-                e.target
-                  .value
+                e.target.value
               )
             }
-            className="w-full p-4 rounded-2xl bg-[#F8F4E9]"
+            className="w-full p-4 rounded-2xl bg-[#F8F4E9] outline-none"
           />
 
           <textarea
@@ -289,11 +337,10 @@ function Notices() {
             }
             onChange={(e) =>
               setMensaje(
-                e.target
-                  .value
+                e.target.value
               )
             }
-            className="w-full p-4 rounded-2xl bg-[#F8F4E9] mt-3"
+            className="w-full p-4 rounded-2xl bg-[#F8F4E9] mt-3 outline-none resize-none min-h-[120px]"
           />
 
           <select
@@ -302,11 +349,10 @@ function Notices() {
             }
             onChange={(e) =>
               setPrioridad(
-                e.target
-                  .value
+                e.target.value
               )
             }
-            className="w-full p-4 rounded-2xl bg-[#F8F4E9] mt-3"
+            className="w-full p-4 rounded-2xl bg-[#F8F4E9] mt-3 outline-none"
           >
             <option value="alta">
               Alta
@@ -328,12 +374,9 @@ function Notices() {
               checked={
                 fijado
               }
-              onChange={(
-                e
-              ) =>
+              onChange={(e) =>
                 setFijado(
-                  e.target
-                    .checked
+                  e.target.checked
                 )
               }
             />
@@ -361,20 +404,21 @@ function Notices() {
           (
             item
           ) => (
+
             <div
               key={
                 item.id
               }
-              className="bg-white rounded-[35px] p-5 shadow-card"
+              className="bg-white rounded-[30px] p-5 shadow-lg overflow-hidden"
             >
 
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start gap-3">
 
-                <div>
+                <div className="min-w-0 flex-1">
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
 
-                    <h2 className="font-bold text-lg">
+                    <h2 className="font-bold text-lg break-words">
                       {
                         item.titulo
                       }
@@ -382,9 +426,7 @@ function Notices() {
 
                     {item.fijado && (
                       <Pin
-                        size={
-                          18
-                        }
+                        size={18}
                         className="text-[#B8860B]"
                       />
                     )}
@@ -392,9 +434,7 @@ function Notices() {
                   </div>
 
                   <span
-                    className={`px-3 py-1 rounded-full text-sm inline-block mt-2 ${getColor(
-                      item.prioridad
-                    )}`}
+                    className={`px-3 py-1 rounded-full text-sm inline-block mt-2 ${getColor(item.prioridad)}`}
                   >
                     {
                       item.prioridad
@@ -405,7 +445,7 @@ function Notices() {
 
               </div>
 
-              <p className="mt-4 text-gray-600">
+              <p className="mt-4 text-gray-600 break-words">
                 {
                   item.mensaje
                 }
@@ -414,7 +454,8 @@ function Notices() {
               {canManageNotices(
                 user?.role
               ) && (
-                <div className="flex gap-3 mt-4">
+
+                <div className="flex gap-3 mt-4 flex-wrap">
 
                   <button
                     onClick={() =>

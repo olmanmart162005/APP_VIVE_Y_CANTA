@@ -2,13 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 body {
   background: #F8F4E9;
   font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+.safe-bottom {
+  padding-bottom:
+    calc(
+      90px +
+      env(
+        safe-area-inset-bottom
+      )
+    );
+}
+
+.page-container {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #F8F4E9;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.card-responsive {
+  width: 100%;
+  overflow: hidden;
+}
+
+.text-responsive {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
 }
