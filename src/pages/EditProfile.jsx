@@ -142,40 +142,79 @@ function EditProfile() {
   }
 
   const saveProfile = async () => {
-    try {
-      setLoading(true)
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+  try {
+    setLoading(true)
 
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          foto: form.foto || null,
-          nombre_completo: form.nombre_completo || "",
-          telefono: form.telefono || "",
-          direccion: form.direccion || "",
-          dni: form.dni || "",
-          fecha_nacimiento: form.fecha_nacimiento || "",
-          tipo_sangre: form.tipo_sangre || "",
-          contacto_emergencia: form.contacto_emergencia || "",
-          telefono_emergencia: form.telefono_emergencia || "",
-        })
-        .eq("id", user.id)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-      if (error) {
-        throw error
-      }
-
-      alert("Perfil actualizado")
-      navigate("/profile")
-    } catch (err) {
-      console.log(err)
-      alert("Error al guardar")
-    } finally {
-      setLoading(false)
+    if (!user) {
+      alert("Usuario no encontrado")
+      return
     }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        foto:
+          form.foto || null,
+
+        nombre_completo:
+          form.nombre_completo || "",
+
+        telefono:
+          form.telefono || "",
+
+        direccion:
+          form.direccion || "",
+
+        dni:
+          form.dni || "",
+
+        // 🔥 FIX DEL ERROR
+        fecha_nacimiento:
+          form.fecha_nacimiento || null,
+
+        tipo_sangre:
+          form.tipo_sangre || "",
+
+        contacto_emergencia:
+          form.contacto_emergencia || "",
+
+        telefono_emergencia:
+          form.telefono_emergencia || "",
+      })
+      .eq("id", user.id)
+
+    if (error) {
+      console.error(error)
+
+      alert(
+        error.message
+      )
+
+      return
+    }
+
+    alert(
+      "Perfil actualizado correctamente"
+    )
+
+    navigate("/profile")
+
+  } catch (err) {
+
+    console.error(err)
+
+    alert(
+      "Error al guardar"
+    )
+
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen bg-[#F8F4E9] pb-32 font-sans antialiased text-gray-800">
@@ -266,14 +305,92 @@ function EditProfile() {
             onChange={handleChange}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Fecha de Nacimiento"
-              type="date"
-              name="fecha_nacimiento"
-              value={form.fecha_nacimiento}
-              onChange={handleChange}
-            />
+          <div>
+  <label className="text-[10px] font-black uppercase text-gray-400 tracking-wider block ml-1 mb-1">
+    Fecha de Nacimiento
+  </label>
+
+  <div className="grid grid-cols-3 gap-2">
+
+    {/* DÍA */}
+    <select
+      name="dia"
+      value={form.dia || ""}
+      onChange={handleChange}
+      className="w-full bg-[#F8F4E9]/40 border border-gray-100 rounded-xl p-3 outline-none font-bold text-sm"
+    >
+      <option value="">Día</option>
+
+      {Array.from(
+        { length: 31 },
+        (_, i) => (
+          <option
+            key={i + 1}
+            value={i + 1}
+          >
+            {i + 1}
+          </option>
+        )
+      )}
+    </select>
+
+    {/* MES */}
+    <select
+      name="mes"
+      value={form.mes || ""}
+      onChange={handleChange}
+      className="w-full bg-[#F8F4E9]/40 border border-gray-100 rounded-xl p-3 outline-none font-bold text-sm"
+    >
+      <option value="">
+        Mes
+      </option>
+
+      {[
+        "01","02","03","04",
+        "05","06","07","08",
+        "09","10","11","12"
+      ].map((mes) => (
+        <option
+          key={mes}
+          value={mes}
+        >
+          {mes}
+        </option>
+      ))}
+    </select>
+
+    {/* AÑO */}
+    <select
+      name="anio"
+      value={form.anio || ""}
+      onChange={handleChange}
+      className="w-full bg-[#F8F4E9]/40 border border-gray-100 rounded-xl p-3 outline-none font-bold text-sm"
+    >
+      <option value="">
+        Año
+      </option>
+
+      {Array.from(
+        { length: 80 },
+        (_, i) => {
+          const year =
+            new Date()
+            .getFullYear() - i
+
+          return (
+            <option
+              key={year}
+              value={year}
+            >
+              {year}
+            </option>
+          )
+        }
+      )}
+    </select>
+
+  </div>
+
 
             <div>
               <label className="text-[10px] font-black uppercase text-gray-400 tracking-wider block ml-1 mb-1">

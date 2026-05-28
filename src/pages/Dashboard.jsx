@@ -18,6 +18,9 @@ function Dashboard() {
   const [user, setUser] = useState(null)
   const [balance, setBalance] = useState(0)
   const [nextActivity, setNextActivity] = useState(null)
+  const [membersCount,
+    setMembersCount] =
+    useState(0)
 
   const verses = [
     {
@@ -44,6 +47,7 @@ function Dashboard() {
     loadUser()
     loadFinance()
     loadActivity()
+    loadMembersCount()
   }, [])
 
   const loadUser = async () => {
@@ -80,6 +84,26 @@ function Dashboard() {
     }
   }
 
+  const loadMembersCount =
+    async () => {
+
+      const {
+        count,
+        error,
+      } = await supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+
+      if (!error) {
+        setMembersCount(
+          count || 0
+        )
+      }
+    }
+
   const getRoleName = () => {
     switch (user?.role) {
       case "admin":
@@ -104,11 +128,11 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F8F4E9] pb-32 font-sans antialiased text-gray-800">
-      
+
       {/* HEADER DE BIENVENIDA CON IDENTIDAD PREMIUM */}
       <div className="bg-gradient-to-r from-[#D4AF37] to-[#B8860B] rounded-b-[45px] px-5 pt-6 pb-8 text-white shadow-lg relative">
         <div className="flex items-center justify-between max-w-4xl mx-auto mt-2">
-          
+
           <div className="min-w-0 flex-1">
             <p className="opacity-80 text-[10px] uppercase font-black tracking-widest block capitalize">
               {currentDate}
@@ -146,7 +170,7 @@ function Dashboard() {
 
         {/* CONTENEDOR GRID DE TARJETAS DE MÉTRICAS */}
         <div className="grid grid-cols-2 gap-3.5">
-          
+
           {/* CAJA GENERAL */}
           <div className="bg-white rounded-[28px] p-4 shadow-xl border border-gray-100/70 overflow-hidden flex flex-col justify-between">
             <div>
@@ -172,8 +196,8 @@ function Dashboard() {
                 Integrantes
               </h3>
             </div>
-            <p className="text-2xl sm:text-3xl font-black text-gray-800 mt-2 tracking-tight">
-              32
+            <p className="text-2xl sm:text-3xl font-black text-[#B8860B] mt-2 tracking-tight">
+              {membersCount}
             </p>
           </div>
 
@@ -219,7 +243,7 @@ function Dashboard() {
         {/* PRÓXIMA ACTIVIDAD */}
         <div className="bg-white rounded-[28px] shadow-xl p-5 border border-gray-100/70 overflow-hidden">
           <div className="flex gap-4 items-start">
-            
+
             <div className="bg-[#F8F4E9] p-3 rounded-xl text-[#B8860B] shrink-0">
               <CalendarDays size={22} />
             </div>
@@ -234,7 +258,7 @@ function Dashboard() {
                   <h3 className="font-black text-base text-gray-800 tracking-tight break-words">
                     {nextActivity.titulo}
                   </h3>
-                  
+
                   <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
                     <p className="text-gray-500 font-medium text-xs flex items-center gap-1.5">
                       <Clock size={13} className="text-[#B8860B]" />

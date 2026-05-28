@@ -7,6 +7,7 @@ import EditProfile from "./pages/EditProfile"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import MemberDetails from "./pages/MemberDetails"
+import MemberCard from "./pages/MemberCard"
 import Activities from "./pages/Activities"
 import Finance from "./pages/Finance"
 import Profile from "./pages/Profile"
@@ -72,6 +73,11 @@ function App() {
       <Route
         path="/member/:id"
         element={<MemberDetails />}
+      />
+
+      <Route
+        path="/carnet/:id"
+        element={<MemberCard />}
       />
 
       <Route

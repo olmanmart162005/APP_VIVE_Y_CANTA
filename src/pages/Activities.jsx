@@ -39,13 +39,13 @@ function Activities() {
   const [records, setRecords] = useState([])
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [activeTab, setActiveTab] = useState("calendar") 
+  const [activeTab, setActiveTab] = useState("calendar")
+  const [agendaFilter, setAgendaFilter] = useState("proximas")
 
   const [editingId, setEditingId] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState(null)
 
-  // Estado del formulario
   const [titulo, setTitulo] = useState("")
   const [descripcion, setDescripcion] = useState("")
   const [tipo, setTipo] = useState("Ensayo")
@@ -117,12 +117,7 @@ function Activities() {
     } else {
       const { error: insertError } = await supabase
         .from("activities")
-        .insert([
-          {
-            ...payload,
-            created_by: user?.id,
-          },
-        ])
+        .insert([{ ...payload, created_by: user?.id }])
       error = insertError
     }
 
@@ -168,7 +163,13 @@ function Activities() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // Paleta exacta solicitada para los tipos
+  const isVencida = (item) => {
+    if (item.estado === "realizada" || item.estado === "cancelada") return false
+    const hoy = new Date()
+    hoy.setHours(0, 0, 0, 0)
+    return parseISO(item.fecha) < hoy
+  }
+
   const getTypeColors = (tipoActividad) => {
     switch (tipoActividad) {
       case "Ensayo":
@@ -224,7 +225,7 @@ function Activities() {
 
   const eventoDestacado = useMemo(() => {
     const hoy = new Date()
-    hoy.setHours(0,0,0,0)
+    hoy.setHours(0, 0, 0, 0)
     return records.find((r) => {
       if (!r.fecha || r.estado === "cancelada" || r.estado === "realizada") return false
       const targetDate = parseISO(r.fecha)
@@ -235,9 +236,9 @@ function Activities() {
 
   const renderTimeBadge = (fechaActividad) => {
     const hoy = new Date()
-    hoy.setHours(0,0,0,0)
+    hoy.setHours(0, 0, 0, 0)
     const target = parseISO(fechaActividad)
-    
+
     if (isSameDay(target, hoy)) {
       return (
         <span className="flex items-center gap-1 bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse uppercase tracking-wider">
@@ -256,9 +257,27 @@ function Activities() {
     return null
   }
 
+  const agendaTabs = [
+    { key: "proximas",   label: "Próximas" },
+    { key: "realizadas", label: "Realizadas" },
+    { key: "todas",      label: "Todas" },
+  ]
+
+  const getFilteredRecords = (filterKey) => {
+    return records.filter((item) => {
+      if (filterKey === "proximas")
+        return !isVencida(item) && item.estado !== "realizada" && item.estado !== "cancelada"
+      if (filterKey === "realizadas")
+        return item.estado === "realizada" || isVencida(item)
+      return true
+    })
+  }
+
+  const filteredRecords = useMemo(() => getFilteredRecords(agendaFilter), [records, agendaFilter])
+
   return (
     <div className="min-h-screen bg-[#F8F4E9] p-4 md:p-8 pb-32 font-sans antialiased text-gray-800">
-      
+
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start border-b border-gray-200 pb-5 gap-4">
         <div>
@@ -280,7 +299,7 @@ function Activities() {
         )}
       </div>
 
-      {/* EVENTO DESTACADO MENOS DE 7 DIAS */}
+      {/* EVENTO DESTACADO - MENOS DE 7 DIAS */}
       {eventoDestacado && (
         <div className="mt-5 bg-gradient-to-r from-red-600 to-amber-600 rounded-3xl p-5 text-white shadow-xl flex items-center justify-between gap-4 border border-red-500/20">
           <div className="flex items-center gap-3">
@@ -288,25 +307,34 @@ function Activities() {
               <Sparkles className="text-yellow-200" size={22} />
             </div>
             <div>
-              <span className="text-[10px] bg-black/30 px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest">🔥 Evento Crítico Cercano</span>
+              <span className="text-[10px] bg-black/30 px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest">
+                🔥 Evento Crítico Cercano
+              </span>
               <h3 className="font-black text-xl mt-1 tracking-tight">{eventoDestacado.titulo}</h3>
               <p className="text-xs text-white/90 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 font-medium">
                 <span className="flex items-center gap-1">📍 {eventoDestacado.lugar}</span>
                 <span>•</span>
-                <span className="flex items-center gap-1">📅 {format(parseISO(eventoDestacado.fecha), "dd 'de' MMMM", { locale: es })}</span>
+                <span className="flex items-center gap-1">
+                  📅 {format(parseISO(eventoDestacado.fecha), "dd 'de' MMMM", { locale: es })}
+                </span>
               </p>
             </div>
           </div>
           <div className="text-right whitespace-nowrap bg-black/15 p-3 rounded-2xl border border-white/10 min-w-[75px]">
             <span className="text-2xl font-black tracking-tight">
-              {differenceInDays(parseISO(eventoDestacado.fecha), new Date() >= parseISO(eventoDestacado.fecha) ? parseISO(eventoDestacado.fecha) : new Date())}
+              {differenceInDays(
+                parseISO(eventoDestacado.fecha),
+                new Date() >= parseISO(eventoDestacado.fecha)
+                  ? parseISO(eventoDestacado.fecha)
+                  : new Date()
+              )}
             </span>
             <p className="text-[9px] font-black uppercase tracking-wider text-white/80">Días Faltan</p>
           </div>
         </div>
       )}
 
-      {/* SELECTOR PARA SMARTPHONES */}
+      {/* SELECTOR MOBILE */}
       <div className="flex mt-5 bg-white p-1.5 rounded-2xl shadow-xs border border-gray-100 md:hidden">
         <button
           onClick={() => setActiveTab("calendar")}
@@ -442,8 +470,8 @@ function Activities() {
 
       {/* DASHBOARD PRINCIPAL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 items-start">
-        
-        {/* CALENDARIO MENSUAL VISUAL GRANDE */}
+
+        {/* CALENDARIO MENSUAL */}
         <div className={`lg:col-span-2 bg-white rounded-[30px] p-4 md:p-6 shadow-xs border border-gray-100 ${activeTab === "calendar" ? "block" : "hidden md:block"}`}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-black text-gray-800 capitalize flex items-center gap-2 tracking-tight">
@@ -479,19 +507,19 @@ function Activities() {
                   key={day.toString()}
                   onClick={() => setSelectedDate(day)}
                   className={`aspect-square rounded-xl md:rounded-2xl p-1 flex flex-col justify-between items-center relative transition border cursor-pointer group ${
-                    isSelected 
-                      ? "bg-[#B8860B] text-white border-[#B8860B] shadow-md scale-102" 
-                      : isTodayDay 
-                        ? "bg-amber-50 text-[#B8860B] border-amber-300 font-bold" 
+                    isSelected
+                      ? "bg-[#B8860B] text-white border-[#B8860B] shadow-md scale-102"
+                      : isTodayDay
+                        ? "bg-amber-50 text-[#B8860B] border-amber-300 font-bold"
                         : "bg-gray-50 text-gray-700 hover:bg-gray-100 border-transparent"
                   }`}
                 >
                   <span className="text-xs md:text-sm font-bold mt-0.5">{format(day, "d")}</span>
-                  
+
                   <div className="flex flex-wrap gap-0.5 justify-center w-full max-w-full overflow-hidden px-0.5 mb-1">
                     {matches.slice(0, 3).map((act) => (
-                      <span 
-                        key={act.id} 
+                      <span
+                        key={act.id}
                         className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-white" : getTypeColors(act.tipo).badge}`}
                       ></span>
                     ))}
@@ -504,7 +532,7 @@ function Activities() {
             })}
           </div>
 
-          {/* AGENDA DIARIA EXPANDIDA ABAJO */}
+          {/* AGENDA DIARIA */}
           <div className="mt-6 border-t border-gray-100 pt-5">
             <h3 className="text-xs font-black uppercase text-gray-400 tracking-wider mb-3">
               Eventos para el {format(selectedDate, "dd 'de' MMMM", { locale: es })}
@@ -548,40 +576,70 @@ function Activities() {
           </div>
         </div>
 
-        {/* LISTADO PRÓXIMAS ACTIVIDADES (AGENDA COMPLETA) */}
+        {/* PANEL AGENDA CON FILTROS */}
         <div className={`bg-white rounded-[30px] p-4 md:p-6 shadow-xs border border-gray-100 ${activeTab === "agenda" ? "block" : "hidden lg:block"}`}>
-          <div className="mb-4">
-            <h3 className="text-xs font-black uppercase text-gray-400 tracking-wider flex items-center gap-1.5">
-              <CalendarIcon size={14} /> Próximas Actividades
-            </h3>
+
+          {/* Tabs de filtro */}
+          <div className="flex bg-[#F8F4E9] p-1 rounded-xl mb-4 gap-1">
+            {agendaTabs.map(({ key, label }) => {
+              const count = getFilteredRecords(key).length
+              return (
+                <button
+                  key={key}
+                  onClick={() => setAgendaFilter(key)}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer
+                    ${agendaFilter === key ? "bg-[#B8860B] text-white shadow-xs" : "text-gray-500 hover:text-gray-700"}`}
+                >
+                  {label}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black leading-none
+                    ${agendaFilter === key ? "bg-white/25 text-white" : "bg-gray-200 text-gray-500"}`}>
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
-          <div className="space-y-3 overflow-y-auto max-h-[580px] pr-1">
-            {records.length === 0 ? (
+          <div className="space-y-3 overflow-y-auto max-h-[540px] pr-1">
+            {filteredRecords.length === 0 ? (
               <div className="text-center py-8 text-gray-400 text-sm">
-                No se registran actividades en el sistema general.
+                No hay actividades en esta categoría.
               </div>
             ) : (
-              records.map((item) => {
+              filteredRecords.map((item) => {
                 const colors = getTypeColors(item.tipo)
+                const vencida = isVencida(item)
                 return (
                   <div
                     key={item.id}
                     onClick={() => setSelectedActivity(item)}
-                    className="bg-gray-50/60 rounded-2xl p-4 border border-gray-100 hover:border-amber-200 transition-all cursor-pointer relative overflow-hidden group"
+                    className={`rounded-2xl p-4 border transition-all cursor-pointer relative overflow-hidden group
+                      ${vencida
+                        ? "bg-amber-50/60 border-amber-100 hover:border-amber-300"
+                        : "bg-gray-50/60 border-gray-100 hover:border-amber-200"
+                      }`}
                   >
-                    <div className={`absolute top-0 left-0 bottom-0 w-1.5 ${colors.badge}`}></div>
-                    
+                    <div className={`absolute top-0 left-0 bottom-0 w-1.5 rounded-l-2xl ${vencida ? "bg-amber-400" : colors.badge}`}></div>
+
                     <div className="flex justify-between items-start gap-2 mb-1.5">
-                      <h4 className="font-extrabold text-sm text-gray-800 tracking-tight group-hover:text-[#B8860B] transition-colors line-clamp-1">
+                      <h4 className={`font-extrabold text-sm tracking-tight line-clamp-1 transition-colors
+                        ${vencida ? "text-amber-800 group-hover:text-amber-900" : "text-gray-800 group-hover:text-[#B8860B]"}`}>
                         {item.titulo}
                       </h4>
-                      {renderTimeBadge(item.fecha)}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {vencida ? (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 uppercase">
+                            Vencida
+                          </span>
+                        ) : (
+                          renderTimeBadge(item.fecha)
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-1 text-xs text-gray-500 font-medium">
                       <div className="flex items-center gap-1.5 text-gray-800 font-bold">
-                        <CalendarIcon size={13} className="text-[#B8860B]" />
+                        <CalendarIcon size={13} className={vencida ? "text-amber-600" : "text-[#B8860B]"} />
                         <span>{format(parseISO(item.fecha + "T00:00:00"), "dd 'de' MMMM", { locale: es })}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -596,9 +654,23 @@ function Activities() {
 
                     <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-gray-100/70">
                       <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">{item.tipo}</span>
-                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full uppercase ${getEstadoBadge(item.estado)}`}>
-                        {item.estado}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {vencida && canManageActivities(user?.role) && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation()
+                              await supabase.from("activities").update({ estado: "realizada" }).eq("id", item.id)
+                              loadActivities()
+                            }}
+                            className="text-[10px] font-black px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200 hover:bg-green-200 transition cursor-pointer uppercase"
+                          >
+                            ✓ Marcar realizada
+                          </button>
+                        )}
+                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full uppercase ${getEstadoBadge(item.estado)}`}>
+                          {item.estado}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )
@@ -608,21 +680,28 @@ function Activities() {
         </div>
       </div>
 
-      {/* ELEGANTE MODAL PREMIUM DE DETALLES */}
+      {/* MODAL DE DETALLES */}
       {selectedActivity && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-white rounded-[30px] p-6 w-full max-w-md shadow-2xl relative border border-gray-100">
-            <button 
-              onClick={() => setSelectedActivity(null)} 
+            <button
+              onClick={() => setSelectedActivity(null)}
               className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full text-gray-400 transition cursor-pointer"
             >
               <X size={18} />
             </button>
 
             <div className="mb-4">
-              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider ${getEstadoBadge(selectedActivity.estado)}`}>
-                {selectedActivity.estado}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider ${getEstadoBadge(selectedActivity.estado)}`}>
+                  {selectedActivity.estado}
+                </span>
+                {isVencida(selectedActivity) && (
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                    Vencida
+                  </span>
+                )}
+              </div>
               <h3 className="font-black text-xl text-gray-800 tracking-tight mt-2.5">{selectedActivity.titulo}</h3>
               <p className="text-xs text-[#B8860B] font-bold mt-0.5">Categoría: {selectedActivity.tipo}</p>
             </div>
@@ -630,7 +709,9 @@ function Activities() {
             <div className="bg-gray-50 rounded-2xl p-4 space-y-3 text-sm text-gray-600 border border-gray-100">
               <div className="flex items-center gap-2.5">
                 <CalendarIcon size={16} className="text-[#B8860B]" />
-                <span className="font-bold text-gray-700">{format(parseISO(selectedActivity.fecha + "T00:00:00"), "dd 'de' MMMM, yyyy", { locale: es })}</span>
+                <span className="font-bold text-gray-700">
+                  {format(parseISO(selectedActivity.fecha + "T00:00:00"), "dd 'de' MMMM, yyyy", { locale: es })}
+                </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Clock size={16} className="text-gray-400" />
@@ -648,24 +729,37 @@ function Activities() {
 
             {selectedActivity.descripcion && (
               <div className="mt-4">
-                <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mb-1"><Info size={12} /> Observaciones Internas</h5>
+                <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mb-1">
+                  <Info size={12} /> Observaciones Internas
+                </h5>
                 <p className="text-xs text-gray-600 leading-relaxed bg-amber-50/50 p-3 rounded-xl border border-amber-100/40 font-medium">
                   {selectedActivity.descripcion}
                 </p>
               </div>
             )}
 
-            {/* ACCIONES CRUD DENTRO DEL MODAL */}
             {canManageActivities(user?.role) && (
               <div className="flex gap-2 mt-6 pt-4 border-t border-gray-100">
-                <button 
-                  onClick={() => handleEdit(selectedActivity)} 
+                {isVencida(selectedActivity) && (
+                  <button
+                    onClick={async () => {
+                      await supabase.from("activities").update({ estado: "realizada" }).eq("id", selectedActivity.id)
+                      setSelectedActivity(null)
+                      loadActivities()
+                    }}
+                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-green-50 text-green-700 hover:bg-green-100 transition-colors cursor-pointer text-center"
+                  >
+                    ✓ Marcar Realizada
+                  </button>
+                )}
+                <button
+                  onClick={() => handleEdit(selectedActivity)}
                   className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer text-center"
                 >
                   Editar
                 </button>
-                <button 
-                  onClick={() => handleDelete(selectedActivity.id)} 
+                <button
+                  onClick={() => handleDelete(selectedActivity.id)}
                   className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-colors cursor-pointer text-center"
                 >
                   Eliminar
