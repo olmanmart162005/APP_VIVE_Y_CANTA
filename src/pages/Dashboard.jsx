@@ -233,7 +233,8 @@ function Dashboard() {
               </h2>
             </div>
             <p className="mt-4 font-bold text-base leading-snug break-words">
-              El que canta con fe, evangeliza con alegría. 🎶
+              “Yo, no moriré, sino que viviré y cantaré las obras del Señor”
+
             </p>
             <div className="w-12 h-1 bg-white/30 rounded-full mt-4" />
           </div>

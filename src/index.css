@@ -18,6 +18,86 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* ===== AUTO DARK MODE GLOBAL ===== */
+
+@media (prefers-color-scheme: dark) {
+
+  body {
+    background: #0E0C09 !important;
+    color: #F5E9C0 !important;
+  }
+
+  .bg-white {
+    background-color:
+      #1A1710 !important;
+  }
+
+  .bg-gray-50,
+  .bg-gray-100,
+  .bg-\[\#F8F4E9\] {
+    background-color:
+      #14110D !important;
+  }
+
+  .text-gray-800,
+  .text-gray-900,
+  .text-black {
+    color:
+      #F5E9C0 !important;
+  }
+
+  .text-gray-500,
+  .text-gray-400 {
+    color:
+      #B8A57A !important;
+  }
+
+  .border-gray-100,
+  .border-gray-200 {
+    border-color:
+      rgba(
+        212,
+        175,
+        55,
+        0.15
+      ) !important;
+  }
+
+  input,
+  select,
+  textarea {
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.05
+      ) !important;
+
+    color:
+      #F5E9C0 !important;
+
+    border-color:
+      rgba(
+        212,
+        175,
+        55,
+        0.2
+      ) !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color:
+      rgba(
+        245,
+        233,
+        192,
+        0.4
+      ) !important;
+  }
+
+}
 
 * {
   box-sizing: border-box;
@@ -71,4 +151,154 @@ button {
 
 .hide-scrollbar {
   scrollbar-width: none;
+}
+
+/* ===== MODO CLARO (default) ===== */
+:root {
+  --bg-main: #F8F4E9;
+  --bg-card: #ffffff;
+  --bg-input: #F8F4E9;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
+  --gold: #D4AF37;
+  --gold-dark: #B8860B;
+}
+
+/* ===== MODO OSCURO (automático según el teléfono) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-main: #0E0C09;
+    --bg-card: #1A1710;
+    --bg-input: rgba(255,255,255,0.04);
+    --text-primary: #F5E9C0;
+    --text-secondary: #a89060;
+    --text-muted: rgba(245,233,192,0.35);
+    --border-color: rgba(212,175,55,0.2);
+    --gold: #D4AF37;
+    --gold-dark: #B8860B;
+  }
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.bg-main {
+  background-color: var(--bg-main);
+}
+
+.bg-card {
+  background-color: var(--bg-card);
+}
+
+.bg-input {
+  background-color: var(--bg-input);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.border-theme {
+  border-color: var(--border-color);
+}
+
+/* ===== SELECT DARK MODE FIX ===== */
+
+@media (prefers-color-scheme: dark) {
+
+  select {
+    background-color:
+      #1A1710 !important;
+
+    color:
+      #F5E9C0 !important;
+
+    border-color:
+      rgba(
+        212,
+        175,
+        55,
+        0.2
+      ) !important;
+
+    color-scheme:
+      dark;
+  }
+
+  option {
+    background:
+      #1A1710 !important;
+
+    color:
+      #F5E9C0 !important;
+  }
+
+}
+
+/* ===== DARK MODE FIX CARDS ===== */
+
+@media (prefers-color-scheme: dark) {
+
+  .bg-white {
+    background-color:
+      #16120D !important;
+  }
+
+  .bg-gray-50,
+  .bg-gray-100 {
+    background-color:
+      #1A1710 !important;
+  }
+
+  .text-gray-800,
+  .text-gray-900,
+  .text-black {
+    color:
+      #F5E9C0 !important;
+  }
+
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-400 {
+    color:
+      #B8A57A !important;
+  }
+
+  .border-gray-100,
+  .border-gray-200 {
+    border-color:
+      rgba(
+        212,
+        175,
+        55,
+        0.12
+      ) !important;
+  }
+
+  /* CARDS DEL CALENDARIO */
+
+  [class*="rounded"] {
+    box-shadow:
+      0 2px 20px
+      rgba(
+        212,
+        175,
+        55,
+        0.05
+      );
+  }
+
 }

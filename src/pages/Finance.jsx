@@ -1,61 +1,265 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  FileText,
-  PlusCircle,
-  RefreshCw,
-  Calendar,
-  Layers,
-  Activity
+  TrendingUp, TrendingDown, Wallet, FileText,
+  PlusCircle, RefreshCw, Calendar, Layers,
+  Activity, X, Edit3, Trash2, ChevronDown,
+  Filter, Search, AlertCircle, CheckCircle,
+  Loader2,
 } from "lucide-react"
-
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  LineChart, Line, CartesianGrid, XAxis, YAxis,
+  Tooltip, ResponsiveContainer, Legend,
 } from "recharts"
-
 import { jsPDF } from "jspdf"
 import autoTable from "jspdf-autotable"
-
-// Importación del logo del coro
 import logoCoro from "../assets/logo.png"
-
 import BottomNav from "../components/BottomNav"
 import { getCurrentUser } from "../services/authService"
 import { canManageFinance } from "../services/permissions"
 import { supabase } from "../lib/supabase"
 
-function Finance() {
-  const [user, setUser] = useState(null)
-  const [monto, setMonto] = useState("")
-  const [descripcion, setDescripcion] = useState("")
-  const [categoria, setCategoria] = useState("")
-  const [actividad, setActividad] = useState("")
-  const [tipo, setTipo] = useState("ingreso")
-  const [records, setRecords] = useState([])
-  const [editingId, setEditingId] = useState(null)
-  const [loading, setLoading] = useState(false)
+/* ─── Paleta ─────────────────────────────────────────── */
+const C = {
+  bg:       "#0E0C09",
+  card:     "#1A1710",
+  card2:    "#211E12",
+  gold:     "#D4AF37",
+  goldDim:  "#9A7209",
+  goldFade: "#3D3010",
+  text:     "#F5E9C0",
+  muted:    "#a89060",
+  border:   "#2E2A1A",
+  green:    "#4ADE80",
+  red:      "#F87171",
+  greenDim: "#14532d",
+  redDim:   "#450a0a",
+}
 
-  // Filtros Avanzados
-  const [filterTipo, setFilterTipo] = useState("todos")
-  const [filterActividad, setFilterActividad] = useState("todos")
-  const [filterTiempo, setFilterTiempo] = useState("todos") 
+/* ─── Categorías ─────────────────────────────────────── */
+const CATS_INGRESO = ["Misa","Concierto","Donación","Actividad económica","Otro"]
+const CATS_GASTO   = ["Transporte","Alimentación","Sonido","Uniformes","Instrumentos","Otro"]
+
+/* ─── Toast ──────────────────────────────────────────── */
+function Toast({ toast, onClose }) {
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(onClose, 4500)
+    return () => clearTimeout(t)
+  }, [toast, onClose])
+  if (!toast) return null
+  const ok = toast.type === "success"
+  return (
+    <div style={{ background: C.card, borderColor: ok ? C.gold : C.red }}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border max-w-sm w-[calc(100vw-2rem)]">
+      {ok
+        ? <CheckCircle size={18} style={{ color: C.gold }} className="shrink-0" />
+        : <AlertCircle size={18} style={{ color: C.red }} className="shrink-0" />}
+      <p className="text-sm font-bold" style={{ color: C.text }}>{toast.msg}</p>
+      <button onClick={onClose} className="ml-auto opacity-50 hover:opacity-100 transition">
+        <X size={14} style={{ color: C.text }} />
+      </button>
+    </div>
+  )
+}
+
+/* ─── Tooltip personalizado del gráfico ─────────────── */
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div style={{ background: C.card2, border: `1px solid ${C.border}`, borderRadius: 14 }}
+      className="px-4 py-3 shadow-2xl">
+      <p className="text-xs font-bold mb-2" style={{ color: C.muted }}>{label}</p>
+      {payload.map((p) => (
+        <p key={p.name} className="text-sm font-extrabold" style={{ color: p.color }}>
+          {p.name}: L {Number(p.value).toLocaleString()}
+        </p>
+      ))}
+    </div>
+  )
+}
+
+/* ─── Modal Formulario ───────────────────────────────── */
+function ModalForm({ item, onClose, onSaved, user }) {
+  const editing = !!item?.id
+  const [tipo,       setTipo]       = useState(item?.tipo        || "ingreso")
+  const [caja,       setCaja]       = useState(item?.caja        || "operativa")
+  const [categoria,  setCategoria]  = useState(item?.categoria   || "")
+  const [actividad,  setActividad]  = useState(item?.actividad   || "")
+  const [descripcion,setDescripcion]= useState(item?.descripcion || "")
+  const [monto,      setMonto]      = useState(item?.monto ? String(item.monto) : "")
+  const [saving,     setSaving]     = useState(false)
+  const [err,        setErr]        = useState("")
+
+  const cats = tipo === "ingreso" ? CATS_INGRESO : CATS_GASTO
+
+  const handleSave = async () => {
+    if (!monto || Number(monto) <= 0) return setErr("Ingresa un monto válido.")
+    if (!categoria) return setErr("Selecciona una categoría.")
+    setErr("")
+    setSaving(true)
+    const payload = {
+      tipo, caja, categoria,
+      actividad: actividad.trim() || categoria,
+      monto: Number(monto),
+      descripcion: descripcion.trim(),
+    }
+    let error
+    if (editing) {
+      ;({ error } = await supabase.from("financial_records").update(payload).eq("id", item.id))
+    } else {
+      ;({ error } = await supabase.from("financial_records").insert([{ ...payload, created_by: user?.id }]))
+    }
+    setSaving(false)
+    if (error) return setErr(error.message)
+    onSaved(editing ? "Movimiento actualizado." : "Movimiento guardado.")
+  }
+
+  const inputCls = "w-full px-4 py-3 rounded-xl text-sm font-medium outline-none transition"
+  const inputStyle = { background: C.bg, border: `1px solid ${C.border}`, color: C.text }
+  const labelCls = "block text-[10px] font-black uppercase tracking-widest mb-1.5"
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}` }}
+        className="w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+
+        {/* Header */}
+        <div style={{ background: `linear-gradient(135deg, ${C.goldFade}, ${C.card2})`, borderBottom: `1px solid ${C.border}` }}
+          className="px-6 pt-6 pb-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div style={{ background: C.goldFade, border: `1px solid ${C.gold}` }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center">
+              <PlusCircle size={16} style={{ color: C.gold }} />
+            </div>
+            <div>
+              <p style={{ color: C.muted }} className="text-[9px] font-black uppercase tracking-widest">Coro Vive y Canta</p>
+              <h2 style={{ color: C.text }} className="font-black text-lg leading-tight">
+                {editing ? "Editar Movimiento" : "Nuevo Movimiento"}
+              </h2>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ color: C.muted }} className="hover:opacity-70 transition">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {err && (
+            <div style={{ background: C.redDim, border: `1px solid ${C.red}` }}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl">
+              <AlertCircle size={13} style={{ color: C.red }} />
+              <p className="text-xs font-medium" style={{ color: C.red }}>{err}</p>
+            </div>
+          )}
+
+          {/* Tipo + Caja en fila */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label style={{ color: C.muted }} className={labelCls}>Tipo</label>
+              <div className="relative">
+                <select value={tipo} onChange={e => { setTipo(e.target.value); setCategoria("") }}
+                  className={inputCls} style={inputStyle}>
+                  <option value="ingreso">🟢 Ingreso</option>
+                  <option value="gasto">🔴 Gasto</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: C.muted }} />
+              </div>
+            </div>
+            <div>
+              <label style={{ color: C.muted }} className={labelCls}>Caja</label>
+              <div className="relative">
+                <select value={caja} onChange={e => setCaja(e.target.value)}
+                  className={inputCls} style={inputStyle}>
+                  <option value="operativa">Caja 1 · Operativa</option>
+                  <option value="inversiones">Caja 2 · Inversiones</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: C.muted }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label style={{ color: C.muted }} className={labelCls}>Categoría <span style={{ color: C.red }}>*</span></label>
+            <div className="relative">
+              <select value={categoria} onChange={e => setCategoria(e.target.value)}
+                className={inputCls} style={inputStyle}>
+                <option value="">Seleccionar...</option>
+                {cats.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: C.muted }} />
+            </div>
+          </div>
+
+          {/* Actividad */}
+          <div>
+            <label style={{ color: C.muted }} className={labelCls}>Actividad específica</label>
+            <input type="text" placeholder="Ej: Misa Patronal" value={actividad}
+              onChange={e => setActividad(e.target.value)}
+              className={inputCls} style={inputStyle} />
+          </div>
+
+          {/* Monto */}
+          <div>
+            <label style={{ color: C.muted }} className={labelCls}>Monto (L.) <span style={{ color: C.red }}>*</span></label>
+            <input type="number" placeholder="0.00" value={monto}
+              onChange={e => setMonto(e.target.value)}
+              className={inputCls} style={{ ...inputStyle, fontWeight: 800, fontSize: 18 }} />
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label style={{ color: C.muted }} className={labelCls}>Descripción</label>
+            <input type="text" placeholder="Detalles adicionales..." value={descripcion}
+              onChange={e => setDescripcion(e.target.value)}
+              className={inputCls} style={inputStyle} />
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 flex gap-3">
+          <button onClick={onClose} disabled={saving}
+            style={{ border: `1px solid ${C.border}`, color: C.muted }}
+            className="flex-1 py-3 rounded-xl font-bold text-sm hover:opacity-80 transition disabled:opacity-40">
+            Cancelar
+          </button>
+          <button onClick={handleSave} disabled={saving}
+            style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDim})` }}
+            className="flex-[2] py-3 rounded-xl font-black text-sm text-black hover:opacity-90 transition disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg">
+            {saving
+              ? <><Loader2 size={14} className="animate-spin" /> Guardando...</>
+              : editing ? "Actualizar" : "Guardar"
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Componente principal Finance ───────────────────── */
+function Finance() {
+  const [user,        setUser]        = useState(null)
+  const [records,     setRecords]     = useState([])
+  const [loading,     setLoading]     = useState(false)
+  const [modalItem,   setModalItem]   = useState(null)  // null = cerrado, {} = nuevo, item = editar
+  const [showModal,   setShowModal]   = useState(false)
+  const [toast,       setToast]       = useState(null)
+  const [search,      setSearch]      = useState("")
+  const [filterCaja,  setFilterCaja]  = useState("todos")
+  const [filterTipo,  setFilterTipo]  = useState("todos")
+  const [filterTiempo,setFilterTiempo]= useState("todos")
+  const [chartCaja,   setChartCaja]   = useState("todos")
+  const [chartTiempo, setChartTiempo] = useState("todos")
 
   useEffect(() => {
-    loadUser()
+    ;(async () => {
+      const profile = await getCurrentUser()
+      setUser(profile)
+    })()
     loadRecords()
   }, [])
-
-  const loadUser = async () => {
-    const profile = await getCurrentUser()
-    setUser(profile)
-  }
 
   const loadRecords = async () => {
     setLoading(true)
@@ -63,592 +267,482 @@ function Finance() {
       .from("financial_records")
       .select("*")
       .order("created_at", { ascending: false })
-
-    if (!error && data) {
-      setRecords(data)
-    }
+    if (!error && data) setRecords(data)
     setLoading(false)
   }
 
-  const handleSave = async () => {
-    if (!monto || Number(monto) <= 0) {
-      return alert("Por favor, ingrese un monto válido mayor a 0.")
-    }
-    if (!categoria) {
-      return alert("Por favor, seleccione una categoría.")
-    }
+  const showToast = (msg, type = "success") => setToast({ msg, type })
 
-    try {
-      const payload = {
-        tipo,
-        categoria,
-        actividad: actividad.trim() || categoria,
-        monto: Number(monto),
-        descripcion: descripcion.trim(),
-      }
-
-      let error = null
-
-      if (editingId) {
-        const { error: updateError } = await supabase
-          .from("financial_records")
-          .update(payload)
-          .eq("id", editingId)
-        error = updateError
-      } else {
-        const { error: insertError } = await supabase
-          .from("financial_records")
-          .insert([
-            {
-              ...payload,
-              created_by: user?.id,
-            },
-          ])
-        error = insertError
-      }
-
-      if (error) {
-        console.error(error)
-        return alert("Error al guardar en la base de datos.")
-      }
-
-      setMonto("")
-      setDescripcion("")
-      setCategoria("")
-      setActividad("")
-      setTipo("ingreso")
-      setEditingId(null)
-
-      await loadRecords()
-      alert(editingId ? "¡Registro actualizado!" : "¡Registro guardado!")
-    } catch (err) {
-      console.error(err)
-      alert("Ocurrió un error inesperado.")
-    }
+  const handleSaved = (msg) => {
+    setShowModal(false)
+    setModalItem(null)
+    showToast(msg)
+    loadRecords()
   }
 
   const handleDelete = async (id) => {
-    const confirmDelete = confirm("¿Eliminar este movimiento?")
-    if (!confirmDelete) return
-
-    const { error } = await supabase
-      .from("financial_records")
-      .delete()
-      .eq("id", id)
-
-    if (error) {
-      alert("No se pudo eliminar el registro.")
-    } else {
-      loadRecords()
-    }
+    if (!window.confirm("¿Eliminar este movimiento permanentemente?")) return
+    const { error } = await supabase.from("financial_records").delete().eq("id", id)
+    if (error) showToast("Error al eliminar.", "error")
+    else { showToast("Movimiento eliminado."); loadRecords() }
   }
 
-  const handleEdit = (item) => {
-    setEditingId(item.id)
-    setTipo(item.tipo)
-    setMonto(String(item.monto))
-    setDescripcion(item.descripcion || "")
-    setCategoria(item.categoria || "")
-    setActividad(item.actividad || "")
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    })
-  }
-
-  // Actividades dinámicas desde la DB para el select del filtro
-  const actividadesDisponibles = useMemo(() => {
-    const listas = records.map((r) => r.actividad || r.categoria).filter(Boolean)
-    return Array.from(new Set(listas))
+  /* ── Stats por caja ── */
+  const statsFor = useCallback((caja) => {
+    const rows = records.filter(r => r.caja === caja)
+    const ing  = rows.filter(r => r.tipo === "ingreso").reduce((s, r) => s + Number(r.monto), 0)
+    const gas  = rows.filter(r => r.tipo === "gasto").reduce((s, r) => s + Number(r.monto), 0)
+    return { ingresos: ing, gastos: gas, balance: ing - gas }
   }, [records])
 
-  // Lógica de Filtrado Avanzado (Tiempo + Actividad + Tipo)
+  const op  = statsFor("operativa")
+  const inv = statsFor("inversiones")
+
+  /* ── Filtrado historial ── */
   const filteredRecords = useMemo(() => {
-    return records.filter((r) => {
-      if (filterTipo !== "todos" && r.tipo !== filterTipo) return false
-      
-      const actNorm = r.actividad || r.categoria
-      if (filterActividad !== "todos" && actNorm !== filterActividad) return false
-
+    return records.filter(r => {
+      if (filterCaja  !== "todos" && r.caja !== filterCaja)  return false
+      if (filterTipo  !== "todos" && r.tipo !== filterTipo)  return false
+      if (search) {
+        const q = search.toLowerCase()
+        if (
+          !r.descripcion?.toLowerCase().includes(q) &&
+          !r.categoria?.toLowerCase().includes(q) &&
+          !r.actividad?.toLowerCase().includes(q)
+        ) return false
+      }
       if (filterTiempo !== "todos" && r.created_at) {
-        const recordDate = new Date(r.created_at)
-        const now = new Date()
-
+        const d = new Date(r.created_at), now = new Date()
         if (filterTiempo === "semana") {
-          const unaSemanaAtras = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          if (recordDate < unaSemanaAtras) return false
+          if (d < new Date(now - 7*24*60*60*1000)) return false
         } else if (filterTiempo === "mes") {
-          if (recordDate.getMonth() !== now.getMonth() || recordDate.getFullYear() !== now.getFullYear()) return false
+          if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false
         } else if (filterTiempo === "ano") {
-          if (recordDate.getFullYear() !== now.getFullYear()) return false
+          if (d.getFullYear() !== now.getFullYear()) return false
         }
       }
       return true
     })
-  }, [records, filterTipo, filterActividad, filterTiempo])
+  }, [records, filterCaja, filterTipo, filterTiempo, search])
 
-  // Recalcular Totales según filtros
-  const { ingresos, gastos, balance } = useMemo(() => {
-    let ing = 0
-    let gas = 0
-    filteredRecords.forEach((r) => {
-      const val = Number(r.monto) || 0
-      if (r.tipo === "ingreso") ing += val
-      if (r.tipo === "gasto") gas += val
-    })
-    return { ingresos: ing, gastos: gas, balance: ing - gas }
-  }, [filteredRecords])
-
-  // Resumen de Auditoría Inteligente
-  const resumenInteligente = useMemo(() => {
-    if (filteredRecords.length === 0) return "No hay transacciones registradas para este periodo de auditoría."
-    if (balance > 0 && gastos === 0) return "Excelente desempeño operacional. Se registran 100% ingresos sin egresos en este intervalo."
-    if (balance > 0) {
-      const porcentajeGasto = ((gastos / ingresos) * 100).toFixed(1)
-      return "Salud financiera estable. Se ha consumido el " + porcentajeGasto + "% de los ingresos totales en gastos operativos."
-    }
-    if (balance < 0) {
-      return "Alerta de déficit acumulado: Los egresos superan los ingresos en el periodo seleccionado. Se sugiere auditar prioridades."
-    }
-    return "Balance neutro equilibrado: Los ingresos y egresos se encuentran exactamente en proporción 1:1."
-  }, [filteredRecords, balance, ingresos, gastos])
-
-  // Lógica del gráfico adaptativa si ingresos y gastos están en 0
+  /* ── Datos del gráfico de líneas ── */
   const chartData = useMemo(() => {
-    if (ingresos === 0 && gastos === 0) {
-      return [{ name: "Sin datos", value: 1 }]
-    }
-    return [
-      { name: "Ingresos", value: ingresos },
-      { name: "Gastos", value: gastos },
-    ]
-  }, [ingresos, gastos])
+    const src = records.filter(r => {
+      if (chartCaja !== "todos" && r.caja !== chartCaja) return false
+      if (chartTiempo !== "todos" && r.created_at) {
+        const d = new Date(r.created_at), now = new Date()
+        if (chartTiempo === "semana") return d >= new Date(now - 7*24*60*60*1000)
+        if (chartTiempo === "mes") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+        if (chartTiempo === "ano") return d.getFullYear() === now.getFullYear()
+      }
+      return true
+    })
 
-  const COLORS = useMemo(() => {
-    if (ingresos === 0 && gastos === 0) return ["#9ca3af"] 
-    return ["#D4AF37", "#ef4444"] 
-  }, [ingresos, gastos])
+    // Agrupar por mes-año
+    const map = {}
+    src.forEach(r => {
+      const d = new Date(r.created_at)
+      const key = d.toLocaleDateString("es-HN", { month: "short", year: "2-digit" })
+      if (!map[key]) map[key] = { label: key, ingresos: 0, gastos: 0, _ts: d.getTime() }
+      if (r.tipo === "ingreso") map[key].ingresos += Number(r.monto)
+      if (r.tipo === "gasto")   map[key].gastos   += Number(r.monto)
+    })
 
-  // Función procesadora del Logo e Impresión del PDF
+    return Object.values(map)
+      .sort((a, b) => a._ts - b._ts)
+      .map(({ label, ingresos, gastos }) => ({ label, ingresos, gastos }))
+  }, [records, chartCaja, chartTiempo])
+
+  /* ── Export PDF ── */
   const exportarPDF = () => {
     try {
       const doc = new jsPDF()
-      const fechaActual = new Date()
-      const strFecha = fechaActual.toISOString().split('T')[0] 
-      const nombreArchivo = "Reporte_Financiero_" + strFecha + ".pdf"
-
-      // Renderizado de Barra de Encabezado de Color Institucional
-      doc.setFillColor(184, 134, 11) 
+      const fecha = new Date()
+      doc.setFillColor(14, 12, 9)
       doc.rect(0, 0, 220, 28, "F")
-      
-      // Añadir el Logo de forma segura al Header del documento
-      try {
-        doc.addImage(logoCoro, "PNG", 14, 4, 20, 20)
-      } catch (e) {
-        console.warn("No se pudo renderizar la imagen en formato PNG directo, intentando fallback de renderizado.", e)
-      }
-
-      // Título al lado del Logo
+      try { doc.addImage(logoCoro, "PNG", 14, 4, 20, 20) } catch {}
       doc.setFont("times", "bold")
-      doc.setTextColor(255, 255, 255)
+      doc.setTextColor(212, 175, 55)
       doc.setFontSize(16)
       doc.text("CORO VIVE Y CANTA", 40, 13)
-      doc.setFontSize(11)
-      doc.setFont("times", "italic")
-      doc.text("Auditoría de Control Financiero Interno", 40, 19)
-
-      // Metadata del Reporte Contable
-      doc.setTextColor(40, 40, 40)
       doc.setFontSize(10)
+      doc.setFont("times", "italic")
+      doc.setTextColor(200, 200, 200)
+      doc.text("Reporte Financiero — Control Contable Interno", 40, 20)
+      doc.setTextColor(60, 60, 60)
       doc.setFont("times", "normal")
-      doc.text("Fecha de Emisión: " + fechaActual.toLocaleString("es-HN"), 14, 38)
-      doc.text("Auditor Responsable: " + (user?.email || "Administrador General"), 14, 44)
-      doc.text("Filtros Aplicados: Tiempo (" + filterTiempo.toUpperCase() + ") | Actividad (" + filterActividad.toUpperCase() + ")", 14, 50)
-
+      doc.setFontSize(9)
+      doc.text(`Emitido: ${fecha.toLocaleString("es-HN")}   |   Responsable: ${user?.email || "Admin"}`, 14, 38)
       doc.setDrawColor(212, 175, 55)
-      doc.line(14, 55, 196, 55)
-      
-      // Estado de Cuentas Consolidadas
-      doc.setFont("times", "bold")
-      doc.setFontSize(12)
-      doc.text("ESTADO DE BALANCE GENERAL", 14, 64)
-      
-      doc.setFont("times", "normal")
-      doc.setFontSize(11)
-      doc.text("Total Ingresos Consolidados: L " + ingresos.toLocaleString(), 14, 72)
-      doc.text("Total Gastos Operativos:        L " + gastos.toLocaleString(), 14, 78)
-      
-      doc.setFont("times", "bold")
-      doc.text("Balance Neto Recalculado:     L " + balance.toLocaleString(), 14, 86)
-      
-      doc.line(14, 92, 196, 92)
-      doc.text("ANEXO: HISTORIAL DE MOVIMIENTOS CONTABLES", 14, 100)
-
-      const tableRows = filteredRecords.map((item, index) => [
-        index + 1,
-        new Date(item.created_at).toLocaleDateString("es-HN"),
-        item.tipo.toUpperCase(),
-        item.actividad || item.categoria || "General",
-        item.descripcion || "Sin observaciones",
-        "L " + Number(item.monto).toLocaleString()
-      ])
-
-      // Estructuración de tabla autotable adaptada a la nueva altura
+      doc.line(14, 42, 196, 42)
+      // Resumen cajas
+      doc.setFont("times", "bold"); doc.setFontSize(11); doc.setTextColor(40,40,40)
+      doc.text("Caja 1 · Operativa", 14, 52)
+      doc.setFont("times","normal"); doc.setFontSize(10)
+      doc.text(`Ingresos: L ${op.ingresos.toLocaleString()}   Gastos: L ${op.gastos.toLocaleString()}   Balance: L ${op.balance.toLocaleString()}`, 14, 58)
+      doc.setFont("times","bold"); doc.setFontSize(11)
+      doc.text("Caja 2 · Inversiones", 14, 68)
+      doc.setFont("times","normal"); doc.setFontSize(10)
+      doc.text(`Ingresos: L ${inv.ingresos.toLocaleString()}   Gastos: L ${inv.gastos.toLocaleString()}   Balance: L ${inv.balance.toLocaleString()}`, 14, 74)
+      doc.line(14, 80, 196, 80)
+      doc.setFont("times","bold"); doc.setFontSize(11); doc.text("HISTORIAL DE MOVIMIENTOS", 14, 88)
       autoTable(doc, {
-        startY: 106,
-        head: [["#", "Fecha", "Tipo", "Actividad / Categoría", "Descripción", "Monto"]],
-        body: tableRows,
-        styles: { font: "times", fontSize: 9 },
-        headStyles: { fillColor: [184, 134, 11], textColor: [255, 255, 255], fontStyle: "bold" },
-        alternateRowStyles: { fillColor: [250, 248, 242] },
-        columnStyles: {
-          5: { halign: "right", fontStyle: "bold" }
-        }
+        startY: 94,
+        head: [["Fecha","Caja","Tipo","Categoría","Descripción","Monto"]],
+        body: filteredRecords.map((r,i) => [
+          new Date(r.created_at).toLocaleDateString("es-HN"),
+          r.caja === "operativa" ? "Operativa" : "Inversiones",
+          r.tipo.toUpperCase(),
+          r.actividad || r.categoria || "-",
+          r.descripcion || "-",
+          "L " + Number(r.monto).toLocaleString(),
+        ]),
+        styles: { font:"times", fontSize:9 },
+        headStyles: { fillColor:[14,12,9], textColor:[212,175,55], fontStyle:"bold" },
+        alternateRowStyles: { fillColor:[248,244,233] },
+        columnStyles: { 5: { halign:"right", fontStyle:"bold" } }
       })
-
-      doc.save(nombreArchivo)
-    } catch (pdfError) {
-      console.error("Error PDF: ", pdfError)
-      alert("Error al estructurar el PDF corporativo.")
-    }
+      doc.save(`Reporte_ViVeyCanta_${new Date().toISOString().split("T")[0]}.pdf`)
+    } catch(e) { console.error(e); showToast("Error al generar PDF.", "error") }
   }
 
-  // Estilos limpios para VS Code
-  const getCardStyle = (tipoItem) => {
-    let b = "bg-white rounded-[22px] p-4 shadow-sm border-l-4 transition hover:shadow-md flex justify-between items-center "
-    return b + (tipoItem === "ingreso" ? "border-l-green-500" : "border-l-red-500")
-  }
-
-  const getBadgeStyle = (tipoItem) => {
-    let b = "text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider "
-    return b + (tipoItem === "ingreso" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")
-  }
-
-  const getMontoStyle = (tipoItem) => {
-    let b = "font-extrabold text-base "
-    return b + (tipoItem === "ingreso" ? "text-green-600" : "text-red-500")
-  }
+  /* ── Estilos reutilizables ── */
+  const cardBase = { background: C.card, border: `1px solid ${C.border}` }
+  const selectStyle = { background: C.bg, border: `1px solid ${C.border}`, color: C.muted }
+  const selectCls = "px-3 py-2 rounded-xl text-xs font-bold outline-none transition appearance-none cursor-pointer"
 
   return (
-    <div className="min-h-screen bg-[#F8F4E9] p-4 md:p-8 pb-32 font-sans">
-      
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b border-gray-200 pb-4">
+    <div style={{ background: C.bg, color: C.text, minHeight: "100vh" }}
+      className="pb-32 antialiased">
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
+
+      {showModal && (
+        <ModalForm
+          item={modalItem}
+          onClose={() => { setShowModal(false); setModalItem(null) }}
+          onSaved={handleSaved}
+          user={user}
+        />
+      )}
+
+      {/* ── Top Header ─────────────────────────────────── */}
+      <div style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}
+        className="px-5 py-5 flex items-center justify-between sticky top-0 z-40">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-3xl text-[#B8860B]">♪</span>
-            <h1 className="text-3xl font-extrabold text-[#B8860B] tracking-tight">Control Contable</h1>
-          </div>
-          <p className="text-gray-500 text-sm mt-1">Gestión financiera avanzada para Coro Vive y Canta</p>
+          <p style={{ color: C.muted }} className="text-[9px] font-black uppercase tracking-widest mb-0.5">Coro Vive y Canta</p>
+          <h1 style={{ color: C.gold }} className="text-2xl font-black tracking-tight flex items-center gap-2">
+            <span>♪</span> Finanzas
+          </h1>
         </div>
-
-        <button
-          onClick={exportarPDF}
-          className="mt-4 sm:mt-0 flex items-center justify-center gap-2 bg-gradient-to-r from-[#B8860B] to-[#D4AF37] text-white px-5 py-3 rounded-2xl font-semibold shadow-md hover:opacity-90 transition w-full sm:w-auto"
-        >
-          <FileText size={18} />
-          Exportar PDF Profesional
-        </button>
+        <div className="flex gap-2">
+          <button onClick={exportarPDF}
+            style={{ background: C.goldFade, border: `1px solid ${C.gold}`, color: C.gold }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs hover:opacity-80 transition">
+            <FileText size={14} />
+            <span className="hidden sm:inline">Exportar PDF</span>
+          </button>
+          {canManageFinance(user?.role) && (
+            <button
+              onClick={() => { setModalItem({}); setShowModal(true) }}
+              style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldDim})` }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs text-black hover:opacity-90 transition shadow-lg">
+              <PlusCircle size={14} />
+              Agregar
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Grid Principal Superior */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        
-        {/* Card Premium de Balance */}
-        <div className="lg:col-span-1 flex flex-col gap-4">
-          <div className="bg-gradient-to-br from-[#D4AF37] to-[#B8860B] rounded-[30px] p-6 text-white shadow-xl flex flex-col justify-between min-h-[140px]">
-            <div>
-              <p className="text-white/80 font-medium tracking-wide uppercase text-xs">Balance Neto Recalculado</p>
-              <h2 className="text-4xl font-black mt-2 tracking-tight">
-                L {balance.toLocaleString()}
-              </h2>
-            </div>
-          </div>
+      <div className="px-4 md:px-6 max-w-7xl mx-auto mt-5 space-y-5">
 
-          {/* Panel de Auditoría Inteligente */}
-          <div className="bg-white rounded-[25px] p-5 shadow-sm border border-amber-100">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 mb-2 flex items-center gap-1.5">
-              <Activity size={14} /> Auditoría del Sistema
-            </h4>
-            <p className="text-sm text-gray-600 leading-relaxed">{resumenInteligente}</p>
-          </div>
+        {/* ── Cards de Cajas ─────────────────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[
+            { label: "Caja 1 · Operativa", emoji: "🏦", stats: op, key: "operativa" },
+            { label: "Caja 2 · Inversiones", emoji: "📈", stats: inv, key: "inversiones" },
+          ].map(({ label, emoji, stats }) => (
+            <div key={label} style={{ ...cardBase, background: C.card2 }}
+              className="rounded-[26px] p-5 relative overflow-hidden">
+              {/* Glow decorativo */}
+              <div style={{ background: `radial-gradient(circle at top right, ${C.goldFade}, transparent 70%)` }}
+                className="absolute inset-0 pointer-events-none" />
+              <div className="relative">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div style={{ background: C.goldFade, border: `1px solid ${C.gold}33` }}
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-base">
+                      {emoji}
+                    </div>
+                    <div>
+                      <p style={{ color: C.muted }} className="text-[10px] font-black uppercase tracking-wider">{label}</p>
+                      <p style={{ color: C.muted }} className="text-[9px]">Saldo actual</p>
+                    </div>
+                  </div>
+                  <div style={{
+                    background: stats.balance >= 0 ? C.greenDim : C.redDim,
+                    color: stats.balance >= 0 ? C.green : C.red,
+                    border: `1px solid ${stats.balance >= 0 ? C.green : C.red}33`
+                  }} className="text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-wider">
+                    {stats.balance >= 0 ? "Positivo" : "Déficit"}
+                  </div>
+                </div>
+                <p style={{ color: C.gold }} className="text-3xl font-black tracking-tight mb-4">
+                  L {stats.balance.toLocaleString()}
+                </p>
+                <div style={{ borderTop: `1px solid ${C.border}` }} className="pt-3 grid grid-cols-2 gap-3">
+                  <div>
+                    <p style={{ color: C.muted }} className="text-[9px] font-black uppercase tracking-widest mb-0.5">Ingresos</p>
+                    <p style={{ color: C.green }} className="font-black text-sm">L {stats.ingresos.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p style={{ color: C.muted }} className="text-[9px] font-black uppercase tracking-widest mb-0.5">Egresos</p>
+                    <p style={{ color: C.red }} className="font-black text-sm">L {stats.gastos.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Listado de Métricas Rápidas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4 lg:col-span-1">
-          <div className="bg-white rounded-[25px] p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+        {/* ── Gráfico de Líneas ──────────────────────── */}
+        <div style={cardBase} className="rounded-[26px] p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase">Ingresos</p>
-              <h3 className="font-black text-xl text-green-600 mt-0.5">L {ingresos.toLocaleString()}</h3>
+              <p style={{ color: C.muted }} className="text-[9px] font-black uppercase tracking-widest mb-0.5">Visualización</p>
+              <h3 style={{ color: C.text }} className="font-black text-base">Ingresos y Costos</h3>
             </div>
-            <div className="bg-green-50 p-2.5 rounded-xl"><TrendingUp className="text-green-500" size={20} /></div>
+            <div className="flex flex-wrap gap-2">
+              <select value={chartCaja} onChange={e => setChartCaja(e.target.value)}
+                className={selectCls} style={selectStyle}>
+                <option value="todos">Todas las cajas</option>
+                <option value="operativa">Caja Operativa</option>
+                <option value="inversiones">Caja Inversiones</option>
+              </select>
+              <select value={chartTiempo} onChange={e => setChartTiempo(e.target.value)}
+                className={selectCls} style={selectStyle}>
+                <option value="todos">Histórico</option>
+                <option value="semana">Esta semana</option>
+                <option value="mes">Este mes</option>
+                <option value="ano">Este año</option>
+              </select>
+            </div>
           </div>
 
-          <div className="bg-white rounded-[25px] p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase">Gastos</p>
-              <h3 className="font-black text-xl text-red-500 mt-0.5">L {gastos.toLocaleString()}</h3>
+          {chartData.length === 0 ? (
+            <div className="h-48 flex items-center justify-center">
+              <p style={{ color: C.muted }} className="text-sm font-medium">Sin datos para graficar.</p>
             </div>
-            <div className="bg-red-50 p-2.5 rounded-xl"><TrendingDown className="text-red-500" size={20} /></div>
-          </div>
-
-          <div className="bg-white rounded-[25px] p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase">Neto Actual</p>
-              <h3 className="font-black text-xl text-[#B8860B] mt-0.5">L {balance.toLocaleString()}</h3>
+          ) : (
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: C.muted, fontSize: 10, fontWeight: 700 }}
+                    axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: C.muted, fontSize: 10 }}
+                    axisLine={false} tickLine={false}
+                    tickFormatter={v => `L${(v/1000).toFixed(0)}k`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend
+                    wrapperStyle={{ fontSize: 11, color: C.muted, paddingTop: 12 }}
+                    iconType="circle" />
+                  <Line
+                    type="monotone" dataKey="ingresos" name="Ingresos"
+                    stroke={C.gold} strokeWidth={2.5} dot={{ fill: C.gold, r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: C.gold }} />
+                  <Line
+                    type="monotone" dataKey="gastos" name="Gastos"
+                    stroke={C.red} strokeWidth={2.5} dot={{ fill: C.red, r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: C.red }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-            <div className="bg-amber-50 p-2.5 rounded-xl"><Wallet className="text-[#B8860B]" size={20} /></div>
-          </div>
+          )}
         </div>
 
-        {/* Gráfico Seguro Recharts (Sin Warnings) */}
-        <div className="bg-white rounded-[30px] p-5 shadow-sm border border-gray-100 lg:col-span-1 flex flex-col justify-center items-center min-w-0">
-          <p className="text-xs font-bold text-gray-400 uppercase mb-2 text-center">Distribución de Recursos</p>
-          <div className="h-[160px] w-full max-w-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={chartData} dataKey="value" outerRadius={55} innerRadius={35} paddingAngle={5}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => ingresos === 0 && gastos === 0 ? "Sin movimientos" : "L " + value.toLocaleString()} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: "11px" }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        {/* ── Historial ──────────────────────────────── */}
+        <div style={cardBase} className="rounded-[26px] overflow-hidden">
 
-      </div>
+          {/* Barra de filtros */}
+          <div style={{ borderBottom: `1px solid ${C.border}` }} className="p-4 flex flex-wrap gap-3 items-center">
+            <h3 style={{ color: C.text }} className="font-black text-sm flex-1 min-w-[140px]">
+              Movimientos recientes
+            </h3>
 
-      {/* Flujo de Operaciones Avanzadas e Historial */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6 items-start">
-        
-        {/* Formulario Dinámico Administrativo */}
-        {canManageFinance(user?.role) && (
-          <div className="bg-white rounded-[30px] p-6 shadow-md border border-amber-100 xl:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <PlusCircle className="text-[#B8860B]" size={20} />
-              <h2 className="font-bold text-gray-800 text-lg">{editingId ? "Modificar Registro" : "Nuevo Registro"}</h2>
+            {/* Búsqueda */}
+            <div style={{ background: C.bg, border: `1px solid ${C.border}` }}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl flex-1 min-w-[150px] max-w-[220px]">
+              <Search size={12} style={{ color: C.muted }} />
+              <input type="text" placeholder="Buscar movimiento..."
+                value={search} onChange={e => setSearch(e.target.value)}
+                style={{ background: "transparent", color: C.text, outline: "none", width: "100%" }}
+                className="text-xs font-medium placeholder-amber-900/60" />
+              {search && <button onClick={() => setSearch("")}><X size={11} style={{ color: C.muted }} /></button>}
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">Tipo de Movimiento</label>
-                <select
-                  value={tipo}
-                  onChange={(e) => {
-                    setTipo(e.target.value)
-                    setCategoria("")
-                  }}
-                  className="w-full p-3 rounded-xl bg-[#F8F4E9] border-none outline-none text-sm font-medium"
-                >
-                  <option value="ingreso">🟢 Ingreso</option>
-                  <option value="gasto">🔴 Gasto</option>
-                </select>
-              </div>
+            {/* Filtros */}
+            <select value={filterCaja} onChange={e => setFilterCaja(e.target.value)}
+              className={selectCls} style={selectStyle}>
+              <option value="todos">Todas las cajas</option>
+              <option value="operativa">Caja Operativa</option>
+              <option value="inversiones">Caja Inversiones</option>
+            </select>
 
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">Categoría Base</label>
-                <select
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#F8F4E9] border-none outline-none text-sm font-medium"
-                >
-                  <option value="">Seleccionar opción</option>
-                  {tipo === "ingreso" ? (
-                    <>
-                      <option value="Misa">Misa</option>
-                      <option value="Concierto">Concierto</option>
-                      <option value="Donación">Donación</option>
-                      <option value="Actividad económica">Actividad económica</option>
-                      <option value="Otro">Otro</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="Transporte">Transporte</option>
-                      <option value="Alimentación">Alimentación</option>
-                      <option value="Sonido">Sonido</option>
-                      <option value="Uniformes">Uniformes</option>
-                      <option value="Instrumentos">Instrumentos</option>
-                      <option value="Otro">Otro</option>
-                    </>
-                  )}
-                </select>
-              </div>
+            <select value={filterTipo} onChange={e => setFilterTipo(e.target.value)}
+              className={selectCls} style={selectStyle}>
+              <option value="todos">Todos</option>
+              <option value="ingreso">Ingresos</option>
+              <option value="gasto">Gastos</option>
+            </select>
 
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">Actividad Específica (Opcional)</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Ensayo General / Misa Patronal"
-                  value={actividad}
-                  onChange={(e) => setActividad(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#F8F4E9] border-none outline-none text-sm"
-                />
-              </div>
+            <select value={filterTiempo} onChange={e => setFilterTiempo(e.target.value)}
+              className={selectCls} style={selectStyle}>
+              <option value="todos">Historial completo</option>
+              <option value="semana">Esta semana</option>
+              <option value="mes">Este mes</option>
+              <option value="ano">Este año</option>
+            </select>
 
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">Monto (L.)</label>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  value={monto}
-                  onChange={(e) => setMonto(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#F8F4E9] border-none outline-none text-sm font-semibold"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">Descripción del Movimiento</label>
-                <input
-                  type="text"
-                  placeholder="Detalles adicionales..."
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#F8F4E9] border-none outline-none text-sm"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                {editingId && (
-                  <button
-                    onClick={() => {
-                      setEditingId(null)
-                      setMonto("")
-                      setDescripcion("")
-                      setCategoria("")
-                      setActividad("")
-                    }}
-                    className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-bold"
-                  >
-                    Cancelar
-                  </button>
-                )}
-                <button
-                  onClick={handleSave}
-                  className="flex-1 text-white py-3 rounded-xl text-sm font-bold bg-[#D4AF37] hover:bg-[#B8860B] transition"
-                >
-                  {editingId ? "Actualizar" : "Guardar"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Listado con Panel de Control de Filtros */}
-        <div className={canManageFinance(user?.role) ? "xl:col-span-2 space-y-4" : "xl:col-span-3 space-y-4"}>
-          
-          {/* Bloque Completo de Filtros Avanzados */}
-          <div className="bg-white p-4 rounded-[25px] shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center justify-between">
-            
-            <div className="flex-1 min-w-[120px]">
-              <span className="text-[10px] font-bold text-gray-400 uppercase block mb-1 flex items-center gap-1"><Layers size={10}/> Tipo</span>
-              <select
-                value={filterTipo}
-                onChange={(e) => setFilterTipo(e.target.value)}
-                className="w-full bg-[#F8F4E9] p-2 rounded-xl text-xs font-semibold border-none outline-none"
-              >
-                <option value="todos">Todos</option>
-                <option value="ingreso">Ingresos</option>
-                <option value="gasto">Gastos</option>
-              </select>
-            </div>
-
-            <div className="flex-1 min-w-[130px]">
-              <span className="text-[10px] font-bold text-gray-400 uppercase block mb-1 flex items-center gap-1"><Activity size={10}/> Actividad</span>
-              <select
-                value={filterActividad}
-                onChange={(e) => setFilterActividad(e.target.value)}
-                className="w-full bg-[#F8F4E9] p-2 rounded-xl text-xs font-semibold border-none outline-none"
-              >
-                <option value="todos">Todas</option>
-                {actividadesDisponibles.map((act) => (
-                  <option key={act} value={act}>{act}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex-1 min-w-[130px]">
-              <span className="text-[10px] font-bold text-gray-400 uppercase block mb-1 flex items-center gap-1"><Calendar size={10}/> Tiempo</span>
-              <select
-                value={filterTiempo}
-                onChange={(e) => setFilterTiempo(e.target.value)}
-                className="w-full bg-[#F8F4E9] p-2 rounded-xl text-xs font-semibold border-none outline-none"
-              >
-                <option value="todos">Historial Completo</option>
-                <option value="semana">Esta Semana</option>
-                <option value="mes">Este Mes</option>
-                <option value="ano">Este Año</option>
-              </select>
-            </div>
-
-            <button 
-              onClick={loadRecords}
-              className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition text-gray-600 mt-4 md:mt-0"
-              title="Actualizar Datos"
-            >
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            <button onClick={loadRecords} style={{ background: C.goldFade, color: C.gold }}
+              className="p-2.5 rounded-xl hover:opacity-70 transition"
+              title="Actualizar">
+              <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
 
-          {/* Renderizado Seguro del Historial de Cuentas */}
-          <div className="space-y-3 overflow-y-auto max-h-[480px] pr-1">
-            {filteredRecords.length === 0 ? (
-              <div className="bg-white rounded-[25px] p-8 text-center border border-dashed border-gray-200">
-                <p className="text-gray-400 text-sm">No se encontraron movimientos registrados.</p>
+          {/* Tabla (desktop) / Cards (mobile) */}
+          {loading ? (
+            <div className="py-16 flex justify-center">
+              <Loader2 size={24} style={{ color: C.gold }} className="animate-spin" />
+            </div>
+          ) : filteredRecords.length === 0 ? (
+            <div className="py-16 text-center">
+              <Layers size={32} style={{ color: C.border }} className="mx-auto mb-3" />
+              <p style={{ color: C.muted }} className="text-sm font-medium">Sin movimientos.</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                      {["Fecha","Descripción","Caja","Tipo","Categoría","Monto","Acciones"].map(h => (
+                        <th key={h} style={{ color: C.muted }}
+                          className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRecords.map((r, i) => (
+                      <tr key={r.id}
+                        style={{ borderBottom: `1px solid ${C.border}`, background: i % 2 === 0 ? "transparent" : `${C.card2}80` }}
+                        className="hover:bg-white/5 transition">
+                        <td className="px-5 py-3.5 text-xs font-mono whitespace-nowrap" style={{ color: C.muted }}>
+                          {new Date(r.created_at).toLocaleDateString("es-HN")}
+                        </td>
+                        <td className="px-5 py-3.5 text-xs font-medium max-w-[160px] truncate" style={{ color: C.text }}>
+                          {r.descripcion || "Sin descripción"}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span style={{
+                            background: r.caja === "operativa" ? "#3D2A00" : "#0A1F2E",
+                            color: r.caja === "operativa" ? C.gold : "#60C8F5",
+                            border: `1px solid ${r.caja === "operativa" ? C.gold + "44" : "#60C8F544"}`
+                          }} className="text-[10px] font-black px-2.5 py-1 rounded-lg whitespace-nowrap">
+                            {r.caja === "operativa" ? "Caja 1 · Operativa" : "Caja 2 · Inversiones"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span style={{
+                            background: r.tipo === "ingreso" ? C.greenDim : C.redDim,
+                            color: r.tipo === "ingreso" ? C.green : C.red,
+                          }} className="text-[10px] font-black px-2.5 py-1 rounded-lg uppercase">
+                            {r.tipo}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-xs font-medium" style={{ color: C.muted }}>
+                          {r.actividad || r.categoria || "General"}
+                        </td>
+                        <td className="px-5 py-3.5 font-black text-sm text-right whitespace-nowrap"
+                          style={{ color: r.tipo === "ingreso" ? C.green : C.red }}>
+                          {r.tipo === "ingreso" ? "+" : "-"} L {Number(r.monto).toLocaleString()}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          {canManageFinance(user?.role) && (
+                            <div className="flex gap-1.5">
+                              <button onClick={() => { setModalItem(r); setShowModal(true) }}
+                                style={{ background: "#1e3a5f", color: "#60C8F5" }}
+                                className="p-2 rounded-lg hover:opacity-80 transition">
+                                <Edit3 size={12} />
+                              </button>
+                              <button onClick={() => handleDelete(r.id)}
+                                style={{ background: C.redDim, color: C.red }}
+                                className="p-2 rounded-lg hover:opacity-80 transition">
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ) : (
-              filteredRecords.map((item) => (
-                <div
-                  key={item.id}
-                  className={getCardStyle(item.tipo)}
-                >
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className={getBadgeStyle(item.tipo)}>
-                        {item.tipo}
-                      </span>
-                      <span className="text-[11px] text-[#B8860B] font-bold bg-amber-50 px-2 py-0.5 rounded-md">
-                        {item.actividad || item.categoria || "General"}
-                      </span>
+
+              {/* Mobile cards */}
+              <div className="md:hidden divide-y" style={{ borderColor: C.border }}>
+                {filteredRecords.map(r => (
+                  <div key={r.id} className="p-4 flex items-center gap-3">
+                    <div style={{
+                      background: r.tipo === "ingreso" ? C.greenDim : C.redDim,
+                      color: r.tipo === "ingreso" ? C.green : C.red,
+                    }} className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0">
+                      {r.tipo === "ingreso" ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
                     </div>
-                    <p className="text-gray-800 font-medium text-sm pt-0.5">{item.descripcion || "Sin comentarios"}</p>
-                    <p className="text-[10px] text-gray-400 font-mono">
-                      {new Date(item.created_at).toLocaleDateString("es-HN")}
-                    </p>
-                  </div>
-
-                  <div className="text-right flex flex-col items-end gap-2.5">
-                    <p className={getMontoStyle(item.tipo)}>
-                      {item.tipo === "ingreso" ? "+" : "-"} L {Number(item.monto).toLocaleString()}
-                    </p>
-                    
-                    {canManageFinance(user?.role) && (
-                      <div className="flex gap-1.5">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="px-2.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition"
-                        >
-                          Eliminar
-                        </button>
+                    <div className="flex-1 min-w-0">
+                      <p style={{ color: C.text }} className="text-sm font-bold truncate">
+                        {r.descripcion || r.actividad || r.categoria}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span style={{ color: r.caja === "operativa" ? C.gold : "#60C8F5" }}
+                          className="text-[9px] font-black uppercase">
+                          {r.caja === "operativa" ? "Caja 1" : "Caja 2"}
+                        </span>
+                        <span style={{ color: C.muted }} className="text-[9px]">
+                          {new Date(r.created_at).toLocaleDateString("es-HN")}
+                        </span>
                       </div>
-                    )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p style={{ color: r.tipo === "ingreso" ? C.green : C.red }}
+                        className="font-black text-sm">
+                        {r.tipo === "ingreso" ? "+" : "-"}L {Number(r.monto).toLocaleString()}
+                      </p>
+                      {canManageFinance(user?.role) && (
+                        <div className="flex gap-1 mt-1 justify-end">
+                          <button onClick={() => { setModalItem(r); setShowModal(true) }}
+                            style={{ background: "#1e3a5f", color: "#60C8F5" }}
+                            className="p-1.5 rounded-lg hover:opacity-80 transition">
+                            <Edit3 size={11} />
+                          </button>
+                          <button onClick={() => handleDelete(r.id)}
+                            style={{ background: C.redDim, color: C.red }}
+                            className="p-1.5 rounded-lg hover:opacity-80 transition">
+                            <Trash2 size={11} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-
+                ))}
+              </div>
+            </>
+          )}
         </div>
-
       </div>
 
       <BottomNav />
