@@ -207,38 +207,38 @@ function Dashboard() {
         className="p-4 max-w-4xl mx-auto -mt-6 space-y-5"
       >
         {/* TARJETAS DE MÉTRICAS */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 sm:gap-4">
           {/* CAJA GENERAL */}
-          <div className="card-premium relative overflow-hidden p-4 min-h-[140px] group">
+          <div className="card-premium relative overflow-hidden p-4 min-h-[172px] sm:min-h-[140px] group">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none" />
-            <div className="flex items-start justify-between gap-4">
-              <div className="bg-[#221F18] p-3 rounded-2xl text-[#D4AF37] border border-[#D4AF37]/10 shadow-inner">
+            <div className="flex items-start justify-between gap-3 sm:gap-4 min-w-0">
+              <div className="bg-[#221F18] p-3 rounded-2xl text-[#D4AF37] border border-[#D4AF37]/10 shadow-inner shrink-0">
                 <DollarSign size={20} />
               </div>
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.3em] text-[#a89060]">Caja</p>
-                <p className="text-3xl sm:text-4xl font-black text-[#D4AF37] mt-1">L {balance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <div className="text-right min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.16em] sm:tracking-[0.3em] text-[#a89060]">Caja</p>
+                <p className="text-2xl sm:text-4xl font-black text-[#D4AF37] mt-1 leading-none break-words">L {balance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <h3 className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">Caja General</h3>
               <p className="mt-2 text-sm text-[#F5E9C0]/80">Saldo disponible del fondo administrativo.</p>
             </div>
           </div>
 
           {/* INTEGRANTES */}
-          <div className="card-premium relative overflow-hidden p-4 min-h-[140px] group">
+          <div className="card-premium relative overflow-hidden p-4 min-h-[172px] sm:min-h-[140px] group">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none" />
-            <div className="flex items-start justify-between gap-4">
-              <div className="bg-[#221F18] p-3 rounded-2xl text-[#D4AF37] border border-[#D4AF37]/10 shadow-inner">
+            <div className="flex items-start justify-between gap-3 sm:gap-4 min-w-0">
+              <div className="bg-[#221F18] p-3 rounded-2xl text-[#D4AF37] border border-[#D4AF37]/10 shadow-inner shrink-0">
                 <Users size={20} />
               </div>
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.3em] text-[#a89060]">Miembros</p>
-                <p className="text-3xl sm:text-4xl font-black text-[#D4AF37] mt-1">{membersCount}</p>
+              <div className="text-right min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.16em] sm:tracking-[0.3em] text-[#a89060]">Miembros</p>
+                <p className="text-2xl sm:text-4xl font-black text-[#D4AF37] mt-1 leading-none">{membersCount}</p>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <h3 className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">Integrantes</h3>
               <p className="mt-2 text-sm text-[#F5E9C0]/80">Total de integrantes activos en el coro.</p>
             </div>
