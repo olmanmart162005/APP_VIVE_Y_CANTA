@@ -418,14 +418,14 @@ function Members() {
 
       <div className="p-4 md:p-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-5">
         <div className="space-y-4 lg:col-span-1">
-          <div className="bg-[#1A1710] rounded-2xl px-4 py-3 flex items-center gap-3 border border-[#D4AF37]/15">
+          <div className="bg-[#16120E] rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-[#D4AF37]/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-within:border-[#D4AF37]/50 focus-within:shadow-[0_0_0_2px_rgba(212,175,55,0.14)] transition-all">
             <Search className="text-[#D4AF37] shrink-0" size={17} />
             <input
               type="text"
               placeholder="Buscar miembro..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full outline-none bg-transparent text-sm placeholder-[#a89060]/30 text-[#F5E9C0]"
+              className="members-search-input w-full outline-none bg-transparent text-[15px] md:text-sm font-semibold tracking-[0.01em] placeholder:text-[#c7b178] placeholder:opacity-95 text-[#F7EBC4] caret-[#D4AF37]"
             />
             {search && (
               <button onClick={() => setSearch("")} className="text-[#a89060] hover:text-[#D4AF37] transition-colors">

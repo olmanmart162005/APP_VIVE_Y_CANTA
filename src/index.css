@@ -285,6 +285,14 @@ option {
   color: var(--text-muted);
 }
 
+.members-search-input:-webkit-autofill,
+.members-search-input:-webkit-autofill:hover,
+.members-search-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #F7EBC4;
+  box-shadow: 0 0 0 1000px #16120E inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .title-professional {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-weight: 700;

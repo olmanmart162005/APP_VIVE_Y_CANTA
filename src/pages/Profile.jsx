@@ -67,16 +67,16 @@ function Profile() {
   return (
     <div className="min-h-screen bg-[#0E0C09] pb-32 font-sans antialiased text-[#F5E9C0]">
       {/* HEADER UNIFICADO */}
-      <div className="page-header-gold rounded-b-[45px] px-5 pt-7 pb-16">
+      <div className="page-header-gold rounded-b-[45px] px-5 pt-7 pb-24 sm:pb-16 relative overflow-hidden">
         <div className="max-w-4xl mx-auto">
           <p className="header-text-secondary text-[10px] uppercase font-bold tracking-widest">Coro Vive y Canta</p>
-          <h1 className="title-professional title-gold-black text-3xl sm:text-4xl mt-1 tracking-tight break-words">
+          <h1 className="title-professional title-gold-black text-[2.35rem] sm:text-4xl leading-[0.95] mt-1 tracking-tight break-words text-balance pr-2">
             {user?.nombre_completo || "Perfil"}
           </h1>
         </div>
       </div>
 
-      <div className="px-4 max-w-4xl mx-auto -mt-24">
+      <div className="px-4 max-w-4xl mx-auto -mt-16 sm:-mt-24 relative z-10">
         {/* TARJETA DE IDENTIFICACIÓN PRINCIPAL */}
         <div className="bg-[#1A1710] rounded-[32px] shadow-2xl p-6 text-center relative border border-[#D4AF37]/15 overflow-hidden">
           {/* ANILLO DE AVATAR PREMIUM CON DEGRADADO METÁLICO */}
