@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Coro Vive y Canta</string>
+    <string name="title_activity_main">Coro Vive y Canta</string>
+    <string name="package_name">app.viveycanta.sistema</string>
+    <string name="custom_url_scheme">app.viveycanta.sistema</string>
+</resources>

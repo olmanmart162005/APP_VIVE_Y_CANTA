@@ -12,7 +12,7 @@ function Particle({ x, y, size, delay, duration }) {
         width: size,
         height: size,
         borderRadius: "50%",
-        background: "rgba(255,255,255,0.15)",
+        background: "rgba(212, 175, 55, 0.12)",
         backdropFilter: "blur(2px)",
       }}
       animate={{
@@ -39,7 +39,7 @@ function PulseRing({ delay, scale }) {
         width: 220,
         height: 220,
         borderRadius: "50%",
-        border: "1px solid rgba(255,255,255,0.2)",
+        border: "1px solid rgba(212, 175, 55, 0.15)",
       }}
       animate={{
         scale: [scale, scale + 0.8],
@@ -77,28 +77,28 @@ function SplashScreen() {
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        zIndex: 50,
-        background: "linear-gradient(160deg, #C8961A 0%, #D4AF37 30%, #9A7000 65%, #6B4E00 100%)",
-        fontFamily: "'Palatino Linotype', Palatino, Georgia, serif",
+        zIndex: 100,
+        background: "radial-gradient(circle at center, #1E1A12 0%, #0E0C09 100%)",
+        fontFamily: "'Inter', sans-serif",
       }}
     >
       {/* Malla de brillo superior */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,240,160,0.35) 0%, transparent 70%)",
+        background: "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,55,0.08) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
       {/* Brillo inferior cálido */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 60% 40% at 80% 110%, rgba(180,100,0,0.4) 0%, transparent 70%)",
+        background: "radial-gradient(ellipse 60% 40% at 80% 110%, rgba(212,175,55,0.04) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
       {/* Textura de grano sutil */}
       <div style={{
-        position: "absolute", inset: 0, opacity: 0.04,
+        position: "absolute", inset: 0, opacity: 0.03,
         backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         backgroundSize: "200px",
         pointerEvents: "none",
@@ -118,7 +118,7 @@ function SplashScreen() {
           position: "absolute",
           width: 180, height: 180,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(255,240,120,0.18) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)",
         }} />
 
         {/* Logo */}
@@ -132,8 +132,8 @@ function SplashScreen() {
           <div style={{
             position: "absolute", inset: -16,
             borderRadius: "50%",
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.2)",
+            background: "rgba(26,23,16,0.85)",
+            border: "1px solid rgba(212,175,55,0.15)",
             backdropFilter: "blur(6px)",
           }} />
           <img
@@ -141,7 +141,7 @@ function SplashScreen() {
             alt="Coro Vive y Canta"
             style={{
               width: 120, height: 120, objectFit: "contain",
-              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.35)) drop-shadow(0 0 40px rgba(255,220,80,0.3))",
+              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.5)) drop-shadow(0 0 40px rgba(212,175,55,0.2))",
               position: "relative", zIndex: 1,
             }}
           />
@@ -165,31 +165,32 @@ function SplashScreen() {
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.6 }}
         >
-          <div style={{ height: 1, width: 40, background: "rgba(255,255,255,0.4)" }} />
-          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(255,255,255,0.6)" }} />
-          <div style={{ height: 1, width: 40, background: "rgba(255,255,255,0.4)" }} />
+          <div style={{ height: 1, width: 40, background: "rgba(212,175,55,0.2)" }} />
+          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(212,175,55,0.4)" }} />
+          <div style={{ height: 1, width: 40, background: "rgba(212,175,55,0.2)" }} />
         </motion.div>
 
         <h1 style={{
-          color: "#fff",
-          fontSize: 28,
-          fontWeight: 900,
+          color: "#F5E9C0",
+          fontSize: 32,
+          fontWeight: 700,
           letterSpacing: "0.06em",
           lineHeight: 1.1,
           margin: 0,
-          textShadow: "0 2px 20px rgba(0,0,0,0.3)",
+          textShadow: "0 2px 20px rgba(0,0,0,0.5)",
         }}>
           Coro Vive y Canta
         </h1>
 
         <motion.p
           style={{
-            color: "rgba(255,255,255,0.75)",
-            fontSize: 11,
+            color: "rgba(245,233,192,0.6)",
+            fontSize: 14,
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             marginTop: 8,
-            fontWeight: 400,
+            fontWeight: 600,
+            fontFamily: "'Inter', sans-serif"
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -208,11 +209,11 @@ function SplashScreen() {
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{ delay: 1, duration: 0.6 }}
         >
-          <div style={{ height: 1, width: 30, background: "rgba(255,255,255,0.25)" }} />
-          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.4)" }} />
-          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.4)" }} />
-          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.4)" }} />
-          <div style={{ height: 1, width: 30, background: "rgba(255,255,255,0.25)" }} />
+          <div style={{ height: 1, width: 30, background: "rgba(212,175,55,0.15)" }} />
+          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(212,175,55,0.3)" }} />
+          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(212,175,55,0.3)" }} />
+          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(212,175,55,0.3)" }} />
+          <div style={{ height: 1, width: 30, background: "rgba(212,175,55,0.15)" }} />
         </motion.div>
       </motion.div>
 
@@ -226,13 +227,13 @@ function SplashScreen() {
         {/* Track */}
         <div style={{
           height: 2, borderRadius: 99,
-          background: "rgba(255,255,255,0.2)",
+          background: "rgba(212,175,55,0.15)",
           overflow: "hidden",
         }}>
           <motion.div
             style={{
               height: "100%", borderRadius: 99,
-              background: "linear-gradient(90deg, rgba(255,255,255,0.4), #fff, rgba(255,255,255,0.4))",
+              background: "linear-gradient(90deg, rgba(212,175,55,0.4), #D4AF37, rgba(212,175,55,0.4))",
               transformOrigin: "left",
             }}
             animate={{ scaleX: [0, 1] }}
@@ -244,9 +245,10 @@ function SplashScreen() {
         <motion.p
           style={{
             textAlign: "center", marginTop: 12,
-            color: "rgba(255,255,255,0.5)",
+            color: "rgba(212,175,55,0.4)",
             fontSize: 9, letterSpacing: "0.25em",
             textTransform: "uppercase",
+            fontFamily: "'Inter', sans-serif"
           }}
           animate={{ opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
@@ -254,7 +256,6 @@ function SplashScreen() {
           Cargando…
         </motion.p>
       </motion.div>
-
     </div>
   )
 }

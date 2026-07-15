@@ -25,7 +25,7 @@ export default defineConfig({
         short_name: "Vive y Canta",
         description: "Sistema Administrativo del Coro Vive y Canta",
         theme_color: "#D4AF37",
-        background_color: "#F8F4E9",
+        background_color: "#0E0C09",
         display: "standalone",
         orientation: "portrait",
         scope: "/",
@@ -64,11 +64,19 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB — needed for pdfmake bundle
       },
     }),
   ],
 
   build: {
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 4000,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("pdfmake")) return "pdfmake"
+        },
+      },
+    },
   },
 })

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Avatar from "react-avatar"
-
 import {
   Mail,
   Phone,
@@ -13,6 +12,7 @@ import {
   Heart,
   ShieldAlert,
 } from "lucide-react"
+import { toast } from "react-hot-toast"
 
 import BottomNav from "../components/BottomNav"
 import { getCurrentUser } from "../services/authService"
@@ -27,8 +27,12 @@ function Profile() {
   }, [])
 
   const loadUser = async () => {
-    const profile = await getCurrentUser()
-    setUser(profile)
+    try {
+      const profile = await getCurrentUser()
+      setUser(profile)
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const getRoleName = (role) => {
@@ -47,27 +51,37 @@ function Profile() {
   }
 
   const handleLogout = async () => {
-    const confirmLogout = confirm("¿Cerrar sesión?")
+    const confirmLogout = window.confirm("¿Cerrar sesión?")
     if (!confirmLogout) return
 
-    await supabase.auth.signOut()
-    navigate("/")
+    try {
+      await supabase.auth.signOut()
+      toast.success("Sesión cerrada correctamente")
+      navigate("/", { replace: true })
+    } catch (err) {
+      console.error(err)
+      toast.error("Error al cerrar sesión")
+    }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F4E9] pb-32 font-sans antialiased text-gray-800">
-      
-      {/* HEADER ELEGANTE CON CURVATURA SUAVE */}
-      <div className="bg-gradient-to-r from-[#D4AF37] to-[#B8860B] h-48 rounded-b-[45px] shadow-lg" />
+    <div className="min-h-screen bg-[#0E0C09] pb-32 font-sans antialiased text-[#F5E9C0]">
+      {/* HEADER UNIFICADO */}
+      <div className="page-header-gold rounded-b-[45px] px-5 pt-7 pb-16">
+        <div className="max-w-4xl mx-auto">
+          <p className="header-text-secondary text-[10px] uppercase font-bold tracking-widest">Coro Vive y Canta</p>
+          <h1 className="title-professional title-gold-black text-3xl sm:text-4xl mt-1 tracking-tight break-words">
+            {user?.nombre_completo || "Perfil"}
+          </h1>
+        </div>
+      </div>
 
       <div className="px-4 max-w-4xl mx-auto -mt-24">
-
         {/* TARJETA DE IDENTIFICACIÓN PRINCIPAL */}
-        <div className="bg-white rounded-[32px] shadow-xl p-6 text-center relative border border-gray-100/80 overflow-hidden">
-          
+        <div className="bg-[#1A1710] rounded-[32px] shadow-2xl p-6 text-center relative border border-[#D4AF37]/15 overflow-hidden">
           {/* ANILLO DE AVATAR PREMIUM CON DEGRADADO METÁLICO */}
           <div className="w-32 h-32 mx-auto relative p-1 rounded-full bg-gradient-to-tr from-[#B8860B] via-[#EEDC82] to-[#D4AF37] shadow-md">
-            <div className="w-full h-full rounded-full overflow-hidden bg-white p-0.5">
+            <div className="w-full h-full rounded-full overflow-hidden bg-[#0E0C09] p-0.5">
               {user?.foto ? (
                 <img
                   src={user.foto}
@@ -76,37 +90,32 @@ function Profile() {
                 />
               ) : (
                 <Avatar
-                  name={user?.nombre_completo}
+                  name={user?.nombre_completo || "Usuario"}
                   size="120"
                   round={true}
-                  color="#F3EAC2"
-                  textColor="#8B6508"
-                  className="font-black"
+                  color="#221F18"
+                  textColor="#D4AF37"
+                  className="font-bold"
                 />
               )}
             </div>
           </div>
 
-          <h1 className="text-2xl font-black mt-4 text-gray-800 tracking-tight break-words">
-            {user?.nombre_completo}
-          </h1>
-
-          <span className="inline-block text-xs bg-amber-50 text-[#B8860B] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-amber-100/70 mt-2">
+          <span className="inline-block text-xs bg-[#D4AF37]/10 text-[#D4AF37] font-bold uppercase tracking-widest px-3.5 py-1 rounded-full border border-[#D4AF37]/20 mt-2">
             {getRoleName(user?.role)}
           </span>
 
           <button
             onClick={() => navigate("/profile/edit")}
-            className="bg-[#B8860B] hover:bg-[#D4AF37] text-white px-5 py-2.5 rounded-xl mt-5 text-xs font-black tracking-wider uppercase flex items-center gap-2 mx-auto shadow-xs transition-all active:scale-95 cursor-pointer"
+            className="btn-primary mt-5 flex items-center gap-2 mx-auto shadow-md"
           >
             <Pencil size={14} />
             Editar Perfil
           </button>
         </div>
 
-        {/* BLOQUE DE INFORMACIÓN: EN MÓVIL 1 COLUMNA, EN ESCRITORIO 2 COLUMNAS */}
+        {/* BLOQUE DE INFORMACIÓN */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-5">
-          
           <InfoCard
             icon={<Mail size={18} />}
             title="Correo Electrónico"
@@ -157,15 +166,14 @@ function Profile() {
           />
         </div>
 
-        {/* BOTÓN DE CIERRE DE SESIÓN LIMPIO Y REFINADO */}
+        {/* BOTÓN DE CIERRE DE SESIÓN */}
         <button
           onClick={handleLogout}
-          className="w-full bg-white hover:bg-red-50 text-red-600 border border-red-100 py-4 rounded-[22px] font-black uppercase text-xs tracking-wider shadow-xs mt-6 flex justify-center items-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+          className="btn-danger w-full mt-6 py-4 flex justify-center items-center gap-2"
         >
           <LogOut size={16} />
           Cerrar Sesión
         </button>
-
       </div>
 
       <BottomNav />
@@ -173,26 +181,21 @@ function Profile() {
   )
 }
 
-/* COMPONENTE INTERNO REFACTORIZADO Y ESTILIZADO DE TARJETA */
 function InfoCard({ icon, title, value, isCritical }) {
   return (
-    <div className="bg-white rounded-[22px] shadow-2xs p-4 flex items-center gap-4 border border-gray-100/80 overflow-hidden">
-      
-      {/* ÍCONO ENMARCADO */}
-      <div className="bg-[#F8F4E9] min-w-[46px] min-h-[46px] rounded-xl flex items-center justify-center text-[#B8860B] shrink-0">
+    <div className="bg-[#1A1710] rounded-[22px] shadow-lg p-4 flex items-center gap-4 border border-[#D4AF37]/10 overflow-hidden">
+      <div className="bg-[#221F18] min-w-[46px] min-h-[46px] rounded-xl flex items-center justify-center text-[#D4AF37] border border-[#D4AF37]/10 shrink-0">
         {icon}
       </div>
 
-      {/* TEXTO INFORMATIVO */}
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-black uppercase text-gray-400 tracking-wider">
+        <p className="text-[10px] font-bold uppercase text-[#a89060] tracking-wider">
           {title}
         </p>
-        <p className={`text-sm font-bold mt-0.5 break-words whitespace-normal ${isCritical ? "text-red-600 font-black" : "text-gray-700"}`}>
+        <p className={`text-sm font-bold mt-0.5 break-words whitespace-normal ${isCritical && value ? "text-red-400 font-extrabold" : "text-[#F5E9C0]"}`}>
           {value || "No registrado"}
         </p>
       </div>
-
     </div>
   )
 }

@@ -12,7 +12,8 @@ import {
   Info,
   X,
   Layers,
-  Sparkles
+  Sparkles,
+  Loader2
 } from "lucide-react"
 
 import {
@@ -28,6 +29,7 @@ import {
   differenceInDays
 } from "date-fns"
 import { es } from "date-fns/locale"
+import { toast } from "react-hot-toast"
 
 import BottomNav from "../components/BottomNav"
 import { getCurrentUser } from "../services/authService"
@@ -45,6 +47,7 @@ function Activities() {
   const [editingId, setEditingId] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState(null)
+  const [saving, setSaving] = useState(false)
 
   const [titulo, setTitulo] = useState("")
   const [descripcion, setDescripcion] = useState("")
@@ -61,18 +64,28 @@ function Activities() {
   }, [])
 
   const loadUser = async () => {
-    const profile = await getCurrentUser()
-    setUser(profile)
+    try {
+      const profile = await getCurrentUser()
+      setUser(profile)
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const loadActivities = async () => {
-    const { data, error } = await supabase
-      .from("activities")
-      .select("*")
-      .order("fecha", { ascending: true })
-      .order("hora", { ascending: true })
+    try {
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .order("fecha", { ascending: true })
+        .order("hora", { ascending: true })
 
-    if (!error && data) setRecords(data)
+      if (error) throw error
+      if (data) setRecords(data)
+    } catch (err) {
+      console.error(err)
+      toast.error("Error al cargar actividades")
+    }
   }
 
   const clearForm = () => {
@@ -90,8 +103,10 @@ function Activities() {
 
   const handleSave = async () => {
     if (!titulo.trim() || !fecha || !hora || !lugar.trim()) {
-      return alert("Por favor complete los campos obligatorios: Título, Fecha, Hora y Lugar.")
+      toast.error("Por favor completa los campos requeridos: Título, Fecha, Hora y Lugar.")
+      return
     }
+    setSaving(true)
 
     const payload = {
       titulo: titulo.trim(),
@@ -104,42 +119,46 @@ function Activities() {
       estado,
     }
 
-    let error = null
+    try {
+      let error = null
+      if (editingId) {
+        const { error: updateError } = await supabase
+          .from("activities")
+          .update(payload)
+          .eq("id", editingId)
+        error = updateError
+      } else {
+        const { error: insertError } = await supabase
+          .from("activities")
+          .insert([{ ...payload, created_by: user?.id }])
+        error = insertError
+      }
 
-    if (editingId) {
-      const { error: updateError } = await supabase
-        .from("activities")
-        .update(payload)
-        .eq("id", editingId)
-      error = updateError
-    } else {
-      const { error: insertError } = await supabase
-        .from("activities")
-        .insert([{ ...payload, created_by: user?.id }])
-      error = insertError
+      if (error) throw error
+      toast.success(editingId ? "¡Actividad modificada!" : "¡Actividad agendada con éxito!")
+      clearForm()
+      loadActivities()
+    } catch (err) {
+      console.error(err)
+      toast.error("Error de sincronización al guardar la actividad")
+    } finally {
+      setSaving(false)
     }
-
-    if (error) {
-      console.error(error)
-      return alert("Error de sincronización al guardar la actividad.")
-    }
-
-    alert(editingId ? "¡Actividad modificada!" : "¡Actividad agendada con éxito!")
-    clearForm()
-    loadActivities()
   }
 
   const handleDelete = async (id) => {
-    const confirmDelete = confirm("¿Está seguro de eliminar esta actividad definitivamente?")
+    const confirmDelete = window.confirm("¿Está seguro de eliminar esta actividad definitivamente?")
     if (!confirmDelete) return
 
-    const { error } = await supabase.from("activities").delete().eq("id", id)
-
-    if (!error) {
+    try {
+      const { error } = await supabase.from("activities").delete().eq("id", id)
+      if (error) throw error
+      toast.success("Actividad eliminada.")
       setSelectedActivity(null)
       loadActivities()
-    } else {
-      alert("Error al intentar eliminar la actividad.")
+    } catch (err) {
+      console.error(err)
+      toast.error("Error al intentar eliminar la actividad")
     }
   }
 
@@ -165,49 +184,48 @@ function Activities() {
     return parseISO(item.fecha) < hoy
   }
 
-  // ✅ COLORES CON DARK MODE — premium negro/dorado
   const getTypeColors = (tipoActividad) => {
     switch (tipoActividad) {
       case "Ensayo":
         return {
-          bg: "bg-blue-50 dark:bg-blue-950/40",
-          text: "text-blue-700 dark:text-blue-300",
-          border: "border-blue-200 dark:border-blue-800/60",
+          bg: "bg-blue-500/10",
+          text: "text-blue-300",
+          border: "border-blue-500/20",
           badge: "bg-blue-500",
         }
       case "Misa":
         return {
-          bg: "bg-amber-50 dark:bg-amber-950/40",
-          text: "text-amber-800 dark:text-amber-300",
-          border: "border-amber-200 dark:border-amber-700/50",
+          bg: "bg-amber-500/10",
+          text: "text-[#D4AF37]",
+          border: "border-[#D4AF37]/20",
           badge: "bg-[#D4AF37]",
         }
       case "Concierto":
         return {
-          bg: "bg-red-50 dark:bg-red-950/40",
-          text: "text-red-700 dark:text-red-300",
-          border: "border-red-200 dark:border-red-800/60",
+          bg: "bg-red-500/10",
+          text: "text-red-300",
+          border: "border-red-500/20",
           badge: "bg-red-500",
         }
       case "Retiro":
         return {
-          bg: "bg-purple-50 dark:bg-purple-950/40",
-          text: "text-purple-700 dark:text-purple-300",
-          border: "border-purple-200 dark:border-purple-800/60",
+          bg: "bg-purple-500/10",
+          text: "text-purple-300",
+          border: "border-purple-500/20",
           badge: "bg-purple-500",
         }
       case "Reunión":
         return {
-          bg: "bg-green-50 dark:bg-green-950/40",
-          text: "text-green-700 dark:text-green-300",
-          border: "border-green-200 dark:border-green-800/60",
+          bg: "bg-green-500/10",
+          text: "text-green-300",
+          border: "border-green-500/20",
           badge: "bg-green-500",
         }
       default:
         return {
-          bg: "bg-gray-50 dark:bg-white/5",
-          text: "text-gray-700 dark:text-gray-300",
-          border: "border-gray-200 dark:border-white/10",
+          bg: "bg-white/5",
+          text: "text-gray-300",
+          border: "border-white/10",
           badge: "bg-gray-500",
         }
     }
@@ -216,15 +234,15 @@ function Activities() {
   const getEstadoBadge = (estadoActividad) => {
     switch (estadoActividad) {
       case "pendiente":
-        return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-semibold border border-yellow-200 dark:border-yellow-700/50"
+        return "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20"
       case "confirmada":
-        return "bg-sky-100 dark:bg-sky-900/40 text-sky-800 dark:text-sky-300 font-semibold border border-sky-200 dark:border-sky-700/50"
+        return "bg-sky-500/10 text-sky-300 border border-sky-500/20"
       case "realizada":
-        return "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 font-bold border border-green-200 dark:border-green-700/50"
+        return "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold"
       case "cancelada":
-        return "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 font-medium border border-red-200 dark:border-red-700/50 line-through"
+        return "bg-red-500/10 text-red-300 border border-red-500/20 line-through"
       default:
-        return "bg-gray-100 dark:bg-white/10 text-gray-800 dark:text-gray-300"
+        return "bg-white/10 text-gray-300"
     }
   }
 
@@ -272,7 +290,7 @@ function Activities() {
 
     if (isSameDay(target, hoy)) {
       return (
-        <span className="flex items-center gap-1 bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full animate-pulse uppercase tracking-wider">
+        <span className="flex items-center gap-1 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse uppercase tracking-wider">
           <Flame size={10} /> Hoy
         </span>
       )
@@ -280,7 +298,7 @@ function Activities() {
     const diff = differenceInDays(target, hoy)
     if (diff > 0 && diff <= 3) {
       return (
-        <span className="flex items-center gap-1 bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+        <span className="flex items-center gap-1 bg-amber-500 text-black text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
           <AlertTriangle size={10} /> Próximo
         </span>
       )
@@ -309,24 +327,19 @@ function Activities() {
     [records, agendaFilter]
   )
 
-  // ✅ CLASES REUTILIZABLES DARK MODE
-  const inputCls =
-    "w-full p-3.5 rounded-xl bg-[#F8F4E9] dark:bg-white/5 dark:text-[#F5E9C0] dark:placeholder-white/30 border-none outline-none text-sm font-medium text-gray-700"
-
-  const selectCls =
-    "w-full p-3.5 rounded-xl bg-[#F8F4E9] dark:bg-white/5 dark:text-[#F5E9C0] border-none outline-none text-sm font-bold text-gray-700"
+  const inputCls = "input-premium"
+  const selectCls = "input-premium"
 
   return (
-    <div className="min-h-screen bg-[#F8F4E9] dark:bg-[#16120D] p-4 md:p-8 pb-32 font-sans antialiased text-gray-800 dark:text-[#F5E9C0]">
-
+    <div className="min-h-screen bg-[#0E0C09] p-4 md:p-8 pb-32 font-sans antialiased text-[#F5E9C0]">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start border-b border-gray-200 dark:border-[rgba(212,175,55,0.15)] pb-5 gap-4">
+      <div className="page-header-gold flex flex-col sm:flex-row sm:justify-between sm:items-start rounded-3xl px-4 py-4 gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-3xl text-[#B8860B]">♪</span>
-            <h1 className="text-3xl font-black text-[#B8860B] tracking-tight">Calendario Coral</h1>
+            <span className="text-3xl header-text-primary">♪</span>
+            <h1 className="title-professional title-gold-black text-3xl tracking-tight">Calendario Coral</h1>
           </div>
-          <p className="text-gray-500 dark:text-[#F5E9C0]/50 text-sm mt-0.5">
+          <p className="header-text-secondary text-sm mt-0.5">
             Gestión y control de eventos para Coro Vive y Canta
           </p>
         </div>
@@ -334,7 +347,7 @@ function Activities() {
         {canManageActivities(user?.role) && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#B8860B] text-white px-5 py-3 rounded-2xl font-bold shadow-md transition w-full sm:w-auto text-sm cursor-pointer"
+            className="btn-primary w-full sm:w-auto"
           >
             <PlusCircle size={18} />
             Agendar Actividad
@@ -344,17 +357,17 @@ function Activities() {
 
       {/* EVENTO DESTACADO */}
       {eventoDestacado && (
-        <div className="mt-5 bg-gradient-to-r from-red-600 to-amber-600 rounded-3xl p-5 text-white shadow-xl flex items-center justify-between gap-4 border border-red-500/20">
+        <div className="mt-5 bg-gradient-to-r from-red-700 to-amber-600 rounded-3xl p-5 text-black shadow-xl flex items-center justify-between gap-4 border border-red-500/20">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2.5 rounded-2xl hidden sm:inline-block">
               <Sparkles className="text-yellow-200" size={22} />
             </div>
             <div>
-              <span className="text-[10px] bg-black/30 px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest">
+              <span className="text-[9px] bg-black/20 px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest text-black">
                 🔥 Evento Crítico Cercano
               </span>
-              <h3 className="font-black text-xl mt-1 tracking-tight">{eventoDestacado.titulo}</h3>
-              <p className="text-xs text-white/90 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 font-medium">
+              <h3 className="font-black text-xl mt-1 tracking-tight text-black">{eventoDestacado.titulo}</h3>
+              <p className="text-xs text-black/80 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 font-semibold">
                 <span className="flex items-center gap-1">📍 {eventoDestacado.lugar}</span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
@@ -363,8 +376,8 @@ function Activities() {
               </p>
             </div>
           </div>
-          <div className="text-right whitespace-nowrap bg-black/15 p-3 rounded-2xl border border-white/10 min-w-[75px]">
-            <span className="text-2xl font-black tracking-tight">
+          <div className="text-right whitespace-nowrap bg-black/10 p-3 rounded-2xl border border-black/10 min-w-[75px]">
+            <span className="text-2xl font-black tracking-tight text-black">
               {differenceInDays(
                 parseISO(eventoDestacado.fecha),
                 new Date() >= parseISO(eventoDestacado.fecha)
@@ -372,19 +385,19 @@ function Activities() {
                   : new Date()
               )}
             </span>
-            <p className="text-[9px] font-black uppercase tracking-wider text-white/80">Días Faltan</p>
+            <p className="text-[9px] font-black uppercase tracking-wider text-black/70">Días Faltan</p>
           </div>
         </div>
       )}
 
       {/* SELECTOR MOBILE */}
-      <div className="flex mt-5 bg-white dark:bg-white/5 p-1.5 rounded-2xl shadow-xs border border-gray-100 dark:border-[rgba(212,175,55,0.10)] md:hidden">
+      <div className="flex mt-5 bg-[#1A1710] p-1.5 rounded-2xl border border-[#D4AF37]/15 md:hidden">
         <button
           onClick={() => setActiveTab("calendar")}
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeTab === "calendar"
-              ? "bg-[#B8860B] text-white shadow-xs"
-              : "text-gray-500 dark:text-[#F5E9C0]/50"
+              ? "bg-[#D4AF37] text-black shadow-md"
+              : "text-[#a89060]/60"
           }`}
         >
           Vista Calendario
@@ -393,8 +406,8 @@ function Activities() {
           onClick={() => setActiveTab("agenda")}
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeTab === "agenda"
-              ? "bg-[#B8860B] text-white shadow-xs"
-              : "text-gray-500 dark:text-[#F5E9C0]/50"
+              ? "bg-[#D4AF37] text-black shadow-md"
+              : "text-[#a89060]/60"
           }`}
         >
           Vista Agenda
@@ -403,15 +416,15 @@ function Activities() {
 
       {/* FORMULARIO CRUD */}
       {showForm && canManageActivities(user?.role) && (
-        <div className="bg-white dark:bg-[#1E1A12] rounded-[30px] p-6 mt-5 shadow-lg border border-amber-100 dark:border-[rgba(212,175,55,0.12)] max-w-2xl mx-auto transition-all">
-          <div className="flex justify-between items-center mb-5 border-b border-gray-100 dark:border-white/10 pb-3">
-            <h2 className="font-black text-gray-800 dark:text-[#F5E9C0] text-lg flex items-center gap-2">
-              <Layers className="text-[#B8860B]" size={20} />
+        <div className="bg-[#1A1710] rounded-[30px] p-6 mt-5 shadow-2xl border border-[#D4AF37]/15 max-w-2xl mx-auto transition-all">
+          <div className="flex justify-between items-center mb-5 border-b border-[#D4AF37]/10 pb-3">
+            <h2 className="font-extrabold text-[#F5E9C0] text-lg flex items-center gap-2">
+              <Layers className="text-[#D4AF37]" size={20} />
               {editingId ? "Modificar Datos de Actividad" : "Planificar Nueva Actividad"}
             </h2>
             <button
               onClick={clearForm}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full text-gray-400 dark:text-[#F5E9C0]/40 transition cursor-pointer"
+              className="p-2 hover:bg-[#221F18] rounded-full text-[#a89060] transition cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -419,7 +432,7 @@ function Activities() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Título de la Actividad *
               </label>
               <input
@@ -432,19 +445,19 @@ function Activities() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Descripción / Notas
               </label>
               <textarea
                 placeholder="Detalles extras o cantos..."
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                className={`${inputCls} h-24 resize-none`}
+                className={`${inputCls} h-24 py-3 resize-none`}
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Categoría
               </label>
               <select value={tipo} onChange={(e) => setTipo(e.target.value)} className={selectCls}>
@@ -457,7 +470,7 @@ function Activities() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Estado de Confirmación
               </label>
               <select value={estado} onChange={(e) => setEstado(e.target.value)} className={selectCls}>
@@ -469,7 +482,7 @@ function Activities() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Fecha Programada *
               </label>
               <input
@@ -481,7 +494,7 @@ function Activities() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Hora de Convocatoria *
               </label>
               <input
@@ -493,7 +506,7 @@ function Activities() {
             </div>
 
             <div className="sm:col-span-1">
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Lugar Establecido *
               </label>
               <input
@@ -506,7 +519,7 @@ function Activities() {
             </div>
 
             <div className="sm:col-span-1">
-              <label className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase block mb-1">
+              <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">
                 Responsable / Encargado
               </label>
               <input
@@ -522,15 +535,22 @@ function Activities() {
           <div className="flex gap-3 mt-6">
             <button
               onClick={clearForm}
-              className="flex-1 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-[#F5E9C0]/70 py-3.5 rounded-xl text-sm font-bold transition cursor-pointer"
+              className="btn-secondary flex-1 py-3.5 text-xs font-bold cursor-pointer"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 bg-[#D4AF37] hover:bg-[#B8860B] text-white py-3.5 rounded-xl text-sm font-bold shadow-md transition cursor-pointer"
+              disabled={saving}
+              className="btn-primary flex-1 py-3.5 text-xs font-bold cursor-pointer"
             >
-              {editingId ? "Actualizar Parámetros" : "Agendar Actividad"}
+              {saving ? (
+                <><Loader2 size={14} className="animate-spin" /> Guardando...</>
+              ) : editingId ? (
+                "Actualizar Actividad"
+              ) : (
+                "Agendar Actividad"
+              )}
             </button>
           </div>
         </div>
@@ -538,35 +558,34 @@ function Activities() {
 
       {/* DASHBOARD PRINCIPAL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 items-start">
-
         {/* CALENDARIO MENSUAL */}
         <div
-          className={`lg:col-span-2 bg-white dark:bg-[#1E1A12] rounded-[30px] p-4 md:p-6 shadow-xs border border-gray-100 dark:border-[rgba(212,175,55,0.10)] ${
+          className={`lg:col-span-2 bg-[#1A1710] rounded-[30px] p-4 md:p-6 border border-[#D4AF37]/10 shadow-2xl ${
             activeTab === "calendar" ? "block" : "hidden md:block"
           }`}
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-black text-gray-800 dark:text-[#F5E9C0] capitalize flex items-center gap-2 tracking-tight">
-              <CalendarIcon className="text-[#B8860B]" size={20} />
+            <h2 className="text-lg font-black text-[#F5E9C0] capitalize flex items-center gap-2 tracking-tight">
+              <CalendarIcon className="text-[#D4AF37]" size={20} />
               {format(currentMonth, "MMMM yyyy", { locale: es })}
             </h2>
-            <div className="flex gap-1 bg-[#F8F4E9] dark:bg-white/5 p-1 rounded-xl">
+            <div className="flex gap-1 bg-[#221F18] border border-[#D4AF37]/15 p-1 rounded-xl">
               <button
                 onClick={prevMonth}
-                className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg transition text-gray-600 dark:text-[#F5E9C0]/60 cursor-pointer"
+                className="p-2 hover:bg-[#1A1710] rounded-lg transition text-[#a89060] cursor-pointer"
               >
                 <ChevronLeft size={16} />
               </button>
               <button
                 onClick={nextMonth}
-                className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg transition text-gray-600 dark:text-[#F5E9C0]/60 cursor-pointer"
+                className="p-2 hover:bg-[#1A1710] rounded-lg transition text-[#a89060] cursor-pointer"
               >
                 <ChevronRight size={16} />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center font-black text-xs text-gray-400 dark:text-[#F5E9C0]/40 uppercase tracking-wider mb-2">
+          <div className="grid grid-cols-7 gap-1 text-center font-bold text-xs text-[#a89060]/75 uppercase tracking-wider mb-2">
             <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
           </div>
 
@@ -574,7 +593,7 @@ function Activities() {
             {Array.from({ length: startOfMonth(currentMonth).getDay() }).map((_, idx) => (
               <div
                 key={`empty-${idx}`}
-                className="aspect-square bg-gray-50/40 dark:bg-white/[0.02] rounded-xl md:rounded-2xl"
+                className="aspect-square bg-[#221F18]/20 rounded-xl md:rounded-2xl"
               />
             ))}
 
@@ -591,10 +610,10 @@ function Activities() {
                   onClick={() => setSelectedDate(day)}
                   className={`aspect-square rounded-xl md:rounded-2xl p-1 flex flex-col justify-between items-center relative transition border cursor-pointer group ${
                     isSelected
-                      ? "bg-[#B8860B] text-white border-[#B8860B] shadow-md scale-102"
+                      ? "bg-[#D4AF37] text-black border-[#D4AF37] shadow-md scale-102"
                       : isTodayDay
-                        ? "bg-amber-50 dark:bg-amber-900/30 text-[#B8860B] border-amber-300 dark:border-amber-600/40 font-bold"
-                        : "bg-gray-50 dark:bg-white/[0.04] text-gray-700 dark:text-[#F5E9C0]/70 hover:bg-gray-100 dark:hover:bg-white/[0.08] border-transparent"
+                        ? "bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/40 font-bold"
+                        : "bg-[#221F18] text-[#F5E9C0] hover:bg-[#221F18]/80 border-transparent"
                   }`}
                 >
                   <span className="text-xs md:text-sm font-bold mt-0.5">{format(day, "d")}</span>
@@ -602,11 +621,11 @@ function Activities() {
                     {matches.slice(0, 3).map((act) => (
                       <span
                         key={act.id}
-                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-white" : getTypeColors(act.tipo).badge}`}
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? "bg-black" : getTypeColors(act.tipo).badge}`}
                       />
                     ))}
                     {matches.length > 3 && (
-                      <span className={`text-[8px] font-black leading-none ${isSelected ? "text-white" : "text-[#B8860B]"}`}>+</span>
+                      <span className={`text-[8px] font-black leading-none ${isSelected ? "text-black" : "text-[#D4AF37]"}`}>+</span>
                     )}
                   </div>
                 </button>
@@ -615,13 +634,13 @@ function Activities() {
           </div>
 
           {/* AGENDA DIARIA */}
-          <div className="mt-6 border-t border-gray-100 dark:border-white/10 pt-5">
-            <h3 className="text-xs font-black uppercase text-gray-400 dark:text-[#F5E9C0]/40 tracking-wider mb-3">
+          <div className="mt-6 border-t border-[#D4AF37]/10 pt-5">
+            <h3 className="text-xs font-bold uppercase text-[#a89060] tracking-wider mb-3">
               Eventos para el {format(selectedDate, "dd 'de' MMMM", { locale: es })}
             </h3>
 
             {selectedDayActivities.length === 0 ? (
-              <p className="text-xs text-gray-400 dark:text-[#F5E9C0]/30 bg-gray-50 dark:bg-white/[0.03] rounded-2xl p-4 text-center border border-dashed border-gray-200 dark:border-white/10">
+              <p className="text-xs text-[#a89060]/50 bg-[#221F18]/30 rounded-2xl p-4 text-center border border-dashed border-[#D4AF37]/10">
                 No hay actividades programadas para esta fecha.
               </p>
             ) : (
@@ -639,14 +658,14 @@ function Activities() {
                           <span className={`w-2 h-2 rounded-full ${colors.badge}`} />
                           <h4 className={`font-bold text-sm truncate ${colors.text}`}>{act.titulo}</h4>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-[#F5E9C0]/40 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-medium">
+                        <p className="text-xs text-[#a89060]/60 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-medium">
                           <span className="flex items-center gap-1"><Clock size={12} /> {act.hora}</span>
                           <span className="flex items-center gap-1 truncate"><MapPin size={12} /> {act.lugar}</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-2 ml-2 shrink-0">
                         {renderTimeBadge(act.fecha)}
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/90 dark:bg-white/10 border border-gray-200 dark:border-white/10 shadow-2xs uppercase dark:text-[#F5E9C0]/70">
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#1A1710] border border-[#D4AF37]/15 shadow-2xs uppercase text-[#a89060]">
                           {act.tipo}
                         </span>
                       </div>
@@ -660,12 +679,12 @@ function Activities() {
 
         {/* PANEL AGENDA */}
         <div
-          className={`bg-white dark:bg-[#1E1A12] rounded-[30px] p-4 md:p-6 shadow-xs border border-gray-100 dark:border-[rgba(212,175,55,0.10)] ${
+          className={`bg-[#1A1710] rounded-[30px] p-4 md:p-6 border border-[#D4AF37]/10 shadow-2xl ${
             activeTab === "agenda" ? "block" : "hidden lg:block"
           }`}
         >
           {/* Tabs de filtro */}
-          <div className="flex bg-[#F8F4E9] dark:bg-white/5 p-1 rounded-xl mb-4 gap-1">
+          <div className="flex bg-[#221F18] border border-[#D4AF37]/15 p-1 rounded-xl mb-4 gap-1">
             {agendaTabs.map(({ key, label }) => {
               const count = getFilteredRecords(key).length
               return (
@@ -674,16 +693,16 @@ function Activities() {
                   onClick={() => setAgendaFilter(key)}
                   className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                     agendaFilter === key
-                      ? "bg-[#B8860B] text-white shadow-xs"
-                      : "text-gray-500 dark:text-[#F5E9C0]/40 hover:text-gray-700 dark:hover:text-[#F5E9C0]/70"
+                      ? "bg-[#D4AF37] text-black shadow-md"
+                      : "text-[#a89060]/60 hover:text-[#F5E9C0]"
                   }`}
                 >
                   {label}
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-black leading-none ${
+                    className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold leading-none ${
                       agendaFilter === key
-                        ? "bg-white/25 text-white"
-                        : "bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-[#F5E9C0]/40"
+                        ? "bg-black/20 text-black"
+                        : "bg-[#1A1710] text-[#a89060]/50"
                     }`}
                   >
                     {count}
@@ -695,7 +714,7 @@ function Activities() {
 
           <div className="space-y-3 overflow-y-auto max-h-[540px] pr-1">
             {filteredRecords.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 dark:text-[#F5E9C0]/30 text-sm">
+              <div className="text-center py-8 text-[#a89060]/40 text-sm">
                 No hay actividades en esta categoría.
               </div>
             ) : (
@@ -708,8 +727,8 @@ function Activities() {
                     onClick={() => setSelectedActivity(item)}
                     className={`rounded-2xl p-4 border transition-all cursor-pointer relative overflow-hidden group ${
                       vencida
-                        ? "bg-amber-50/60 dark:bg-amber-950/30 border-amber-100 dark:border-amber-700/30 hover:border-amber-300 dark:hover:border-amber-600/50"
-                        : "bg-gray-50/60 dark:bg-white/[0.03] border-gray-100 dark:border-white/[0.06] hover:border-amber-200 dark:hover:border-[rgba(212,175,55,0.25)]"
+                        ? "bg-amber-500/5 border-amber-500/15 hover:border-amber-500/35"
+                        : "bg-[#221F18]/50 border-[#D4AF37]/10 hover:border-[#D4AF37]/30"
                     }`}
                   >
                     <div
@@ -720,17 +739,17 @@ function Activities() {
 
                     <div className="flex justify-between items-start gap-2 mb-1.5">
                       <h4
-                        className={`font-extrabold text-sm tracking-tight line-clamp-1 transition-colors ${
+                        className={`font-bold text-sm tracking-tight line-clamp-1 transition-colors ${
                           vencida
-                            ? "text-amber-800 dark:text-amber-300 group-hover:text-amber-900 dark:group-hover:text-amber-200"
-                            : "text-gray-800 dark:text-[#F5E9C0] group-hover:text-[#B8860B]"
+                            ? "text-amber-300 group-hover:text-amber-200"
+                            : "text-[#F5E9C0] group-hover:text-[#D4AF37]"
                         }`}
                       >
                         {item.titulo}
                       </h4>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {vencida ? (
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50 uppercase">
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 uppercase">
                             Vencida
                           </span>
                         ) : (
@@ -739,9 +758,9 @@ function Activities() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-1 text-xs text-gray-500 dark:text-[#F5E9C0]/40 font-medium">
-                      <div className="flex items-center gap-1.5 text-gray-800 dark:text-[#F5E9C0]/80 font-bold">
-                        <CalendarIcon size={13} className={vencida ? "text-amber-600" : "text-[#B8860B]"} />
+                    <div className="grid grid-cols-1 gap-1 text-xs text-[#a89060]/60 font-medium">
+                      <div className="flex items-center gap-1.5 text-[#F5E9C0]/85 font-bold">
+                        <CalendarIcon size={13} className={vencida ? "text-amber-500" : "text-[#D4AF37]"} />
                         <span>
                           {format(parseISO(item.fecha + "T00:00:00"), "dd 'de' MMMM", { locale: es })}
                         </span>
@@ -756,8 +775,8 @@ function Activities() {
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-gray-100 dark:border-white/[0.06]">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-[#F5E9C0]/30">
+                    <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-[#D4AF37]/10">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#a89060]/40">
                         {item.tipo}
                       </span>
                       <div className="flex items-center gap-2">
@@ -765,18 +784,25 @@ function Activities() {
                           <button
                             onClick={async (e) => {
                               e.stopPropagation()
-                              await supabase
-                                .from("activities")
-                                .update({ estado: "realizada" })
-                                .eq("id", item.id)
-                              loadActivities()
+                              try {
+                                const { error } = await supabase
+                                  .from("activities")
+                                  .update({ estado: "realizada" })
+                                  .eq("id", item.id)
+                                if (error) throw error
+                                toast.success("¡Actividad marcada como realizada!")
+                                loadActivities()
+                              } catch (err) {
+                                console.error(err)
+                                toast.error("Error al actualizar estado")
+                              }
                             }}
-                            className="text-[10px] font-black px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700/50 hover:bg-green-200 dark:hover:bg-green-800/50 transition cursor-pointer uppercase"
+                            className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-500/15 text-green-300 border border-green-500/30 hover:bg-green-500/25 transition cursor-pointer uppercase"
                           >
-                            ✓ Marcar realizada
+                            ✓ Realizada
                           </button>
                         )}
-                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full uppercase ${getEstadoBadge(item.estado)}`}>
+                        <span className={`text-[9px] px-2.5 py-0.5 rounded-full uppercase ${getEstadoBadge(item.estado)}`}>
                           {item.estado}
                         </span>
                       </div>
@@ -791,49 +817,49 @@ function Activities() {
 
       {/* MODAL DE DETALLES */}
       {selectedActivity && (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white dark:bg-[#1E1A12] rounded-[30px] p-6 w-full max-w-md shadow-2xl relative border border-gray-100 dark:border-[rgba(212,175,55,0.15)]">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[#1A1710] border border-[#D4AF37]/20 rounded-[30px] p-6 w-full max-w-md shadow-2xl relative">
             <button
               onClick={() => setSelectedActivity(null)}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full text-gray-400 dark:text-[#F5E9C0]/40 transition cursor-pointer"
+              className="absolute top-4 right-4 p-2 hover:bg-[#221F18] rounded-full text-[#a89060] transition cursor-pointer"
             >
               <X size={18} />
             </button>
 
             <div className="mb-4">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider ${getEstadoBadge(selectedActivity.estado)}`}>
+                <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${getEstadoBadge(selectedActivity.estado)}`}>
                   {selectedActivity.estado}
                 </span>
                 {isVencida(selectedActivity) && (
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50">
+                  <span className="text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
                     Vencida
                   </span>
                 )}
               </div>
-              <h3 className="font-black text-xl text-gray-800 dark:text-[#F5E9C0] tracking-tight mt-2.5">
+              <h3 className="font-extrabold text-xl text-[#F5E9C0] tracking-tight mt-2.5">
                 {selectedActivity.titulo}
               </h3>
-              <p className="text-xs text-[#B8860B] font-bold mt-0.5">Categoría: {selectedActivity.tipo}</p>
+              <p className="text-xs text-[#D4AF37] font-bold mt-0.5">Categoría: {selectedActivity.tipo}</p>
             </div>
 
-            <div className="bg-gray-50 dark:bg-white/[0.04] rounded-2xl p-4 space-y-3 text-sm text-gray-600 dark:text-[#F5E9C0]/60 border border-gray-100 dark:border-white/[0.06]">
+            <div className="bg-[#221F18] border border-[#D4AF37]/15 rounded-2xl p-4 space-y-3 text-sm text-[#F5E9C0]/70">
               <div className="flex items-center gap-2.5">
-                <CalendarIcon size={16} className="text-[#B8860B]" />
-                <span className="font-bold text-gray-700 dark:text-[#F5E9C0]/90">
+                <CalendarIcon size={16} className="text-[#D4AF37]" />
+                <span className="font-bold text-[#F5E9C0]">
                   {format(parseISO(selectedActivity.fecha + "T00:00:00"), "dd 'de' MMMM, yyyy", { locale: es })}
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Clock size={16} className="text-gray-400 dark:text-[#F5E9C0]/30" />
+                <Clock size={16} className="text-[#a89060]/50" />
                 <span className="font-medium">{selectedActivity.hora}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <MapPin size={16} className="text-gray-400 dark:text-[#F5E9C0]/30" />
-                <span className="font-medium">{selectedActivity.lugar}</span>
+                <MapPin size={16} className="text-[#a89060]/50" />
+                <span className="font-medium truncate">{selectedActivity.lugar}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <User size={16} className="text-gray-400 dark:text-[#F5E9C0]/30" />
+                <User size={16} className="text-[#a89060]/50" />
                 <span className="font-medium">
                   Encargado: {selectedActivity.responsable || "Coordinación General"}
                 </span>
@@ -842,41 +868,48 @@ function Activities() {
 
             {selectedActivity.descripcion && (
               <div className="mt-4">
-                <h5 className="text-xs font-bold text-gray-400 dark:text-[#F5E9C0]/40 uppercase tracking-wider flex items-center gap-1 mb-1">
+                <h5 className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider flex items-center gap-1 mb-1.5">
                   <Info size={12} /> Observaciones Internas
                 </h5>
-                <p className="text-xs text-gray-600 dark:text-[#F5E9C0]/60 leading-relaxed bg-amber-50/50 dark:bg-amber-900/20 p-3 rounded-xl border border-amber-100/40 dark:border-amber-700/20 font-medium">
+                <p className="text-xs text-[#F5E9C0]/80 leading-relaxed bg-[#221F18]/50 p-3 rounded-xl border border-[#D4AF37]/10 font-medium">
                   {selectedActivity.descripcion}
                 </p>
               </div>
             )}
 
             {canManageActivities(user?.role) && (
-              <div className="flex gap-2 mt-6 pt-4 border-t border-gray-100 dark:border-white/10">
+              <div className="flex gap-2 mt-6 pt-4 border-t border-[#D4AF37]/15">
                 {isVencida(selectedActivity) && (
                   <button
                     onClick={async () => {
-                      await supabase
-                        .from("activities")
-                        .update({ estado: "realizada" })
-                        .eq("id", selectedActivity.id)
-                      setSelectedActivity(null)
-                      loadActivities()
+                      try {
+                        const { error } = await supabase
+                          .from("activities")
+                          .update({ estado: "realizada" })
+                          .eq("id", selectedActivity.id)
+                        if (error) throw error
+                        toast.success("¡Actividad realizada!")
+                        setSelectedActivity(null)
+                        loadActivities()
+                      } catch (err) {
+                        console.error(err)
+                        toast.error("Error al actualizar la actividad")
+                      }
                     }}
-                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/40 transition-colors cursor-pointer text-center"
+                    className="btn-primary flex-1 py-2 text-xs"
                   >
-                    ✓ Marcar Realizada
+                    ✓ Realizada
                   </button>
                 )}
                 <button
                   onClick={() => handleEdit(selectedActivity)}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/40 transition-colors cursor-pointer text-center"
+                  className="btn-secondary flex-1 py-2 text-xs text-blue-400 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/25 transition-all"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => handleDelete(selectedActivity.id)}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-800/40 transition-colors cursor-pointer text-center"
+                  className="btn-secondary flex-1 py-2 text-xs text-red-450 bg-red-500/10 border-red-500/20 hover:bg-red-500/25 transition-all"
                 >
                   Eliminar
                 </button>
