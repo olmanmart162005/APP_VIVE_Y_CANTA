@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Lock, User, Loader2 } from "lucide-react"
+import { Lock, User, Loader2, Eye, EyeOff } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 import logo from "../assets/logo.png"
@@ -9,6 +9,8 @@ import { supabase } from "../lib/supabase"
 function Login({ user }) {
   const [usuario, setUsuario] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberLogin, setRememberLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
   const navigate = useNavigate()
@@ -18,6 +20,22 @@ function Login({ user }) {
       navigate("/dashboard", { replace: true })
     }
   }, [user, navigate])
+
+  // Cargar usuario guardado previamente si "Guardar datos de ingreso" estaba activo
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem("vyc_saved_usuario")
+      const savedRemember = localStorage.getItem("vyc_remember_login")
+      if (savedRemember !== null) {
+        setRememberLogin(savedRemember === "true")
+      }
+      if (savedUser && savedRemember !== "false") {
+        setUsuario(savedUser)
+      }
+    } catch (e) {
+      console.warn("No se pudo leer localStorage:", e)
+    }
+  }, [])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -50,6 +68,19 @@ function Login({ user }) {
         console.error("[LOGIN] Error de inicio de sesión retornado por Supabase:", error)
         toast.error("Usuario o contraseña incorrectos")
         return
+      }
+
+      // Guardar o limpiar datos de ingreso según la preferencia del usuario
+      try {
+        if (rememberLogin) {
+          localStorage.setItem("vyc_saved_usuario", usuario.trim())
+          localStorage.setItem("vyc_remember_login", "true")
+        } else {
+          localStorage.removeItem("vyc_saved_usuario")
+          localStorage.setItem("vyc_remember_login", "false")
+        }
+      } catch (storageErr) {
+        console.warn("No se pudo guardar en localStorage:", storageErr)
       }
 
       console.log("[LOGIN] Autenticación exitosa. Navegando al Dashboard...")
@@ -283,6 +314,59 @@ function Login({ user }) {
           color: rgba(245,233,192,0.2);
         }
 
+        .toggle-password-btn {
+          background: transparent;
+          border: none;
+          color: rgba(212,175,55,0.45);
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.35rem;
+          border-radius: 8px;
+          transition: color 0.2s, transform 0.15s, background-color 0.2s;
+          flex-shrink: 0;
+        }
+
+        .toggle-password-btn:hover {
+          color: #D4AF37;
+          background-color: rgba(212,175,55,0.08);
+          transform: scale(1.05);
+        }
+
+        .remember-container {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: -0.5rem;
+          margin-bottom: 1.5rem;
+          padding: 0 0.1rem;
+        }
+
+        .remember-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.55rem;
+          cursor: pointer;
+          user-select: none;
+          font-family: "Cormorant Garamond", Georgia, serif;
+          font-size: 0.95rem;
+          color: rgba(245,233,192,0.8);
+          transition: color 0.2s;
+        }
+
+        .remember-label:hover {
+          color: #F5E9C0;
+        }
+
+        .remember-checkbox {
+          width: 16px;
+          height: 16px;
+          accent-color: #D4AF37;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+
         /* BOTÓN */
         .btn-login {
           width: 100%;
@@ -357,13 +441,15 @@ function Login({ user }) {
           </div>
 
           <div className="card-body">
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} method="post" autoComplete="on">
               <div className="field-group">
                 <div>
-                  <label className="field-label">Usuario</label>
+                  <label htmlFor="usuario" className="field-label">Usuario</label>
                   <div className={`field-inner ${focusedField === "usuario" ? "focused" : ""}`}>
                     <User className="field-icon" size={16} />
                     <input
+                      id="usuario"
+                      name="username"
                       type="text"
                       placeholder="Ingresa tu usuario"
                       value={usuario}
@@ -372,16 +458,19 @@ function Login({ user }) {
                       onBlur={() => setFocusedField(null)}
                       className="field-input"
                       autoComplete="username"
+                      required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="field-label">Contraseña</label>
+                  <label htmlFor="password" className="field-label">Contraseña</label>
                   <div className={`field-inner ${focusedField === "password" ? "focused" : ""}`}>
                     <Lock className="field-icon" size={16} />
                     <input
-                      type="password"
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -389,9 +478,32 @@ function Login({ user }) {
                       onBlur={() => setFocusedField(null)}
                       className="field-input"
                       autoComplete="current-password"
+                      required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="toggle-password-btn"
+                      aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                      title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
+              </div>
+
+              <div className="remember-container">
+                <label className="remember-label">
+                  <input
+                    type="checkbox"
+                    checked={rememberLogin}
+                    onChange={(e) => setRememberLogin(e.target.checked)}
+                    className="remember-checkbox"
+                  />
+                  <span>Guardar datos de ingreso</span>
+                </label>
               </div>
 
               <button type="submit" disabled={loading} className="btn-login">
