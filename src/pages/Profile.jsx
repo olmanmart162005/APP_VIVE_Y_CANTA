@@ -67,25 +67,25 @@ function Profile() {
   return (
     <div className="min-h-screen bg-[#0E0C09] pb-32 font-sans antialiased text-[#F5E9C0]">
       {/* HEADER UNIFICADO */}
-      <div className="page-header-gold rounded-b-[45px] px-5 pt-7 pb-24 sm:pb-16 relative overflow-hidden">
+      <div className="page-header-gold rounded-b-[36px] px-5 pt-8 pb-16 relative overflow-hidden">
         <div className="max-w-4xl mx-auto">
-          <p className="header-text-secondary text-[10px] uppercase font-bold tracking-widest">Coro Vive y Canta</p>
-          <h1 className="title-professional title-gold-black text-[2.35rem] sm:text-4xl leading-[0.95] mt-1 tracking-tight break-words text-balance pr-2">
-            {user?.nombre_completo || "Perfil"}
+          <p className="header-text-secondary text-[11px] uppercase font-bold tracking-widest">Coro Vive y Canta</p>
+          <h1 className="title-professional title-gold-black text-3xl sm:text-4xl mt-1 tracking-tight">
+            Mi Perfil Oficial
           </h1>
         </div>
       </div>
 
-      <div className="px-4 max-w-4xl mx-auto -mt-16 sm:-mt-24 relative z-10">
+      <div className="px-4 max-w-4xl mx-auto -mt-8 relative z-10">
         {/* TARJETA DE IDENTIFICACIÓN PRINCIPAL */}
-        <div className="bg-[#1A1710] rounded-[32px] shadow-2xl p-6 text-center relative border border-[#D4AF37]/15 overflow-hidden">
+        <div className="bg-[#1A1710] rounded-[32px] shadow-2xl p-6 sm:p-8 text-center relative border border-[#D4AF37]/15 overflow-hidden">
           {/* ANILLO DE AVATAR PREMIUM CON DEGRADADO METÁLICO */}
-          <div className="w-32 h-32 mx-auto relative p-1 rounded-full bg-gradient-to-tr from-[#B8860B] via-[#EEDC82] to-[#D4AF37] shadow-md">
+          <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto relative p-1 rounded-full bg-gradient-to-tr from-[#B8860B] via-[#EEDC82] to-[#D4AF37] shadow-xl">
             <div className="w-full h-full rounded-full overflow-hidden bg-[#0E0C09] p-0.5">
               {user?.foto ? (
                 <img
                   src={user.foto}
-                  alt=""
+                  alt={user?.nombre_completo || "Foto de perfil"}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
@@ -101,15 +101,27 @@ function Profile() {
             </div>
           </div>
 
-          <span className="inline-block text-xs bg-[#D4AF37]/10 text-[#D4AF37] font-bold uppercase tracking-widest px-3.5 py-1 rounded-full border border-[#D4AF37]/20 mt-2">
-            {getRoleName(user?.role)}
-          </span>
+          {/* NOMBRE COMPLETO DESTACADO EN LA CREDENCIAL */}
+          <h2 className="title-professional text-2xl sm:text-3xl font-extrabold text-[#F5E9C0] mt-4 tracking-tight break-words">
+            {user?.nombre_completo || "Usuario del Sistema"}
+          </h2>
+
+          <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center text-xs bg-[#D4AF37]/15 text-[#D4AF37] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full border border-[#D4AF37]/30">
+              {getRoleName(user?.role)}
+            </span>
+            {user?.activo !== false && (
+              <span className="inline-flex items-center text-xs bg-emerald-500/15 text-emerald-400 font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-500/30">
+                Activo
+              </span>
+            )}
+          </div>
 
           <button
             onClick={() => navigate("/profile/edit")}
-            className="btn-primary mt-5 flex items-center gap-2 mx-auto shadow-md"
+            className="btn-primary mt-5 inline-flex items-center gap-2 mx-auto shadow-md cursor-pointer"
           >
-            <Pencil size={14} />
+            <Pencil size={15} />
             Editar Perfil
           </button>
         </div>

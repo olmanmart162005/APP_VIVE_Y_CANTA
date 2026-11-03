@@ -519,12 +519,12 @@ function HojaCantos() {
     return blocks.map((block, blockIndex) => {
       if (block.type === 'separator') {
         return (
-          <div key={blockIndex} className="my-2 h-px w-full bg-[var(--gold)]/40" />
+          <div key={blockIndex} className="my-2 h-px w-full bg-[#D4AF37]/30" />
         )
       }
 
       return (
-        <div key={blockIndex} className={block.type === 'chorus' ? 'space-y-1 mb-2 font-semibold' : 'space-y-1 mb-2'}>
+        <div key={blockIndex} className={block.type === 'chorus' ? 'space-y-1 mb-2 font-semibold text-[#D4AF37]' : 'space-y-1 mb-2'}>
           {block.lines.map((line, lineIndex) => {
             const trimmed = line.trim()
             if (!trimmed) {
@@ -642,95 +642,123 @@ function HojaCantos() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--bg-app)] pb-24 text-[var(--text-primary)] flex items-center justify-center">
-        <div className="card-premium flex items-center gap-3 px-4 py-3">
-          <Loader2 className="animate-spin text-[var(--gold)]" size={18} />
-          <span className="text-sm font-semibold">Cargando módulo…</span>
+      <div className="min-h-screen bg-[#0E0C09] pb-24 text-[#F5E9C0] flex items-center justify-center">
+        <div className="bg-[#1A1710] border border-[#D4AF37]/20 rounded-2xl flex items-center gap-3 px-5 py-4 shadow-xl">
+          <Loader2 className="animate-spin text-[#D4AF37]" size={20} />
+          <span className="text-sm font-bold text-[#F5E9C0]">Cargando módulo de cantos…</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] pb-28 text-[var(--text-primary)]">
-      <div className="border-b border-[var(--border-color)] bg-[linear-gradient(135deg,var(--gold),var(--gold-soft))] px-3 py-4 text-[var(--bg-app)] sm:px-4">
-        <div className="mx-auto flex max-w-6xl items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] opacity-70">Coro Vive y Canta</p>
-            <h1 className="title-professional title-gold-black text-3xl sm:text-4xl">Hoja de Cantos</h1>
+    <div className="min-h-screen bg-[#0E0C09] p-4 md:p-8 pb-32 font-sans antialiased text-[#F5E9C0]">
+      {/* HEADER UNIFICADO */}
+      <div className="page-header-gold flex flex-col sm:flex-row sm:justify-between sm:items-start rounded-3xl px-5 py-5 gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-3xl header-text-primary">♪</span>
+            <h1 className="title-professional title-gold-black text-3xl tracking-tight">Hoja de Cantos</h1>
           </div>
-          <div className="rounded-2xl border border-black/10 bg-black/10 p-2.5">
-            <Music4 size={20} />
-          </div>
+          <p className="header-text-secondary text-sm mt-0.5">
+            Planificación litúrgica y repertorio para Coro Vive y Canta
+          </p>
         </div>
+        {isCreateAllowed && (
+          <button
+            onClick={() => {
+              clearForm()
+              setActiveTab("form")
+            }}
+            className="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2"
+          >
+            <Plus size={18} />
+            Nueva Hoja
+          </button>
+        )}
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-3 py-3 sm:px-4 sm:py-4">
+      <div className="mx-auto flex max-w-6xl flex-col gap-5 mt-5">
         {isCreateAllowed && (
-          <section className="card-premium p-3 sm:p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
+          <section className="bg-[#1A1710] rounded-[30px] p-4 sm:p-6 border border-[#D4AF37]/15 shadow-2xl">
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#D4AF37]/10 pb-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--text-secondary)]">Creación rápida</p>
-                <h2 className="title-professional title-gold-black text-xl sm:text-2xl">Nueva hoja en menos de un minuto</h2>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">
+                  {editingId ? "Edición de Hoja" : "Creación rápida"}
+                </p>
+                <h2 className="title-professional text-xl sm:text-2xl font-bold text-[#F5E9C0] mt-0.5">
+                  {editingId ? "Modificar Hoja de Cantos" : "Planificar Nueva Celebración"}
+                </h2>
               </div>
-              <button onClick={() => clearForm()} className="btn-secondary px-3 py-2 text-[10px]">
+              <button
+                onClick={() => clearForm()}
+                className="btn-secondary px-3 py-2 text-xs inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+              >
                 <Plus size={14} />
-                Nueva Hoja
+                Limpiar Formulario
               </button>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-1.5">
-              <div className="flex gap-1.5">
+            <div className="bg-[#221F18] border border-[#D4AF37]/15 p-1 rounded-xl">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab("form")}
-                  className={`flex-1 rounded-full px-3 py-2 text-[11px] font-semibold transition ${activeTab === "form" ? "bg-[var(--gold)] text-[var(--bg-app)]" : "text-[var(--text-secondary)]"}`}
+                  className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === "form"
+                      ? "bg-[#D4AF37] text-black shadow-md"
+                      : "text-[#a89060]/60 hover:text-[#F5E9C0]"
+                  }`}
                 >
                   Formulario
                 </button>
                 <button
                   onClick={() => setActiveTab("preview")}
-                  className={`flex-1 rounded-full px-3 py-2 text-[11px] font-semibold transition ${activeTab === "preview" ? "bg-[var(--gold)] text-[var(--bg-app)]" : "text-[var(--text-secondary)]"}`}
+                  className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === "preview"
+                      ? "bg-[#D4AF37] text-black shadow-md"
+                      : "text-[#a89060]/60 hover:text-[#F5E9C0]"
+                  }`}
                 >
                   Vista previa
                 </button>
               </div>
             </div>
 
-            <div className="mt-3 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:gap-3">
+            <div className="mt-4 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:gap-4">
               <div className={`${activeTab === "form" ? "block" : "hidden"} lg:block`}>
-                <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-3">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <label className="space-y-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Fecha</span>
-                      <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="input-premium h-11" />
+                <div className="rounded-2xl border border-[#D4AF37]/10 bg-[#221F18]/50 p-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="space-y-1 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Fecha</span>
+                      <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="input-premium h-11 w-full" />
                     </label>
-                    <label className="space-y-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Hora</span>
-                      <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="input-premium h-11" />
+                    <label className="space-y-1 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Hora</span>
+                      <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="input-premium h-11 w-full" />
                     </label>
                   </div>
 
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                    <label className="space-y-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Celebración</span>
-                      <select value={celebracion} onChange={(e) => setCelebracion(e.target.value)} className="input-premium h-11">
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="space-y-1 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Celebración</span>
+                      <select value={celebracion} onChange={(e) => setCelebracion(e.target.value)} className="input-premium h-11 w-full">
                         {CELEBRATIONS.map((option) => (
-                          <option key={option} value={option}>{option}</option>
+                          <option key={option} value={option} className="bg-[#1A1710] text-[#F5E9C0]">{option}</option>
                         ))}
                       </select>
                     </label>
-                    <label className="space-y-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Lugar</span>
-                      <input type="text" value={lugar} onChange={(e) => setLugar(e.target.value)} className="input-premium h-11" placeholder="Ej. Capilla" />
+                    <label className="space-y-1 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Lugar</span>
+                      <input type="text" value={lugar} onChange={(e) => setLugar(e.target.value)} className="input-premium h-11 w-full" placeholder="Ej. Parroquia Nuestro Señor de Esquipulas" />
                     </label>
                   </div>
 
-                  <label className="mt-2 block space-y-1">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Observaciones</span>
-                    <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="input-premium min-h-[72px] resize-none py-3" placeholder="Notas rápidas" />
+                  <label className="mt-3 block space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Observaciones / Notas</span>
+                    <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="input-premium min-h-[72px] resize-none py-2.5 w-full" placeholder="Notas litúrgicas, tonos, recomendaciones..." />
                   </label>
 
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-4 space-y-2.5">
                     {SECTION_CONFIG.map((section) => {
                       const result       = searchResults[section.key]
                       const isSearching  = searching[section.key]
@@ -741,14 +769,16 @@ function HojaCantos() {
                       return (
                         <div
                           key={section.key}
-                          className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-2.5"
+                          className="rounded-2xl border border-[#D4AF37]/15 bg-[#1A1710] p-3 transition hover:border-[#D4AF37]/35"
                           ref={(el) => { suggestionRefs.current[section.key] = el }}
                         >
                           <div className="flex items-center gap-2">
-                            <Music4 size={14} className="text-[var(--gold)]" />
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">{section.label}</span>
+                            <Music4 size={14} className="text-[#D4AF37]" />
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-[#F5E9C0]">{section.label}</span>
                             {!isNumericField && (
-                              <span className="ml-auto rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] px-2 py-0.5 text-[9px] text-[var(--text-secondary)]">texto libre</span>
+                              <span className="ml-auto rounded-full bg-[#221F18] border border-[#D4AF37]/20 px-2 py-0.5 text-[9px] font-bold uppercase text-[#a89060]">
+                                texto libre
+                              </span>
                             )}
                           </div>
 
@@ -756,24 +786,23 @@ function HojaCantos() {
                           <div className="relative mt-2">
                             <input
                               type="text"
-                              inputMode={isNumericField ? "text" : "text"}
                               value={fields[section.key] || ""}
                               onChange={(e) => handleFieldChange(section.key, e.target.value)}
                               onFocus={() => {
                                 if (suggestions.length > 0) setActiveSuggestionKey(section.key)
                               }}
-                              placeholder={isNumericField ? "Nº o nombre del canto" : "Texto libre o Nº de canto"}
-                              className="h-11 w-full rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 text-sm font-semibold outline-none transition focus:border-[var(--gold)]"
+                              placeholder={isNumericField ? "Nº o nombre del canto..." : "Texto libre o Nº de canto..."}
+                              className="input-premium h-10 w-full"
                             />
                             {isSearching && (
                               <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                                <Loader2 size={14} className="animate-spin text-[var(--gold)]" />
+                                <Loader2 size={14} className="animate-spin text-[#D4AF37]" />
                               </span>
                             )}
 
                             {/* Dropdown de sugerencias por nombre */}
                             {showDropdown && (
-                              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-xl overflow-hidden">
+                              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-2xl border border-[#D4AF37]/30 bg-[#1A1710] shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
                                 {suggestions.map((song) => (
                                   <button
                                     key={`sug-${section.key}-${song.numero}`}
@@ -782,14 +811,14 @@ function HojaCantos() {
                                       e.preventDefault()
                                       handleSelectTitleSuggestion(section.key, song)
                                     }}
-                                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-[var(--bg-muted)]"
+                                    className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition hover:bg-[#221F18] border-b border-[#D4AF37]/10 last:border-b-0 cursor-pointer"
                                   >
-                                    <span className="min-w-[28px] rounded-full bg-[var(--gold)]/10 px-1.5 py-0.5 text-center text-[10px] font-bold text-[var(--gold)]">
+                                    <span className="min-w-[28px] rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-1.5 py-0.5 text-center text-[10px] font-bold text-[#D4AF37]">
                                       {song.numero}
                                     </span>
-                                    <span className="flex-1 truncate text-[12px] font-semibold text-[var(--text-primary)]">{song.titulo}</span>
+                                    <span className="flex-1 truncate text-xs font-semibold text-[#F5E9C0]">{song.titulo}</span>
                                     {song.categoria && (
-                                      <span className="text-[9px] text-[var(--text-secondary)] shrink-0">{song.categoria}</span>
+                                      <span className="text-[9px] font-bold text-[#a89060] uppercase shrink-0">{song.categoria}</span>
                                     )}
                                   </button>
                                 ))}
@@ -798,10 +827,10 @@ function HojaCantos() {
                           </div>
 
                           {/* Estado de la búsqueda */}
-                          <div className="mt-2 min-h-[18px] text-[11px] text-[var(--text-secondary)]">
+                          <div className="mt-2 min-h-[18px] text-[11px] text-[#a89060]">
                             {result?.kind === "found" && result.matches?.length ? (
                               <div className="space-y-1">
-                                <div className="font-semibold text-[var(--gold)]">{result.value} • {result.firstTitle}</div>
+                                <div className="font-bold text-[#D4AF37]">{result.value} • {result.firstTitle}</div>
                                 {result.matches.length > 1 && (
                                   <div className="flex flex-wrap gap-1.5">
                                     {result.matches.map((item) => (
@@ -809,7 +838,7 @@ function HojaCantos() {
                                         key={`${section.key}-${item.numero}`}
                                         type="button"
                                         onClick={() => handleFieldChange(section.key, String(item.numero))}
-                                        className="rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] px-2 py-1 text-[10px] text-[var(--text-primary)]"
+                                        className="rounded-full border border-[#D4AF37]/25 bg-[#221F18] px-2 py-0.5 text-[10px] font-bold text-[#F5E9C0] hover:border-[#D4AF37] cursor-pointer"
                                       >
                                         {item.numero}
                                       </button>
@@ -818,11 +847,11 @@ function HojaCantos() {
                                 )}
                               </div>
                             ) : result?.kind === "title-search" ? (
-                              <span className="text-[var(--gold)]">Selecciona un canto de la lista</span>
+                              <span className="text-[#D4AF37]">Selecciona un canto de la lista desplegable</span>
                             ) : result?.kind === "not-found" ? (
-                              <span>Canto no encontrado</span>
+                              <span className="text-amber-400">Canto no encontrado en el repertorio</span>
                             ) : result?.kind === "custom" ? (
-                              <span>Texto libre listo para guardar</span>
+                              <span className="text-emerald-400">Texto libre listo para guardar</span>
                             ) : null}
                           </div>
                         </div>
@@ -830,46 +859,49 @@ function HojaCantos() {
                     })}
                   </div>
 
-                  <div className="mt-3 flex gap-2">
-                    <button onClick={clearForm} className="btn-secondary flex-1 py-2.5 text-[10px]">Cancelar</button>
-                    <button onClick={handleSave} disabled={saving} className="btn-primary flex-[2] py-2.5 text-[10px]">
-                      {saving ? "Guardando…" : editingId ? "Actualizar" : "Guardar"}
+                  <div className="mt-4 flex gap-2">
+                    <button onClick={clearForm} className="btn-secondary flex-1 py-3 text-xs cursor-pointer">
+                      Cancelar
+                    </button>
+                    <button onClick={handleSave} disabled={saving} className="btn-primary flex-[2] py-3 text-xs cursor-pointer">
+                      {saving ? "Guardando…" : editingId ? "Actualizar Hoja" : "Guardar Hoja de Cantos"}
                     </button>
                   </div>
                 </div>
               </div>
 
+              {/* VISTA PREVIA COMPACTA */}
               <div className={`${activeTab === "preview" ? "block" : "hidden"} lg:block`}>
-                <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-3">
-                  <div className="flex items-center gap-2 text-[var(--gold)]">
-                    <Sparkles size={15} />
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.24em]">Vista previa compacta</span>
+                <div className="rounded-2xl border border-[#D4AF37]/10 bg-[#221F18]/50 p-4 sticky top-4">
+                  <div className="flex items-center gap-2 text-[#D4AF37]">
+                    <Sparkles size={16} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Vista previa compacta</span>
                   </div>
 
-                  <div className="mt-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-3">
-                    <div className="flex items-start justify-between gap-3">
+                  <div className="mt-3 rounded-2xl border border-[#D4AF37]/15 bg-[#1A1710] p-4 shadow-inner">
+                    <div className="flex items-start justify-between gap-3 border-b border-[#D4AF37]/10 pb-3">
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Resumen</p>
-                        <h3 className="title-professional title-gold-black text-xl">{celebracion || "Celebración"}</h3>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">Celebración</p>
+                        <h3 className="title-professional text-lg font-bold text-[#F5E9C0]">{celebracion || "Misa"}</h3>
                       </div>
-                      <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-2.5 py-2 text-right text-[10px] text-[var(--text-secondary)]">
+                      <div className="rounded-xl border border-[#D4AF37]/20 bg-[#221F18] px-2.5 py-1.5 text-right text-[11px] text-[#a89060]">
                         <div>{formatDate(fecha) || "Fecha"}</div>
-                        <div className="font-semibold text-[var(--gold)]">{hora || "Hora"}</div>
+                        <div className="font-bold text-[#D4AF37]">{hora || "Hora"}</div>
                       </div>
                     </div>
 
-                    <div className="mt-3 space-y-2 text-sm text-[var(--text-primary)]">
-                      <div className="flex items-center gap-2"><CalendarDays size={14} className="text-[var(--gold)]" /> {formatDate(fecha) || "Fecha pendiente"}</div>
-                      <div className="flex items-center gap-2"><Clock3 size={14} className="text-[var(--gold)]" /> {hora || "Hora pendiente"}</div>
-                      <div className="flex items-center gap-2"><MapPin size={14} className="text-[var(--gold)]" /> {lugar || "Lugar pendiente"}</div>
-                      {observaciones ? <div className="flex items-start gap-2"><MessageSquareText size={14} className="text-[var(--gold)] mt-0.5" /> {observaciones}</div> : null}
+                    <div className="mt-3 space-y-1.5 text-xs text-[#F5E9C0]">
+                      <div className="flex items-center gap-2"><CalendarDays size={13} className="text-[#D4AF37]" /> {formatDate(fecha) || "Fecha pendiente"}</div>
+                      <div className="flex items-center gap-2"><Clock3 size={13} className="text-[#D4AF37]" /> {hora || "Hora pendiente"}</div>
+                      <div className="flex items-center gap-2"><MapPin size={13} className="text-[#D4AF37]" /> {lugar || "Lugar pendiente"}</div>
+                      {observaciones ? <div className="flex items-start gap-2"><MessageSquareText size={13} className="text-[#D4AF37] mt-0.5 shrink-0" /> {observaciones}</div> : null}
                     </div>
 
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-3.5 space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
                       {previewSections.filter((section) => section.value).map((section) => (
-                        <div key={section.key} className="flex items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm">
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">{section.label}</span>
-                          <span className="ml-2 truncate text-right text-[var(--text-primary)]">{section.value}</span>
+                        <div key={section.key} className="flex items-center justify-between rounded-xl border border-[#D4AF37]/10 bg-[#221F18] px-3 py-2 text-xs">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">{section.label}</span>
+                          <span className="ml-2 truncate text-right font-semibold text-[#F5E9C0]">{section.value}</span>
                         </div>
                       ))}
                     </div>
@@ -880,70 +912,81 @@ function HojaCantos() {
           </section>
         )}
 
-        <section className="card-premium p-3 sm:p-4">
-          <div className="flex flex-col gap-3 border-b border-[var(--border-color)] pb-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* HISTORIAL DE HOJAS GUARDADAS */}
+        <section className="bg-[#1A1710] rounded-[30px] p-4 sm:p-6 border border-[#D4AF37]/15 shadow-2xl">
+          <div className="flex flex-col gap-3 border-b border-[#D4AF37]/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Historial</p>
-              <h2 className="title-professional title-gold-black text-xl sm:text-2xl">Hojas guardadas</h2>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">Historial Litúrgico</p>
+              <h2 className="title-professional text-xl sm:text-2xl font-bold text-[#F5E9C0]">Hojas de Cantos Registradas</h2>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <label className="flex items-center gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] px-3 py-2 text-sm">
-                <Search size={14} className="text-[var(--gold)]" />
-                <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar" className="w-full bg-transparent text-sm outline-none" />
+              <label className="flex items-center gap-2 rounded-xl border border-[#D4AF37]/15 bg-[#221F18] px-3 py-2 text-xs focus-within:border-[#D4AF37]">
+                <Search size={14} className="text-[#D4AF37]" />
+                <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar celebración o fecha..." className="w-full bg-transparent text-xs text-[#F5E9C0] outline-none placeholder-[#a89060]/50" />
               </label>
-              <label className="flex items-center gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] px-3 py-2 text-sm">
-                <Filter size={14} className="text-[var(--gold)]" />
-                <select value={celebrationFilter} onChange={(e) => setCelebrationFilter(e.target.value)} className="bg-transparent text-sm outline-none">
-                  <option value="todos">Todas</option>
-                  {CELEBRATIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+              <label className="flex items-center gap-2 rounded-xl border border-[#D4AF37]/15 bg-[#221F18] px-3 py-2 text-xs focus-within:border-[#D4AF37]">
+                <Filter size={14} className="text-[#D4AF37]" />
+                <select value={celebrationFilter} onChange={(e) => setCelebrationFilter(e.target.value)} className="bg-transparent text-xs text-[#F5E9C0] outline-none">
+                  <option value="todos" className="bg-[#1A1710]">Todas las celebraciones</option>
+                  {CELEBRATIONS.map((option) => (
+                    <option key={option} value={option} className="bg-[#1A1710] text-[#F5E9C0]">{option}</option>
+                  ))}
                 </select>
               </label>
             </div>
           </div>
 
           {filteredRecords.length === 0 ? (
-            <div className="mt-3 rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-muted)] py-10 text-center text-sm text-[var(--text-secondary)]">
-              <FileText size={28} className="mx-auto mb-2 text-[var(--gold)]" />
-              <p className="font-semibold">Todavía no hay hojas de cantos registradas.</p>
+            <div className="mt-4 rounded-2xl border border-dashed border-[#D4AF37]/20 bg-[#221F18]/40 py-12 text-center text-sm text-[#a89060]">
+              <FileText size={32} className="mx-auto mb-2 text-[#D4AF37]" />
+              <p className="font-bold text-[#F5E9C0]">Todavía no hay hojas de cantos registradas.</p>
+              <p className="text-xs text-[#a89060]/60 mt-1">Crea una nueva hoja para comenzar la planificación litúrgica.</p>
             </div>
           ) : (
-            <div className="mt-3 grid gap-2 lg:grid-cols-2">
+            <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {filteredRecords.map((item) => {
                 const details = detailMap[item.id] || []
                 return (
-                  <div key={item.id} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-3">
+                  <div key={item.id} className="rounded-2xl border border-[#D4AF37]/15 bg-[#221F18]/60 p-4 transition hover:border-[#D4AF37]/35 shadow-md">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">{item.celebracion || "Celebración"}</p>
-                        <h3 className="title-professional title-gold-black text-lg">{formatDate(item.fecha) || "Fecha pendiente"}</h3>
-                        <p className="mt-1 text-xs text-[var(--text-secondary)]">{item.lugar || "Lugar pendiente"}</p>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 inline-block">
+                          {item.celebracion || "Celebración"}
+                        </span>
+                        <h3 className="title-professional text-lg font-bold text-[#F5E9C0] mt-1.5">
+                          {formatDate(item.fecha) || "Fecha pendiente"}
+                        </h3>
+                        <p className="mt-1 text-xs text-[#a89060] flex items-center gap-1">
+                          <MapPin size={12} className="text-[#D4AF37]" />
+                          {item.lugar || "Lugar pendiente"}
+                        </p>
                       </div>
-                      <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-2.5 py-2 text-right text-[10px] text-[var(--text-secondary)]">
-                        <div>{item.hora || "--:--"}</div>
-                        <div className="font-semibold text-[var(--gold)]">{details.length} cantos</div>
+                      <div className="rounded-xl border border-[#D4AF37]/20 bg-[#1A1710] px-3 py-2 text-right text-xs text-[#a89060]">
+                        <div className="font-bold text-[#F5E9C0]">{item.hora || "--:--"}</div>
+                        <div className="font-bold text-[#D4AF37] text-[10px] uppercase mt-0.5">{details.length} cantos</div>
                       </div>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button onClick={() => handleView(item)} className="btn-secondary flex-1 min-w-[120px] py-2.5 text-[10px]">
-                        <Eye size={12} /> Ver
+                    <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-[#D4AF37]/10">
+                      <button onClick={() => handleView(item)} className="btn-secondary flex-1 min-w-[95px] py-2 text-xs inline-flex items-center justify-center gap-1 cursor-pointer">
+                        <Eye size={13} /> Ver
                       </button>
-                      <button onClick={() => handleDownloadPdf(item)} className="btn-secondary flex-1 min-w-[120px] py-2.5 text-[10px]">
-                        <Download size={12} /> PDF
+                      <button onClick={() => handleDownloadPdf(item)} className="btn-secondary flex-1 min-w-[95px] py-2 text-xs inline-flex items-center justify-center gap-1 cursor-pointer">
+                        <Download size={13} /> PDF
                       </button>
                       {isCreateAllowed && (
-                        <button onClick={() => populateFormFromRecord(item)} className="btn-secondary flex-1 min-w-[120px] py-2.5 text-[10px]">
+                        <button onClick={() => populateFormFromRecord(item)} className="btn-secondary flex-1 min-w-[95px] py-2 text-xs cursor-pointer">
                           Editar
                         </button>
                       )}
                       {isCreateAllowed && (
-                        <button onClick={() => handleDuplicate(item)} className="btn-secondary flex-1 min-w-[120px] py-2.5 text-[10px]">
+                        <button onClick={() => handleDuplicate(item)} className="btn-secondary flex-1 min-w-[95px] py-2 text-xs cursor-pointer">
                           Duplicar
                         </button>
                       )}
                       {isDeleteAllowed && (
-                        <button onClick={() => handleDelete(item.id)} className="btn-danger flex-1 min-w-[120px] py-2.5 text-[10px]">
-                          <Trash2 size={12} /> Eliminar
+                        <button onClick={() => handleDelete(item.id)} className="btn-danger flex-1 min-w-[95px] py-2 text-xs inline-flex items-center justify-center gap-1 cursor-pointer">
+                          <Trash2 size={13} /> Eliminar
                         </button>
                       )}
                     </div>
@@ -955,33 +998,38 @@ function HojaCantos() {
         </section>
       </div>
 
+      {/* MODAL DETALLES DE HOJA */}
       {selectedRecord && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-3 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl max-h-[90vh] rounded-[24px] border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-2xl">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-md">
+          <div className="relative w-full max-w-2xl max-h-[90vh] rounded-[32px] border border-[#D4AF37]/25 bg-[#1A1710] shadow-2xl flex flex-col overflow-hidden">
             <button
               type="button"
               onClick={() => setSelectedRecord(null)}
-              className="absolute right-4 top-4 z-50 rounded-full bg-[var(--bg-surface)] p-2 text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--bg-muted)]"
+              className="absolute right-4 top-4 z-50 rounded-full bg-[#221F18] p-2 text-[#a89060] hover:text-[#F5E9C0] border border-[#D4AF37]/20 cursor-pointer"
             >
               ✕
             </button>
 
-            <div className="max-h-[90vh] overflow-y-auto p-4 pt-16">
-              <div className="mb-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Vista previa</p>
-                <h3 className="title-professional title-gold-black text-2xl">{selectedRecord.celebracion || "Celebración"}</h3>
+            <div className="max-h-[90vh] overflow-y-auto p-5 sm:p-6 pt-14">
+              <div className="mb-4 border-b border-[#D4AF37]/10 pb-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">
+                  Vista de Cantoral
+                </span>
+                <h3 className="title-professional text-2xl font-bold text-[#F5E9C0] mt-1">
+                  {selectedRecord.celebracion || "Celebración"}
+                </h3>
               </div>
 
-              <div className="mt-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-3 text-sm">
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <div><span className="font-semibold text-[var(--gold)]">Fecha:</span> {formatDate(selectedRecord.fecha)}</div>
-                  <div><span className="font-semibold text-[var(--gold)]">Hora:</span> {selectedRecord.hora}</div>
-                  <div><span className="font-semibold text-[var(--gold)]">Lugar:</span> {selectedRecord.lugar}</div>
-                  <div><span className="font-semibold text-[var(--gold)]">Observaciones:</span> {selectedRecord.observaciones || "—"}</div>
+              <div className="rounded-2xl border border-[#D4AF37]/15 bg-[#221F18] p-4 text-xs">
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <div><span className="font-bold text-[#D4AF37]">Fecha:</span> {formatDate(selectedRecord.fecha)}</div>
+                  <div><span className="font-bold text-[#D4AF37]">Hora:</span> {selectedRecord.hora}</div>
+                  <div><span className="font-bold text-[#D4AF37]">Lugar:</span> {selectedRecord.lugar || "—"}</div>
+                  <div><span className="font-bold text-[#D4AF37]">Observaciones:</span> {selectedRecord.observaciones || "—"}</div>
                 </div>
               </div>
 
-              <div className="mt-3 space-y-3">
+              <div className="mt-4 space-y-3">
                 {(detailMap[selectedRecord.id] || []).map((detail, index) => {
                   const sectionDef = SECTION_MAP[detail.tipo]
                   const sectionLabel = sectionDef?.label || detail.tipo || "Sección"
@@ -991,28 +1039,30 @@ function HojaCantos() {
                   const contentText = isNumeric ? (song?.letra_markdown || song?.letra || "") : (detail.texto_manual || "")
 
                   return (
-                    <div key={`${selectedRecord.id}-${index}`} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-3 text-sm">
-                      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div key={`${selectedRecord.id}-${index}`} className="rounded-2xl border border-[#D4AF37]/15 bg-[#221F18]/80 p-3.5 text-xs">
+                      <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">{sectionLabel}</p>
-                          <p className="mt-1 text-sm font-semibold">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">{sectionLabel}</p>
+                          <p className="mt-0.5 text-sm font-bold text-[#F5E9C0]">
                             {isNumeric ? `${rawValue}${song?.titulo ? ` • ${song.titulo}` : ''}` : rawValue || 'Texto libre'}
                           </p>
                         </div>
                         {isNumeric && song?.categoria ? (
-                          <p className="text-[11px] text-[var(--text-secondary)]">{song.categoria}</p>
+                          <span className="text-[10px] font-bold text-[#a89060] uppercase px-2 py-0.5 rounded-full bg-[#1A1710] border border-[#D4AF37]/15 self-start sm:self-auto">
+                            {song.categoria}
+                          </span>
                         ) : null}
                       </div>
 
-                      <div className="space-y-1 text-[13px] leading-6 text-[var(--text-primary)]">
+                      <div className="space-y-1 text-xs leading-5 text-[#F5E9C0]/90 mt-2 border-t border-[#D4AF37]/10 pt-2 font-mono">
                         {loadingLyrics[rawValue] ? (
-                          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-                            <Loader2 size={14} className="animate-spin" /> Cargando letra…
+                          <div className="flex items-center gap-2 text-[#a89060]">
+                            <Loader2 size={13} className="animate-spin text-[#D4AF37]" /> Cargando letra…
                           </div>
                         ) : contentText ? (
                           renderPreviewText(contentText)
                         ) : (
-                          <p className="text-[var(--text-secondary)]">No se encontró letra para este canto.</p>
+                          <p className="text-[#a89060]/70 italic">No se encontró letra para este canto.</p>
                         )}
                       </div>
                     </div>
@@ -1020,9 +1070,13 @@ function HojaCantos() {
                 })}
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button onClick={() => handleDownloadPdf(selectedRecord)} className="btn-primary w-full sm:w-auto px-3 py-2 text-[10px]">
-                  Descargar PDF
+              <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-[#D4AF37]/10">
+                <button
+                  onClick={() => handleDownloadPdf(selectedRecord)}
+                  className="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs cursor-pointer"
+                >
+                  <Download size={14} />
+                  Descargar Cantoral en PDF
                 </button>
               </div>
             </div>
