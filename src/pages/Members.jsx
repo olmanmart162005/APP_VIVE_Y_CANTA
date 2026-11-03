@@ -5,7 +5,7 @@ import {
   Search, ChevronRight, X, Phone,
   MessageCircle, Calendar, Layers, MapPin,
   Clock, Heart, Star, Plus, Loader2,
-  UserPlus, ChevronDown
+  UserPlus
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 
@@ -242,11 +242,6 @@ function Members() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [successData, setSuccessData] = useState(null)
 
-  useEffect(() => {
-    loadCurrentUser()
-    loadMembers()
-  }, [])
-
   const loadCurrentUser = async () => {
     try {
       console.log("[MEMBERS] Cargando usuario actual para validar rol...")
@@ -267,6 +262,25 @@ function Members() {
       setCurrentUser({ role: "integrante" })
     }
   }
+
+  const loadMembers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("nombre_completo", { ascending: true })
+      if (error) throw error
+      setMembers(data || [])
+    } catch (err) {
+      console.error(err)
+      toast.error("Error al cargar integrantes")
+    }
+  }
+
+  useEffect(() => {
+    loadCurrentUser()
+    loadMembers()
+  }, [])
 
   const isAdmin = currentUser?.role === "admin"
 
@@ -289,20 +303,6 @@ function Members() {
     } catch (err) {
       console.error("ERROR DELETE:", err)
       toast.error("Error al intentar eliminar integrante: " + err.message)
-    }
-  }
-
-  const loadMembers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("nombre_completo", { ascending: true })
-      if (error) throw error
-      setMembers(data || [])
-    } catch (err) {
-      console.error(err)
-      toast.error("Error al cargar integrantes")
     }
   }
 

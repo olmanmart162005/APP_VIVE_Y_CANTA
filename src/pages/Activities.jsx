@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -58,11 +58,6 @@ function Activities() {
   const [responsable, setResponsable] = useState("")
   const [estado, setEstado] = useState("pendiente")
 
-  useEffect(() => {
-    loadUser()
-    loadActivities()
-  }, [])
-
   const loadUser = async () => {
     try {
       const profile = await getCurrentUser()
@@ -87,6 +82,11 @@ function Activities() {
       toast.error("Error al cargar actividades")
     }
   }
+
+  useEffect(() => {
+    loadUser()
+    loadActivities()
+  }, [])
 
   const clearForm = () => {
     setTitulo("")
@@ -312,7 +312,7 @@ function Activities() {
     { key: "todas", label: "Todas" },
   ]
 
-  const getFilteredRecords = (filterKey) => {
+  const getFilteredRecords = useCallback((filterKey) => {
     return records.filter((item) => {
       if (filterKey === "proximas")
         return !isVencida(item) && item.estado !== "realizada" && item.estado !== "cancelada"
@@ -320,11 +320,11 @@ function Activities() {
         return item.estado === "realizada" || isVencida(item)
       return true
     })
-  }
+  }, [records])
 
   const filteredRecords = useMemo(
     () => getFilteredRecords(agendaFilter),
-    [records, agendaFilter]
+    [getFilteredRecords, agendaFilter]
   )
 
   const inputCls = "input-premium"

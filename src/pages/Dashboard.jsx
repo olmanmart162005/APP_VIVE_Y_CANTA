@@ -56,13 +56,6 @@ function Dashboard() {
 
   const todayVerse = verses[new Date().getDate() % verses.length]
 
-  useEffect(() => {
-    loadUser()
-    loadFinance()
-    loadActivity()
-    loadMembersCount()
-  }, [])
-
   const loadUser = async () => {
     try {
       const profile = await getCurrentUser()
@@ -125,6 +118,13 @@ function Dashboard() {
       console.error("Error loading members count:", err)
     }
   }
+
+  useEffect(() => {
+    loadUser()
+    loadFinance()
+    loadActivity()
+    loadMembersCount()
+  }, [])
 
   const getRoleName = () => {
     switch (user?.role) {

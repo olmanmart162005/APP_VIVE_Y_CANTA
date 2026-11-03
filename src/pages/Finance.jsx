@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react"
 import {
   TrendingUp, TrendingDown, FileText,
   PlusCircle, RefreshCw, Layers,
-  X, Edit3, Trash2, ChevronDown,
+  X, Edit3, Trash2,
   Search, AlertCircle, Loader2,
 } from "lucide-react"
 import {
@@ -320,7 +320,7 @@ function Finance() {
       const fecha = new Date()
       doc.setFillColor(14, 12, 9)
       doc.rect(0, 0, 220, 28, "F")
-      try { doc.addImage(logoCoro, "PNG", 14, 4, 20, 20) } catch {}
+      try { doc.addImage(logoCoro, "PNG", 14, 4, 20, 20) } catch (err) { void err }
       doc.setFont("times", "bold")
       doc.setTextColor(212, 175, 55)
       doc.setFontSize(16)

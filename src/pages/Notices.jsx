@@ -40,19 +40,6 @@ function Notices() {
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => { initializePage() }, [])
-
-  const initializePage = async () => {
-    try {
-      const profile = await getCurrentUser()
-      setUser(profile)
-      await markAsRead(profile?.id)
-      loadNotices()
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
   const markAsRead = async (userId) => {
     if (!userId) return
     try {
@@ -80,6 +67,21 @@ function Notices() {
     }
   }
 
+  const initializePage = async () => {
+    try {
+      const profile = await getCurrentUser()
+      setUser(profile)
+      await markAsRead(profile?.id)
+      loadNotices()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    initializePage()
+  }, [])
+
   const clearForm = () => {
     setTitulo("")
     setMensaje("")
@@ -96,18 +98,16 @@ function Notices() {
     }
     setSaving(true)
     const payload = { titulo, mensaje, prioridad, fijado }
-    let error = null
 
     try {
       if (editingId) {
-        const { error: e } = await supabase.from("notices").update(payload).eq("id", editingId)
-        error = e
+        const { error } = await supabase.from("notices").update(payload).eq("id", editingId)
+        if (error) throw error
       } else {
-        const { error: e } = await supabase.from("notices").insert([{ ...payload, created_by: user?.id }])
-        error = e
+        const { error } = await supabase.from("notices").insert([{ ...payload, created_by: user?.id }])
+        if (error) throw error
       }
 
-      if (error) throw error
       toast.success(editingId ? "Aviso actualizado correctamente." : "Aviso publicado correctamente.")
       clearForm()
       loadNotices()

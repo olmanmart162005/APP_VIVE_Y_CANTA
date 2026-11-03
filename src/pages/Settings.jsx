@@ -5,8 +5,9 @@ import { toast } from "react-hot-toast"
 import BottomNav from "../components/BottomNav"
 import { supabase } from "../lib/supabase"
 
-function Settings({ theme, toggleTheme }) {
+function Settings({ theme, onToggleTheme, toggleTheme }) {
   const navigate = useNavigate()
+  const handleThemeChange = onToggleTheme || toggleTheme
 
   const handleLogout = async () => {
     const confirmLogout = window.confirm("¿Cerrar sesión?")
@@ -37,7 +38,7 @@ function Settings({ theme, toggleTheme }) {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Tema</p>
                 <h2 className="text-sm font-black">Apariencia de la app</h2>
               </div>
-              <button onClick={toggleTheme} className="btn-secondary px-3 py-2 text-[10px]">
+              <button onClick={handleThemeChange} className="btn-secondary px-3 py-2 text-[10px]">
                 {theme === "dark" ? <SunMedium size={14} /> : <MoonStar size={14} />}
                 {theme === "dark" ? "Claro" : "Oscuro"}
               </button>

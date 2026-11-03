@@ -50,8 +50,6 @@ const MAX_COL_H = Math.floor(PRINT_H * 0.88)      // ≈ 631 pt
 // Métricas de fuente (Roboto 9 pt)
 const FONT_SZ  = 9
 const LH_BODY  = 1.18    // lineHeight en estrofas
-const CH_W     = 4.8     // pt por carácter promedio (Roboto 9 pt)
-const CPL      = Math.floor(COL_W / CH_W)          // ≈ 36 caracteres por línea
 
 // Identidad parroquial
 const PARROQUIA_LINE1 = 'Parroquia Nuestro Señor de Esquipulas'

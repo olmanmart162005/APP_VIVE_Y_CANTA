@@ -75,24 +75,6 @@ function formatDate(iso) {
   })
 }
 
-function formatDateForFilename(iso) {
-  if (!iso) return "sin-fecha"
-  const d = new Date(iso)
-  const day   = String(d.getDate()).padStart(2, "0")
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const year  = d.getFullYear()
-  return `${year}-${month}-${day}`
-}
-
-function sanitizeFilename(str) {
-  return (str || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9\-_]/g, "_")
-    .replace(/_+/g, "_")
-    .trim()
-}
-
 function HojaCantos() {
   const [user, setUser] = useState(null)
   const [records, setRecords] = useState([])
@@ -118,22 +100,6 @@ function HojaCantos() {
   const [titleSuggestions, setTitleSuggestions] = useState({})  // key → [{numero, titulo}]
   const [activeSuggestionKey, setActiveSuggestionKey] = useState(null)
   const suggestionRefs = useRef({})
-
-  useEffect(() => {
-    initializePage()
-  }, [])
-
-  const initializePage = async () => {
-    try {
-      const profile = await getCurrentUser()
-      setUser(profile)
-      await loadRecords()
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const loadRecords = async () => {
     try {
@@ -172,6 +138,22 @@ function HojaCantos() {
       toast.error("No se pudieron cargar las hojas de cantos")
     }
   }
+
+  const initializePage = async () => {
+    try {
+      const profile = await getCurrentUser()
+      setUser(profile)
+      await loadRecords()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    initializePage()
+  }, [])
 
   const clearForm = () => {
     setEditingId(null)

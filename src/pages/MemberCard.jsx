@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Download, FileImage, FileText, Loader2 } from "lucide-react"
+import { ArrowLeft, FileImage, FileText, Loader2 } from "lucide-react"
 import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
 import { toast } from "react-hot-toast"
@@ -41,8 +41,6 @@ function MemberCard() {
 
   const cardRef = useRef(null)
 
-  useEffect(() => { loadMember() }, [])
-
   const loadMember = async () => {
     try {
       const { data, error } = await supabase
@@ -78,6 +76,8 @@ function MemberCard() {
       toast.error("Error al cargar la información para el carnet")
     }
   }
+
+  useEffect(() => { loadMember() }, [])
 
   const carnetId = member
     ? (() => {

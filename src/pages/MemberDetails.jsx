@@ -14,16 +14,6 @@ function MemberDetails() {
   const [currentUser, setCurrentUser] = useState(null)
   const [role, setRole] = useState("")
 
-  useEffect(() => {
-    initialize()
-  }, [])
-
-  const initialize = async () => {
-    const user = await getCurrentUser()
-    setCurrentUser(user)
-    loadMember()
-  }
-
   const loadMember = async () => {
     try {
       const { data, error } = await supabase
@@ -42,6 +32,16 @@ function MemberDetails() {
       toast.error("Error al cargar detalles del integrante")
     }
   }
+
+  const initialize = async () => {
+    const user = await getCurrentUser()
+    setCurrentUser(user)
+    await loadMember()
+  }
+
+  useEffect(() => {
+    initialize()
+  }, [])
 
   const saveRole = async () => {
     try {

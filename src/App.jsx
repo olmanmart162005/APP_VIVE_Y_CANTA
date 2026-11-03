@@ -19,6 +19,7 @@ import Gallery from "./pages/Gallery"
 import Settings from "./pages/Settings"
 import HojaCantos from "./pages/HojaCantos"
 import { supabase } from "./lib/supabase"
+import { getCurrentUser } from "./services/authService"
 
 function App() {
   const [user, setUser] = useState(null)
@@ -44,12 +45,15 @@ function App() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
-          setUser({
+          const profile = await getCurrentUser()
+          setUser(profile || {
             id: session.user.id,
             email: session.user.email,
             nombre_completo: session.user.email.split("@")[0],
             role: "integrante",
           })
+        } else {
+          setUser(null)
         }
       } catch (err) {
         console.error(err)
@@ -58,10 +62,11 @@ function App() {
 
     checkSession()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       try {
         if (session?.user) {
-          setUser({
+          const profile = await getCurrentUser()
+          setUser(profile || {
             id: session.user.id,
             email: session.user.email,
             nombre_completo: session.user.email.split("@")[0],

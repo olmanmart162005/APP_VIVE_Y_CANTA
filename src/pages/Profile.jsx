@@ -22,10 +22,6 @@ function Profile() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
 
-  useEffect(() => {
-    loadUser()
-  }, [])
-
   const loadUser = async () => {
     try {
       const profile = await getCurrentUser()
@@ -34,6 +30,10 @@ function Profile() {
       console.error(err)
     }
   }
+
+  useEffect(() => {
+    loadUser()
+  }, [])
 
   const getRoleName = (role) => {
     switch (role) {

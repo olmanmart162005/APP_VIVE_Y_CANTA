@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Save, Camera, ArrowLeft, Loader2 } from "lucide-react"
+import { Camera, ArrowLeft, Loader2 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { supabase } from "../lib/supabase"
 
@@ -25,10 +25,6 @@ function EditProfile() {
     contacto_emergencia: "",
     telefono_emergencia: "",
   })
-
-  useEffect(() => {
-    loadProfile()
-  }, [])
 
   const loadProfile = async () => {
     try {
@@ -81,6 +77,10 @@ function EditProfile() {
       toast.error("Error al cargar el perfil")
     }
   }
+
+  useEffect(() => {
+    loadProfile()
+  }, [])
 
   const formatPhone = (value) => {
     if (!value) return ""
