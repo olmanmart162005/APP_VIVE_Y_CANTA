@@ -19,7 +19,6 @@ import Gallery from "./pages/Gallery"
 import Settings from "./pages/Settings"
 import HojaCantos from "./pages/HojaCantos"
 import { supabase } from "./lib/supabase"
-import { getCurrentUser } from "./services/authService"
 
 function App() {
   const [user, setUser] = useState(null)
@@ -41,17 +40,36 @@ function App() {
       setLoading(false)
     }, 2000)
 
+    const syncUserProfile = (authUser) => {
+      if (!authUser) return
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            setUser((prev) => ({
+              ...prev,
+              ...data,
+              email: authUser.email,
+            }))
+          }
+        })
+        .catch((err) => console.error("Error cargando perfil en segundo plano:", err))
+    }
+
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
-          const profile = await getCurrentUser()
-          setUser(profile || {
+          setUser({
             id: session.user.id,
             email: session.user.email,
             nombre_completo: session.user.email.split("@")[0],
             role: "integrante",
           })
+          syncUserProfile(session.user)
         } else {
           setUser(null)
         }
@@ -62,16 +80,16 @@ function App() {
 
     checkSession()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       try {
         if (session?.user) {
-          const profile = await getCurrentUser()
-          setUser(profile || {
+          setUser({
             id: session.user.id,
             email: session.user.email,
             nombre_completo: session.user.email.split("@")[0],
             role: "integrante",
           })
+          syncUserProfile(session.user)
         } else {
           setUser(null)
         }

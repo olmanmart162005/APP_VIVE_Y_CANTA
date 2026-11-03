@@ -44,7 +44,8 @@ function Login({ user }) {
       return
     }
 
-    const email = `${usuario.trim()}@viveycanta.app`
+    const cleanUser = usuario.trim().toLowerCase()
+    const email = cleanUser.includes("@") ? cleanUser : `${cleanUser}@viveycanta.app`
     console.log("[LOGIN START] Iniciando intento de inicio de sesión...")
     console.log("[LOGIN] Email a autenticar:", email)
 
@@ -85,7 +86,7 @@ function Login({ user }) {
 
       console.log("[LOGIN] Autenticación exitosa. Navegando al Dashboard...")
       toast.success("¡Sesión iniciada con éxito!")
-      navigate("/dashboard")
+      navigate("/dashboard", { replace: true })
     } catch (err) {
       console.error("[LOGIN] Error capturado en el bloque catch:", err)
       if (err.message === "TIMEOUT") {
