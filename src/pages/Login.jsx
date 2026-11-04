@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Lock, User, Loader2, Eye, EyeOff, Sun, Moon } from "lucide-react"
+import { Lock, User, Loader2, Eye, EyeOff, Sun, Moon, ShieldAlert } from "lucide-react"
 import { toast } from "react-hot-toast"
+import { motion } from "framer-motion"
 
 import logo from "../assets/logo.png"
 import { supabase } from "../lib/supabase"
@@ -9,6 +10,7 @@ import { useTheme } from "../context/ThemeContext"
 
 function Login({ user }) {
   const { theme, toggleTheme } = useTheme()
+  const isDark = theme === "dark"
   const [usuario, setUsuario] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -23,7 +25,7 @@ function Login({ user }) {
     }
   }, [user, navigate])
 
-  // Cargar usuario guardado previamente si "Guardar datos de ingreso" estaba activo
+  // Cargar usuario guardado previamente si la opción de recordar estaba activa
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("vyc_saved_usuario")
@@ -42,502 +44,320 @@ function Login({ user }) {
   const handleLogin = async (e) => {
     e.preventDefault()
     if (!usuario.trim() || !password) {
-      toast.error("Por favor ingresa tu usuario y contraseña")
+      toast.error("Por favor completa tu usuario y contraseña")
       return
     }
 
     const cleanUser = usuario.trim().toLowerCase()
     const email = cleanUser.includes("@") ? cleanUser : `${cleanUser}@viveycanta.app`
-    console.log("[LOGIN START] Iniciando intento de inicio de sesión...")
-    console.log("[LOGIN] Email a autenticar:", email)
 
     try {
       setLoading(true)
 
-      // Promesa de timeout de 35 segundos para dar margen a conexiones lentas o resoluciones DNS demoradas
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("TIMEOUT")), 35000)
       )
 
-      console.log("[LOGIN] Enviando credenciales a Supabase...")
       const { data, error } = await Promise.race([
         supabase.auth.signInWithPassword({ email, password }),
-        timeoutPromise
+        timeoutPromise,
       ])
 
-      console.log("[LOGIN] Respuesta recibida de Supabase Auth:", { data, error })
-
       if (error) {
-        console.error("[LOGIN] Error de inicio de sesión retornado por Supabase:", error)
+        console.error("[LOGIN] Error retornado por Supabase:", error)
         toast.error("Usuario o contraseña incorrectos")
         return
       }
 
-      // Guardar o limpiar datos de ingreso según la preferencia del usuario
+      // Guardar usuario en localStorage sólo si el usuario lo autorizó (sin guardar contraseña)
       try {
         if (rememberLogin) {
-          localStorage.setItem("vyc_saved_usuario", usuario.trim())
+          localStorage.setItem("vyc_saved_usuario", cleanUser)
           localStorage.setItem("vyc_remember_login", "true")
         } else {
           localStorage.removeItem("vyc_saved_usuario")
           localStorage.setItem("vyc_remember_login", "false")
         }
       } catch (storageErr) {
-        console.warn("No se pudo guardar en localStorage:", storageErr)
+        console.warn("No se pudo persistir en localStorage:", storageErr)
       }
 
-      console.log("[LOGIN] Autenticación exitosa. Navegando al Dashboard...")
-      toast.success("¡Sesión iniciada con éxito!")
+      toast.success("¡Bienvenido al sistema!")
       navigate("/dashboard", { replace: true })
     } catch (err) {
-      console.error("[LOGIN] Error capturado en el bloque catch:", err)
+      console.error("[LOGIN] Error en autenticación:", err)
       if (err.message === "TIMEOUT") {
-        toast.error("Tiempo de espera agotado. No se pudo conectar al servidor.")
+        toast.error("Tiempo de espera agotado. Por favor verifica tu conexión a internet.")
       } else {
-        toast.error("Error de conexión al iniciar sesión. Verifica tu red.")
+        toast.error("Error al conectar con el servidor. Inténtalo de nuevo.")
       }
     } finally {
-      console.log("[LOGIN END] Finalizado proceso de login, desactivando loading spinner.")
       setLoading(false)
     }
   }
 
   return (
-    <>
-      <style>{`
-        .login-root {
-          min-height: 100dvh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1.5rem;
-          font-family: "Cormorant Garamond", Georgia, serif;
-          position: relative;
-          overflow: hidden;
-          background-color: var(--bg-app);
-        }
-
-        .login-root::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background-image: repeating-linear-gradient(
-            0deg,
-            transparent, transparent 38px,
-            rgba(212,175,55,0.02) 38px,
-            rgba(212,175,55,0.02) 39px
-          );
-        }
-
-        .login-root::after {
-          content: '';
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 600px; height: 600px;
-          pointer-events: none;
-          background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
-        }
-
-        /* CARD */
-        .login-card {
-          position: relative;
-          z-index: 1;
-          width: 100%;
-          max-width: 400px;
-          border-radius: 28px;
-          overflow: hidden;
-          animation: cardIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-          background: var(--bg-card);
-          border: 1px solid var(--border-color);
-          box-shadow: var(--card-shadow);
-        }
-
-        @keyframes cardIn {
-          from { opacity: 0; transform: translateY(30px) scale(0.96); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .card-topline {
-          height: 3px;
-          background: linear-gradient(90deg, transparent, #D4AF37, #F0D060, #D4AF37, transparent);
-        }
-
-        /* HEADER */
-        .card-header {
-          padding: 3rem 2rem 1.5rem;
-          text-align: center;
-          background: linear-gradient(135deg, var(--header-gold-from) 0%, var(--header-gold-to) 100%);
-          color: var(--header-text-primary);
-          border-bottom: 1px solid var(--header-border);
-          animation: fadeUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .logo-ring {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 105px; height: 105px;
-          border-radius: 50%;
-          margin-bottom: 1.5rem;
-          background: radial-gradient(circle at 30% 30%, #2A2416, #0E0C09);
-          border: 1.5px solid rgba(212,175,55,0.35);
-          box-shadow: 0 0 30px rgba(212,175,55,0.15), inset 0 1px 0 rgba(212,175,55,0.2);
-        }
-
-        .logo-ring img {
-          width: 64px; height: 64px;
-          object-fit: contain;
-          filter: drop-shadow(0 2px 6px rgba(212,175,55,0.3));
-        }
-
-        .card-title {
-          font-family: 'Cormorant Garamond', Georgia, serif;
-          font-size: 2rem; /* 32px */
-          font-weight: 700;
-          letter-spacing: 0.02em;
-          line-height: 1.1;
-          margin: 0 0 0.4rem;
-          color: var(--header-text-primary);
-        }
-
-        .card-subtitle {
-          font-size: 0.875rem; /* 14px */
-          font-weight: 600;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: var(--header-text-secondary);
-          margin: 0 0 0.25rem;
-        }
-
-        .card-coro {
-          font-size: 0.75rem;
-          letter-spacing: 0.08em;
-          color: var(--header-text-secondary);
-        }
-
-        /* DIVIDER */
-        .divider {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          margin: 0 2rem;
-          animation: fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        .divider-line {
-          flex: 1; height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2));
-        }
-
-        .divider-line:last-child {
-          background: linear-gradient(270deg, transparent, rgba(212,175,55,0.2));
-        }
-
-        .divider-diamond {
-          width: 5px; height: 5px;
-          background: #D4AF37;
-          transform: rotate(45deg);
-          opacity: 0.5;
-        }
-
-        /* BODY */
-        .card-body {
-          padding: 1.5rem 2rem 2.5rem;
-          animation: fadeUp 0.6s 0.25s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        .field-group {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          margin-bottom: 1.75rem;
-        }
-
-        .field-label {
-          display: block;
-          font-size: 0.8125rem; /* 13px */
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          font-weight: 500;
-          margin-bottom: 0.45rem;
-          color: var(--gold);
-        }
-
-        .field-inner {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          border-radius: 12px;
-          padding: 0 1rem;
-          transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
-          background: var(--bg-input);
-          border: 1px solid var(--border-color);
-        }
-
-        .field-inner.focused {
-          border-color: var(--gold);
-          box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
-        }
-
-        .field-icon {
-          color: var(--gold);
-          flex-shrink: 0;
-          transition: color 0.2s;
-        }
-
-        .field-inner.focused .field-icon {
-          color: var(--gold);
-        }
-
-        .field-input {
-          width: 100%;
-          background: transparent;
-          border: none;
-          outline: none;
-          padding: 0.875rem 0;
-          font-size: 1rem; /* 16px */
-          font-family: "Cormorant Garamond", Georgia, serif;
-          font-weight: 400;
-          letter-spacing: 0.03em;
-          color: var(--text-primary);
-        }
-
-        .field-input::placeholder {
-          color: var(--text-muted);
-        }
-
-        .toggle-password-btn {
-          background: transparent;
-          border: none;
-          color: var(--text-muted);
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0.35rem;
-          border-radius: 8px;
-          transition: color 0.2s, transform 0.15s, background-color 0.2s;
-          flex-shrink: 0;
-        }
-
-        .toggle-password-btn:hover {
-          color: var(--gold);
-          background-color: rgba(212,175,55,0.08);
-          transform: scale(1.05);
-        }
-
-        .remember-container {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-top: -0.5rem;
-          margin-bottom: 1.5rem;
-          padding: 0 0.1rem;
-        }
-
-        .remember-label {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.55rem;
-          cursor: pointer;
-          user-select: none;
-          font-family: "Cormorant Garamond", Georgia, serif;
-          font-size: 0.95rem;
-          color: var(--text-secondary);
-          transition: color 0.2s;
-        }
-
-        .remember-label:hover {
-          color: var(--text-primary);
-        }
-
-        .remember-checkbox {
-          width: 16px;
-          height: 16px;
-          accent-color: #D4AF37;
-          cursor: pointer;
-          border-radius: 4px;
-        }
-
-        /* BOTÓN */
-        .btn-login {
-          width: 100%;
-          position: relative;
-          background: linear-gradient(135deg, #D4AF37 0%, #BFA15A 100%);
-          border: none;
-          border-radius: 12px;
-          padding: 1rem;
-          font-family: "Cormorant Garamond", Georgia, serif;
-          font-size: 1rem; /* 16px */
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: #111111;
-          cursor: pointer;
-          transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-          box-shadow: 0 4px 20px rgba(212,175,55,0.3);
-          overflow: hidden;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .btn-login::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
-          border-radius: inherit;
-        }
-
-        .btn-login:hover:not(:disabled) {
-          opacity: 0.95;
-          transform: translateY(-1px);
-          box-shadow: 0 8px 28px rgba(212,175,55,0.45);
-        }
-
-        .btn-login:active:not(:disabled) { transform: translateY(0); }
-        .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* FOOTER */
-        .card-footer {
-          padding: 0 2rem 2rem;
-          text-align: center;
-          animation: fadeUp 0.6s 0.35s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        .footer-note {
-          font-size: 0.65rem;
-          letter-spacing: 0.08em;
-          color: var(--text-muted);
-        }
-      `}</style>
-
-      <div className="login-root relative">
-        {/* Selector de tema flotante */}
-        <div className="absolute top-4 right-4 z-20">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="p-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] shadow-lg hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-            title={theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
-          >
-            {theme === "dark" ? (
-              <Sun size={17} className="text-[#D4AF37]" />
-            ) : (
-              <Moon size={17} className="text-[#BFA15A]" />
-            )}
-            <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Oscuro"}</span>
-          </button>
-        </div>
-
-        <div className="login-card">
-          <div className="card-topline" />
-
-          <div className="card-header">
-            <div className="logo-ring">
-              <img src={logo} alt="Logo Coro Vive y Canta" />
-            </div>
-            <p className="card-subtitle">Sistema Administrativo</p>
-            <h1 className="card-title title-professional title-gold-black">Vive y Canta</h1>
-            <p className="card-coro">Coro Oficial</p>
-          </div>
-
-          <div className="divider">
-            <div className="divider-line" />
-            <div className="divider-diamond" />
-            <div className="divider-line" />
-          </div>
-
-          <div className="card-body">
-            <form onSubmit={handleLogin} method="post" autoComplete="on">
-              <div className="field-group">
-                <div>
-                  <label htmlFor="usuario" className="field-label">Usuario</label>
-                  <div className={`field-inner ${focusedField === "usuario" ? "focused" : ""}`}>
-                    <User className="field-icon" size={16} />
-                    <input
-                      id="usuario"
-                      name="username"
-                      type="text"
-                      placeholder="Ingresa tu usuario"
-                      value={usuario}
-                      onChange={(e) => setUsuario(e.target.value)}
-                      onFocus={() => setFocusedField("usuario")}
-                      onBlur={() => setFocusedField(null)}
-                      className="field-input"
-                      autoComplete="username"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="field-label">Contraseña</label>
-                  <div className={`field-inner ${focusedField === "password" ? "focused" : ""}`}>
-                    <Lock className="field-icon" size={16} />
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={() => setFocusedField("password")}
-                      onBlur={() => setFocusedField(null)}
-                      className="field-input"
-                      autoComplete="current-password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="toggle-password-btn"
-                      aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                      title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                      tabIndex={-1}
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="remember-container">
-                <label className="remember-label">
-                  <input
-                    type="checkbox"
-                    checked={rememberLogin}
-                    onChange={(e) => setRememberLogin(e.target.checked)}
-                    className="remember-checkbox"
-                  />
-                  <span>Guardar datos de ingreso</span>
-                </label>
-              </div>
-
-              <button type="submit" disabled={loading} className="btn-login">
-                {loading ? (
-                  <Loader2 className="animate-spin text-[#0E0C09]" size={16} />
-                ) : (
-                  "Iniciar Sesión"
-                )}
-              </button>
-            </form>
-          </div>
-
-          <div className="card-footer">
-            <p className="footer-note">© Coro Vive y Canta · Acceso restringido</p>
-          </div>
-        </div>
+    <div
+      className={`min-h-screen w-full flex items-center justify-center p-3 sm:p-6 transition-colors duration-300 relative select-none ${
+        isDark ? "bg-[#111111]" : "bg-[#F5F0E6]"
+      }`}
+      style={{
+        paddingTop: "max(1rem, env(safe-area-inset-top, 0px))",
+        paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
+      }}
+    >
+      {/* Botón flotante selector de tema (Modo Claro / Modo Oscuro) */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={isDark ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+          title={isDark ? "Activar Modo Claro" : "Activar Modo Oscuro"}
+          className={`flex items-center gap-2 px-3 py-2 rounded-2xl text-xs font-bold transition-all duration-200 shadow-md border cursor-pointer ${
+            isDark
+              ? "bg-[#252525] hover:bg-[#2e2e2e] text-[#F5F0E6] border-[#383838]"
+              : "bg-[#FFFFFF] hover:bg-[#F0EBE0] text-[#111111] border-[#DDD6CA]"
+          }`}
+        >
+          {isDark ? (
+            <Sun size={16} className="text-[#D4AF37] transition-transform duration-300 hover:rotate-45" />
+          ) : (
+            <Moon size={16} className="text-[#BFA15A] transition-transform duration-300 hover:-rotate-12" />
+          )}
+          <span className="hidden sm:inline font-sans">{isDark ? "Modo Claro" : "Modo Oscuro"}</span>
+        </button>
       </div>
-    </>
+
+      {/* Contenedor Principal / Tarjeta de Autenticación */}
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className={`w-full max-w-[420px] rounded-[32px] sm:rounded-[36px] overflow-hidden shadow-2xl transition-all duration-300 border ${
+          isDark
+            ? "bg-[#252525] border-[#D4AF37]/25 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+            : "bg-[#FFFFFF] border-[#DDD6CA] shadow-[0_20px_40px_rgba(17,17,17,0.08)]"
+        }`}
+      >
+        {/* =====================================================================
+            ENCABEZADO SUPERIOR DORADO (Protagonista institucional)
+           ===================================================================== */}
+        <div className="relative pt-8 pb-7 px-6 text-center bg-gradient-to-b from-[#E2BE53] via-[#D4AF37] to-[#C49E2E] text-[#111111] shadow-inner">
+          {/* Destello sutil superior */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+
+          {/* Círculo central con el Logotipo Oficial */}
+          <div className="relative w-24 h-24 mx-auto mb-3.5">
+            <div className="absolute inset-0 rounded-full bg-black/10 blur-sm" />
+            <div
+              className={`relative w-24 h-24 rounded-full flex items-center justify-center p-2.5 shadow-xl border-2 transition-transform duration-300 hover:scale-105 ${
+                isDark
+                  ? "bg-[#181818] border-[#111111]"
+                  : "bg-[#FFFFFF] border-[#BFA15A]/60"
+              }`}
+            >
+              <img
+                src={logo}
+                alt="Logotipo Oficial Coro Vive y Canta"
+                className="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.25)]"
+              />
+            </div>
+          </div>
+
+          {/* Textos del Encabezado */}
+          <p
+            className="text-[10px] sm:text-[11px] font-bold tracking-[0.22em] uppercase text-[#111111]/85 mb-0.5 font-sans"
+          >
+            Sistema Administrativo
+          </p>
+
+          <h1
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+            className="text-3xl sm:text-4xl font-bold tracking-[0.02em] text-[#111111] leading-tight"
+          >
+            Vive y Canta
+          </h1>
+
+          <p
+            className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#111111]/75 mt-0.5 font-sans"
+          >
+            Coro Oficial
+          </p>
+
+          {/* Separador decorativo dorado */}
+          <div className="flex items-center justify-center gap-2 mt-3 w-28 mx-auto">
+            <div className="h-[1px] flex-1 bg-black/20" />
+            <div className="w-1.5 h-1.5 rotate-45 bg-[#111111]/60" />
+            <div className="h-[1px] flex-1 bg-black/20" />
+          </div>
+        </div>
+
+        {/* =====================================================================
+            PANEL DE FORMULARIO DE ACCESO (Grafito en oscuro / Blanco en claro)
+           ===================================================================== */}
+        <div className={`p-6 sm:p-8 ${isDark ? "bg-[#252525]" : "bg-[#FFFFFF]"}`}>
+          <form onSubmit={handleLogin} method="post" autoComplete="on" className="space-y-5">
+            {/* CAMPO DE USUARIO */}
+            <div>
+              <label
+                htmlFor="usuario"
+                className="block text-[11px] sm:text-xs font-bold tracking-[0.12em] uppercase mb-1.5 font-sans text-[#D4AF37]"
+              >
+                Usuario
+              </label>
+
+              <div
+                className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl border transition-all duration-200 ${
+                  isDark
+                    ? focusedField === "usuario"
+                      ? "border-[#D4AF37] bg-[#181818] shadow-[0_0_0_3px_rgba(212,175,55,0.18)]"
+                      : "border-[#383838] bg-[#1A1A1A] hover:border-[#4A4A4A]"
+                    : focusedField === "usuario"
+                    ? "border-[#D4AF37] bg-[#FFFFFF] shadow-[0_0_0_3px_rgba(212,175,55,0.15)]"
+                    : "border-[#DDD6CA] bg-[#FAF8F5] hover:border-[#C4BDB0]"
+                }`}
+              >
+                <User
+                  size={18}
+                  className={`shrink-0 transition-colors duration-200 ${
+                    focusedField === "usuario" ? "text-[#D4AF37]" : "text-[#BFA15A]"
+                  }`}
+                />
+                <input
+                  id="usuario"
+                  name="username"
+                  type="text"
+                  placeholder="Ingresa tu usuario"
+                  value={usuario}
+                  onChange={(e) => setUsuario(e.target.value)}
+                  onFocus={() => setFocusedField("usuario")}
+                  onBlur={() => setFocusedField(null)}
+                  autoComplete="username"
+                  required
+                  style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+                  className={`w-full bg-transparent border-none outline-none text-base font-normal tracking-wide ${
+                    isDark
+                      ? "text-[#FFFFFF] placeholder-[#736C61]"
+                      : "text-[#111111] placeholder-[#8C8477]"
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* CAMPO DE CONTRASEÑA */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-[11px] sm:text-xs font-bold tracking-[0.12em] uppercase mb-1.5 font-sans text-[#D4AF37]"
+              >
+                Contraseña
+              </label>
+
+              <div
+                className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl border transition-all duration-200 ${
+                  isDark
+                    ? focusedField === "password"
+                      ? "border-[#D4AF37] bg-[#181818] shadow-[0_0_0_3px_rgba(212,175,55,0.18)]"
+                      : "border-[#383838] bg-[#1A1A1A] hover:border-[#4A4A4A]"
+                    : focusedField === "password"
+                    ? "border-[#D4AF37] bg-[#FFFFFF] shadow-[0_0_0_3px_rgba(212,175,55,0.15)]"
+                    : "border-[#DDD6CA] bg-[#FAF8F5] hover:border-[#C4BDB0]"
+                }`}
+              >
+                <Lock
+                  size={18}
+                  className={`shrink-0 transition-colors duration-200 ${
+                    focusedField === "password" ? "text-[#D4AF37]" : "text-[#BFA15A]"
+                  }`}
+                />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
+                  autoComplete="current-password"
+                  required
+                  style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+                  className={`w-full bg-transparent border-none outline-none text-base font-normal tracking-wide ${
+                    isDark
+                      ? "text-[#FFFFFF] placeholder-[#736C61]"
+                      : "text-[#111111] placeholder-[#8C8477]"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                  title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                  className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                    isDark
+                      ? "text-[#A69F93] hover:text-[#D4AF37] hover:bg-[#333333]"
+                      : "text-[#8C8477] hover:text-[#D4AF37] hover:bg-[#F0EBE0]"
+                  }`}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* CASILLA RECORDAR ACCESO */}
+            <div className="pt-0.5">
+              <label className="flex items-center gap-2.5 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={rememberLogin}
+                  onChange={(e) => setRememberLogin(e.target.checked)}
+                  className="w-4 h-4 rounded-md accent-[#D4AF37] cursor-pointer"
+                />
+                <span
+                  style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+                  className={`text-sm tracking-wide transition-colors ${
+                    isDark
+                      ? "text-[#A69F93] group-hover:text-[#FFFFFF]"
+                      : "text-[#5C564D] group-hover:text-[#111111]"
+                  }`}
+                >
+                  Guardar datos de ingreso
+                </span>
+              </label>
+            </div>
+
+            {/* BOTÓN DE INICIO DE SESIÓN */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#D4AF37] via-[#E0BA4D] to-[#BFA15A] text-[#111111] font-bold text-lg sm:text-xl tracking-[0.05em] uppercase shadow-[0_8px_25px_rgba(212,175,55,0.35)] hover:shadow-[0_10px_30px_rgba(212,175,55,0.5)] hover:opacity-95 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin text-[#111111]" size={20} />
+                  <span>Validando credenciales…</span>
+                </>
+              ) : (
+                <span>Iniciar Sesión</span>
+              )}
+            </button>
+          </form>
+
+          {/* PIE DE PÁGINA DISCRETO */}
+          <div className="mt-7 text-center border-t border-[var(--border-color)] pt-4">
+            <p
+              className={`text-[10px] sm:text-[11px] tracking-wider font-sans ${
+                isDark ? "text-[#736C61]" : "text-[#8C8477]"
+              }`}
+            >
+              © Coro Vive y Canta · Acceso restringido
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   )
 }
 

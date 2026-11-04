@@ -1,263 +1,130 @@
 import { motion } from "framer-motion"
 import logo from "../assets/logo.png"
 
-/* Partícula decorativa flotante */
-function Particle({ x, y, size, delay, duration }) {
+export default function SplashScreen() {
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-[#111111] text-[#F5F0E6] select-none"
       style={{
-        position: "absolute",
-        left: `${x}%`,
-        top: `${y}%`,
-        width: size,
-        height: size,
-        borderRadius: "50%",
-        background: "rgba(212, 175, 55, 0.12)",
-        backdropFilter: "blur(2px)",
-      }}
-      animate={{
-        y: [-10, 10, -10],
-        opacity: [0.2, 0.6, 0.2],
-        scale: [1, 1.2, 1],
-      }}
-      transition={{
-        duration,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    />
-  )
-}
-
-/* Anillo pulsante */
-function PulseRing({ delay, scale }) {
-  return (
-    <motion.div
-      style={{
-        position: "absolute",
-        width: 220,
-        height: 220,
-        borderRadius: "50%",
-        border: "1px solid rgba(212, 175, 55, 0.15)",
-      }}
-      animate={{
-        scale: [scale, scale + 0.8],
-        opacity: [0.5, 0],
-      }}
-      transition={{
-        duration: 2.5,
-        delay,
-        repeat: Infinity,
-        ease: "easeOut",
-      }}
-    />
-  )
-}
-
-const particles = [
-  { x: 8,  y: 15, size: 6,  delay: 0,    duration: 4   },
-  { x: 88, y: 10, size: 10, delay: 0.5,  duration: 5   },
-  { x: 75, y: 80, size: 7,  delay: 1,    duration: 3.5 },
-  { x: 15, y: 75, size: 5,  delay: 1.5,  duration: 4.5 },
-  { x: 92, y: 50, size: 8,  delay: 0.8,  duration: 6   },
-  { x: 5,  y: 50, size: 4,  delay: 2,    duration: 3   },
-  { x: 50, y: 5,  size: 6,  delay: 0.3,  duration: 5.5 },
-  { x: 45, y: 92, size: 9,  delay: 1.2,  duration: 4   },
-]
-
-function SplashScreen() {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-        zIndex: 100,
-        background: "radial-gradient(circle at center, #252525 0%, #111111 100%)",
-        fontFamily: "'Cormorant Garamond', Georgia, serif",
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      {/* Malla de brillo superior */}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,55,0.08) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
+      {/* Resplandor ambiental dorado de fondo */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[500px] h-[340px] sm:h-[500px] rounded-full bg-[radial-gradient(circle,rgba(212,175,55,0.08)_0%,rgba(17,17,17,0)_70%)] blur-2xl" />
+        <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#D4AF37]/5 to-transparent" />
+      </div>
 
-      {/* Brillo inferior cálido */}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 60% 40% at 80% 110%, rgba(212,175,55,0.04) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
-
-      {/* Textura de grano sutil */}
-      <div style={{
-        position: "absolute", inset: 0, opacity: 0.03,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        backgroundSize: "200px",
-        pointerEvents: "none",
-      }} />
-
-      {/* Partículas flotantes */}
-      {particles.map((p, i) => <Particle key={i} {...p} />)}
-
-      {/* Anillos pulsantes detrás del logo */}
-      <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <PulseRing delay={0}   scale={1}   />
-        <PulseRing delay={0.8} scale={1}   />
-        <PulseRing delay={1.6} scale={1}   />
-
-        {/* Halo dorado estático */}
-        <div style={{
-          position: "absolute",
-          width: 180, height: 180,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(212,175,55,0.1) 0%, transparent 70%)",
-        }} />
-
-        {/* Logo */}
-        <motion.div
-          initial={{ scale: 0.5, opacity: 0, rotate: -8 }}
-          animate={{ scale: 1,   opacity: 1, rotate: 0  }}
-          transition={{ duration: 0.9, ease: [0.34, 1.56, 0.64, 1] }}
-          style={{ position: "relative", zIndex: 1 }}
-        >
-          {/* Plato circular detrás del logo */}
-          <div style={{
-            position: "absolute", inset: -16,
-            borderRadius: "50%",
-            background: "rgba(26,23,16,0.85)",
-            border: "1px solid rgba(212,175,55,0.15)",
-            backdropFilter: "blur(6px)",
-          }} />
-          <img
-            src={logo}
-            alt="Coro Vive y Canta"
-            style={{
-              width: 120, height: 120, objectFit: "contain",
-              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.5)) drop-shadow(0 0 40px rgba(212,175,55,0.2))",
-              position: "relative", zIndex: 1,
-            }}
+      {/* Contenedor Central */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-6 text-center max-w-md w-full">
+        {/* LOGO OFICIAL CON ANIMACIÓN SUAVE Y AURA DORADA */}
+        <div className="relative flex items-center justify-center mb-8">
+          {/* Anillo de pulso sutil */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full border border-[#D4AF37]/25"
           />
+
+          {/* Halo luminoso detrás del logo */}
+          <div className="absolute w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[#D4AF37]/10 blur-xl" />
+
+          {/* Círculo contenedor del logo */}
+          <motion.div
+            initial={{ scale: 0.75, opacity: 0, y: 15 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-gradient-to-b from-[#252525] to-[#161616] border-2 border-[#D4AF37]/40 shadow-[0_10px_35px_rgba(0,0,0,0.8),0_0_25px_rgba(212,175,55,0.2)] p-2.5 flex items-center justify-center"
+          >
+            <img
+              src={logo}
+              alt="Logotipo Oficial Coro Vive y Canta"
+              className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
+            />
+          </motion.div>
+        </div>
+
+        {/* SECUENCIA TIPOGRÁFICA INSTITUCIONAL */}
+        {/* 1. Nombre Institucional: CORO DE ALABANZA */}
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.6, ease: "easeOut" }}
+          className="text-[11px] sm:text-xs font-semibold tracking-[0.28em] uppercase text-[#BFA15A] mb-1 font-sans"
+        >
+          Coro de Alabanza
+        </motion.p>
+
+        {/* 2. Nombre Principal: VIVE Y CANTA */}
+        <motion.h1
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65, duration: 0.7, ease: "easeOut" }}
+          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+          className="text-4xl sm:text-5xl font-bold tracking-[0.03em] text-[#F5F0E6] drop-shadow-[0_2px_15px_rgba(0,0,0,0.7)]"
+        >
+          Vive y Canta
+        </motion.h1>
+
+        {/* 3. Línea Decorativa Dorada */}
+        <motion.div
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ scaleX: 1, opacity: 1 }}
+          transition={{ delay: 0.9, duration: 0.6, ease: "easeOut" }}
+          className="flex items-center justify-center gap-2 my-3 w-48 mx-auto"
+        >
+          <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-[#D4AF37]/80" />
+          <div className="w-1.5 h-1.5 rotate-45 bg-[#D4AF37]" />
+          <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#D4AF37]/40 to-[#D4AF37]/80" />
+        </motion.div>
+
+        {/* 4. Identificación Parroquial */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1, duration: 0.6 }}
+          className="text-[10px] sm:text-[11px] font-medium tracking-[0.2em] uppercase text-[#A69F93] font-sans"
+        >
+          Parroquia Nuestro Señor de Esquipulas
+        </motion.p>
+
+        {/* 5. Barra de Carga Minimalista Dorada */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.25, duration: 0.5 }}
+          className="mt-10 w-32 flex flex-col items-center"
+        >
+          <div className="w-full h-[2px] bg-[#252525] rounded-full overflow-hidden">
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: "100%" }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.4,
+                ease: "easeInOut",
+              }}
+              className="w-1/2 h-full bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent"
+            />
+          </div>
+          <span className="text-[9px] tracking-[0.22em] text-[#BFA15A]/70 uppercase mt-2.5 font-sans">
+            Iniciando sistema…
+          </span>
         </motion.div>
       </div>
 
-      {/* Textos */}
-      <motion.div
-        style={{ textAlign: "center", marginTop: 36 }}
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0  }}
-        transition={{ delay: 0.5, duration: 0.7, ease: "easeOut" }}
-      >
-        {/* Línea decorativa */}
-        <motion.div
-          style={{
-            display: "flex", alignItems: "center", gap: 10,
-            justifyContent: "center", marginBottom: 14,
-          }}
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-        >
-          <div style={{ height: 1, width: 40, background: "rgba(212,175,55,0.2)" }} />
-          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(212,175,55,0.4)" }} />
-          <div style={{ height: 1, width: 40, background: "rgba(212,175,55,0.2)" }} />
-        </motion.div>
-
-        <h1 style={{
-          color: "#F5E9C0",
-          fontSize: 32,
-          fontWeight: 700,
-          letterSpacing: "0.06em",
-          lineHeight: 1.1,
-          margin: 0,
-          textShadow: "0 2px 20px rgba(0,0,0,0.5)",
-        }}>
-          Coro Vive y Canta
-        </h1>
-
-        <motion.p
-          style={{
-            color: "rgba(245,233,192,0.6)",
-            fontSize: 14,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            marginTop: 8,
-            fontWeight: 600,
-            fontFamily: "'Inter', sans-serif"
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 }}
-        >
-          Sistema Administrativo
-        </motion.p>
-
-        {/* Separador inferior */}
-        <motion.div
-          style={{
-            display: "flex", alignItems: "center", gap: 10,
-            justifyContent: "center", marginTop: 14,
-          }}
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ delay: 1, duration: 0.6 }}
-        >
-          <div style={{ height: 1, width: 30, background: "rgba(212,175,55,0.15)" }} />
-          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(212,175,55,0.3)" }} />
-          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(212,175,55,0.3)" }} />
-          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(212,175,55,0.3)" }} />
-          <div style={{ height: 1, width: 30, background: "rgba(212,175,55,0.15)" }} />
-        </motion.div>
-      </motion.div>
-
-      {/* Barra de carga elegante */}
-      <motion.div
-        style={{ marginTop: 48, width: 140 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.1 }}
-      >
-        {/* Track */}
-        <div style={{
-          height: 2, borderRadius: 99,
-          background: "rgba(212,175,55,0.15)",
-          overflow: "hidden",
-        }}>
-          <motion.div
-            style={{
-              height: "100%", borderRadius: 99,
-              background: "linear-gradient(90deg, rgba(212,175,55,0.4), #D4AF37, rgba(212,175,55,0.4))",
-              transformOrigin: "left",
-            }}
-            animate={{ scaleX: [0, 1] }}
-            transition={{ duration: 2.2, delay: 1.2, ease: "easeInOut" }}
-          />
-        </div>
-
-        {/* Texto de carga parpadeante */}
-        <motion.p
-          style={{
-            textAlign: "center", marginTop: 12,
-            color: "rgba(212,175,55,0.4)",
-            fontSize: 9, letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            fontFamily: "'Inter', sans-serif"
-          }}
-          animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-        >
-          Cargando…
-        </motion.p>
-      </motion.div>
-    </div>
+      {/* Pie de página sutil */}
+      <div className="absolute bottom-4 text-center">
+        <p className="text-[9px] text-[#736C61] tracking-wider font-sans">
+          El Triunfo, Choluteca, Honduras
+        </p>
+      </div>
+    </motion.div>
   )
 }
-
-export default SplashScreen

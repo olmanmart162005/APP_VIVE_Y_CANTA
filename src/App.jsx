@@ -27,7 +27,7 @@ import { supabase } from "./lib/supabase"
 
 function AppContent() {
   const [user, setUser] = useState(null)
-  // Pantalla de bienvenida se muestra una vez por sesión o al iniciar la app
+  // Pantalla de bienvenida profesional se muestra una vez por sesión o al iniciar la app
   const [loading, setLoading] = useState(() => {
     return !sessionStorage.getItem("pwa_splash_seen")
   })
@@ -38,10 +38,11 @@ function AppContent() {
   useEffect(() => {
     let timer = null
     if (loading) {
+      // 2.3 segundos de duración para una secuencia fluida y elegante
       timer = setTimeout(() => {
         setLoading(false)
         sessionStorage.setItem("pwa_splash_seen", "true")
-      }, 1600)
+      }, 2300)
     }
 
     const syncUserProfile = (authUser) => {
@@ -108,10 +109,6 @@ function AppContent() {
     }
   }, [loading])
 
-  if (loading) {
-    return <SplashScreen />
-  }
-
   const isLoginPage = location.pathname === "/"
 
   const pageVariants = {
@@ -158,6 +155,9 @@ function AppContent() {
 
   return (
     <>
+      <AnimatePresence>
+        {loading && <SplashScreen key="splash" />}
+      </AnimatePresence>
       <OfflineBanner />
       <InstallModal />
       <Toaster
