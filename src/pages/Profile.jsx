@@ -65,7 +65,7 @@ function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0C09] pb-32 font-sans antialiased text-[#F5E9C0]">
+    <div className="min-h-screen bg-[var(--bg-app)] pb-32 font-sans antialiased text-[var(--text-primary)] transition-colors duration-200">
       {/* HEADER UNIFICADO */}
       <div className="page-header-gold rounded-b-[36px] px-5 pt-8 pb-16 relative overflow-hidden">
         <div className="max-w-4xl mx-auto">
@@ -78,10 +78,10 @@ function Profile() {
 
       <div className="px-4 max-w-4xl mx-auto -mt-8 relative z-10">
         {/* TARJETA DE IDENTIFICACIÓN PRINCIPAL */}
-        <div className="bg-[#1A1710] rounded-[32px] shadow-2xl p-6 sm:p-8 text-center relative border border-[#D4AF37]/15 overflow-hidden">
+        <div className="bg-[var(--bg-card)] rounded-[32px] shadow-2xl p-6 sm:p-8 text-center relative border border-[var(--border-color)] overflow-hidden">
           {/* ANILLO DE AVATAR PREMIUM CON DEGRADADO METÁLICO */}
           <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto relative p-1 rounded-full bg-gradient-to-tr from-[#B8860B] via-[#EEDC82] to-[#D4AF37] shadow-xl">
-            <div className="w-full h-full rounded-full overflow-hidden bg-[#0E0C09] p-0.5">
+            <div className="w-full h-full rounded-full overflow-hidden bg-[var(--bg-card)] p-0.5">
               {user?.foto ? (
                 <img
                   src={user.foto}
@@ -93,7 +93,7 @@ function Profile() {
                   name={user?.nombre_completo || "Usuario"}
                   size="120"
                   round={true}
-                  color="#221F18"
+                  color="#1E293B"
                   textColor="#D4AF37"
                   className="font-bold"
                 />
@@ -102,7 +102,7 @@ function Profile() {
           </div>
 
           {/* NOMBRE COMPLETO DESTACADO EN LA CREDENCIAL */}
-          <h2 className="title-professional text-2xl sm:text-3xl font-extrabold text-[#F5E9C0] mt-4 tracking-tight break-words">
+          <h2 className="title-professional text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] mt-4 tracking-tight break-words">
             {user?.nombre_completo || "Usuario del Sistema"}
           </h2>
 
@@ -195,16 +195,16 @@ function Profile() {
 
 function InfoCard({ icon, title, value, isCritical }) {
   return (
-    <div className="bg-[#1A1710] rounded-[22px] shadow-lg p-4 flex items-center gap-4 border border-[#D4AF37]/10 overflow-hidden">
-      <div className="bg-[#221F18] min-w-[46px] min-h-[46px] rounded-xl flex items-center justify-center text-[#D4AF37] border border-[#D4AF37]/10 shrink-0">
+    <div className="bg-[var(--bg-card)] rounded-[22px] shadow-md p-4 flex items-center gap-4 border border-[var(--border-color)] overflow-hidden">
+      <div className="bg-[var(--bg-muted)] min-w-[46px] min-h-[46px] rounded-xl flex items-center justify-center text-[var(--gold)] border border-[var(--border-color)] shrink-0">
         {icon}
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-bold uppercase text-[#a89060] tracking-wider">
+        <p className="text-[10px] font-bold uppercase text-[var(--text-secondary)] tracking-wider">
           {title}
         </p>
-        <p className={`text-sm font-bold mt-0.5 break-words whitespace-normal ${isCritical && value ? "text-red-400 font-extrabold" : "text-[#F5E9C0]"}`}>
+        <p className={`text-sm font-bold mt-0.5 break-words whitespace-normal ${isCritical && value ? "text-red-400 font-extrabold" : "text-[var(--text-primary)]"}`}>
           {value || "No registrado"}
         </p>
       </div>

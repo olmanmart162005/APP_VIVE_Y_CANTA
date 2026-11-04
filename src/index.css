@@ -3,52 +3,65 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
-
-  --bg-app: #0E0C09;
-  --bg-surface: #16120E;
-  --bg-muted: #1D1913;
-  --bg-input: #221F18;
-  --text-primary: #F5E9C0;
-  --text-secondary: #A89060;
-  --text-muted: rgb(245 233 192 / 45%);
-  --gold: #D4AF37;
-  --gold-soft: #F4D98A;
-  --gold-dark: #B8860B;
-  --border-color: rgb(212 175 55 / 18%);
-  --success: #4ADE80;
-  --error: #F87171;
-  --header-gold-from: #D4AF37;
-  --header-gold-to: #B8860B;
-  --header-text-primary: #14110a;
-  --header-text-secondary: rgb(20 17 10 / 75%);
-  --header-border: rgb(20 17 10 / 16%);
-  --header-chip-bg: rgb(20 17 10 / 12%);
-  --header-chip-border: rgb(20 17 10 / 16%);
-}
-
+:root,
+html.light,
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-app: #f7f2e7;
-  --bg-surface: #fffdf8;
-  --bg-muted: #f4ebd6;
-  --bg-input: #fffdf8;
-  --text-primary: #1f1913;
-  --text-secondary: #7a6430;
-  --text-muted: rgb(31 25 19 / 60%);
-  --gold: #b78b15;
-  --gold-soft: #f0d888;
-  --gold-dark: #8d6c0a;
-  --border-color: rgb(183 139 21 / 20%);
-  --header-gold-from: #d3a32d;
-  --header-gold-to: #a4740b;
-  --header-text-primary: #1d160c;
-  --header-text-secondary: rgb(29 22 12 / 74%);
-  --header-border: rgb(29 22 12 / 18%);
-  --header-chip-bg: rgb(29 22 12 / 10%);
-  --header-chip-border: rgb(29 22 12 / 15%);
+  /* Modo Claro - SaaS Ejecutivo */
+  --bg-app: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-muted: #F1F5F9;
+  --bg-input: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --gold: #B8860B;
+  --gold-soft: #D4AF37;
+  --gold-dark: #8C6608;
+  --accent-cyan: #0284C7;
+  --border-color: #E2E8F0;
+  --success: #16A34A;
+  --error: #DC2626;
+  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  --header-gold-from: #E6C665;
+  --header-gold-to: #CA9E28;
+  --header-text-primary: #0F172A;
+  --header-text-secondary: rgba(15, 23, 42, 0.8);
+  --header-border: rgba(184, 134, 11, 0.25);
+  --header-chip-bg: rgba(255, 255, 255, 0.75);
+  --header-chip-border: rgba(184, 134, 11, 0.3);
+}
+
+html.dark,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Modo Oscuro - Paleta Solicitada SaaS */
+  --bg-app: #0B1120;
+  --bg-surface: #111827;
+  --bg-card: #182235;
+  --bg-muted: #1E293B;
+  --bg-input: #131C2D;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --gold: #D4AF37;
+  --gold-soft: #F5E9C0;
+  --gold-dark: #B8860B;
+  --accent-cyan: #38BDF8;
+  --border-color: #293548;
+  --success: #4ADE80;
+  --error: #F87171;
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.35), 0 4px 10px -2px rgba(0, 0, 0, 0.25);
+  --header-gold-from: #D4AF37;
+  --header-gold-to: #9A7B1C;
+  --header-text-primary: #0B1120;
+  --header-text-secondary: rgba(11, 17, 32, 0.85);
+  --header-border: rgba(212, 175, 55, 0.25);
+  --header-chip-bg: rgba(11, 17, 32, 0.22);
+  --header-chip-border: rgba(11, 17, 32, 0.28);
 }
 
 * {
@@ -98,18 +111,27 @@ body {
 }
 
 .card-premium {
-  background: var(--bg-surface);
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 22px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 8%);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .card-premium:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 34px rgb(0 0 0 / 12%);
-  border-color: rgb(212 175 55 / 28%);
+  transform: translateY(-2px);
+  border-color: var(--gold);
 }
+
+.bg-theme-app { background-color: var(--bg-app); }
+.bg-theme-surface { background-color: var(--bg-surface); }
+.bg-theme-card { background-color: var(--bg-card); }
+.bg-theme-muted { background-color: var(--bg-muted); }
+.bg-theme-input { background-color: var(--bg-input); }
+.border-theme-border { border-color: var(--border-color); }
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-muted { color: var(--text-muted); }
 
 .btn-primary {
   display: inline-flex;

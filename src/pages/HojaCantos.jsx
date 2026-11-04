@@ -642,17 +642,17 @@ function HojaCantos() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0E0C09] pb-24 text-[#F5E9C0] flex items-center justify-center">
-        <div className="bg-[#1A1710] border border-[#D4AF37]/20 rounded-2xl flex items-center gap-3 px-5 py-4 shadow-xl">
+      <div className="min-h-screen bg-[var(--bg-app)] pb-24 text-[var(--text-primary)] flex items-center justify-center">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl flex items-center gap-3 px-5 py-4 shadow-xl">
           <Loader2 className="animate-spin text-[#D4AF37]" size={20} />
-          <span className="text-sm font-bold text-[#F5E9C0]">Cargando módulo de cantos…</span>
+          <span className="text-sm font-bold text-[var(--text-primary)]">Cargando módulo de cantos…</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0C09] p-4 md:p-8 pb-32 font-sans antialiased text-[#F5E9C0]">
+    <div className="min-h-screen bg-[var(--bg-app)] p-4 md:p-8 pb-32 font-sans antialiased text-[var(--text-primary)] transition-colors duration-200">
       {/* HEADER UNIFICADO */}
       <div className="page-header-gold flex flex-col sm:flex-row sm:justify-between sm:items-start rounded-3xl px-5 py-5 gap-4">
         <div>
@@ -670,7 +670,7 @@ function HojaCantos() {
               clearForm()
               setActiveTab("form")
             }}
-            className="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2"
+            className="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2 cursor-pointer"
           >
             <Plus size={18} />
             Nueva Hoja
@@ -680,13 +680,13 @@ function HojaCantos() {
 
       <div className="mx-auto flex max-w-6xl flex-col gap-5 mt-5">
         {isCreateAllowed && (
-          <section className="bg-[#1A1710] rounded-[30px] p-4 sm:p-6 border border-[#D4AF37]/15 shadow-2xl">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#D4AF37]/10 pb-4">
+          <section className="bg-[var(--bg-card)] rounded-[30px] p-4 sm:p-6 border border-[var(--border-color)] shadow-xl">
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[var(--border-color)] pb-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                   {editingId ? "Edición de Hoja" : "Creación rápida"}
                 </p>
-                <h2 className="title-professional text-xl sm:text-2xl font-bold text-[#F5E9C0] mt-0.5">
+                <h2 className="title-professional text-xl sm:text-2xl font-bold text-[var(--text-primary)] mt-0.5">
                   {editingId ? "Modificar Hoja de Cantos" : "Planificar Nueva Celebración"}
                 </h2>
               </div>
@@ -699,14 +699,14 @@ function HojaCantos() {
               </button>
             </div>
 
-            <div className="bg-[#221F18] border border-[#D4AF37]/15 p-1 rounded-xl">
+            <div className="bg-[var(--bg-muted)] border border-[var(--border-color)] p-1 rounded-xl">
               <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab("form")}
                   className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeTab === "form"
                       ? "bg-[#D4AF37] text-black shadow-md"
-                      : "text-[#a89060]/60 hover:text-[#F5E9C0]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   Formulario
@@ -716,7 +716,7 @@ function HojaCantos() {
                   className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeTab === "preview"
                       ? "bg-[#D4AF37] text-black shadow-md"
-                      : "text-[#a89060]/60 hover:text-[#F5E9C0]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   Vista previa
@@ -726,35 +726,35 @@ function HojaCantos() {
 
             <div className="mt-4 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:gap-4">
               <div className={`${activeTab === "form" ? "block" : "hidden"} lg:block`}>
-                <div className="rounded-2xl border border-[#D4AF37]/10 bg-[#221F18]/50 p-4">
+                <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)]/50 p-4">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="space-y-1 block">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Fecha</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] block ml-1">Fecha</span>
                       <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="input-premium h-11 w-full" />
                     </label>
                     <label className="space-y-1 block">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Hora</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] block ml-1">Hora</span>
                       <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="input-premium h-11 w-full" />
                     </label>
                   </div>
 
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <label className="space-y-1 block">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Celebración</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] block ml-1">Celebración</span>
                       <select value={celebracion} onChange={(e) => setCelebracion(e.target.value)} className="input-premium h-11 w-full">
                         {CELEBRATIONS.map((option) => (
-                          <option key={option} value={option} className="bg-[#1A1710] text-[#F5E9C0]">{option}</option>
+                          <option key={option} value={option} className="bg-[var(--bg-card)] text-[var(--text-primary)]">{option}</option>
                         ))}
                       </select>
                     </label>
                     <label className="space-y-1 block">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Lugar</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] block ml-1">Lugar</span>
                       <input type="text" value={lugar} onChange={(e) => setLugar(e.target.value)} className="input-premium h-11 w-full" placeholder="Ej. Parroquia Nuestro Señor de Esquipulas" />
                     </label>
                   </div>
 
                   <label className="mt-3 block space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060] block ml-1">Observaciones / Notas</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] block ml-1">Observaciones / Notas</span>
                     <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="input-premium min-h-[72px] resize-none py-2.5 w-full" placeholder="Notas litúrgicas, tonos, recomendaciones..." />
                   </label>
 
@@ -769,14 +769,14 @@ function HojaCantos() {
                       return (
                         <div
                           key={section.key}
-                          className="rounded-2xl border border-[#D4AF37]/15 bg-[#1A1710] p-3 transition hover:border-[#D4AF37]/35"
+                          className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 transition hover:border-[#D4AF37]/50 shadow-xs"
                           ref={(el) => { suggestionRefs.current[section.key] = el }}
                         >
                           <div className="flex items-center gap-2">
                             <Music4 size={14} className="text-[#D4AF37]" />
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-[#F5E9C0]">{section.label}</span>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-primary)]">{section.label}</span>
                             {!isNumericField && (
-                              <span className="ml-auto rounded-full bg-[#221F18] border border-[#D4AF37]/20 px-2 py-0.5 text-[9px] font-bold uppercase text-[#a89060]">
+                              <span className="ml-auto rounded-full bg-[var(--bg-muted)] border border-[var(--border-color)] px-2 py-0.5 text-[9px] font-bold uppercase text-[var(--text-secondary)]">
                                 texto libre
                               </span>
                             )}
@@ -802,7 +802,7 @@ function HojaCantos() {
 
                             {/* Dropdown de sugerencias por nombre */}
                             {showDropdown && (
-                              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-2xl border border-[#D4AF37]/30 bg-[#1A1710] shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
+                              <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
                                 {suggestions.map((song) => (
                                   <button
                                     key={`sug-${section.key}-${song.numero}`}
@@ -811,14 +811,14 @@ function HojaCantos() {
                                       e.preventDefault()
                                       handleSelectTitleSuggestion(section.key, song)
                                     }}
-                                    className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition hover:bg-[#221F18] border-b border-[#D4AF37]/10 last:border-b-0 cursor-pointer"
+                                    className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition hover:bg-[var(--bg-muted)] border-b border-[var(--border-color)] last:border-b-0 cursor-pointer"
                                   >
                                     <span className="min-w-[28px] rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-1.5 py-0.5 text-center text-[10px] font-bold text-[#D4AF37]">
                                       {song.numero}
                                     </span>
-                                    <span className="flex-1 truncate text-xs font-semibold text-[#F5E9C0]">{song.titulo}</span>
+                                    <span className="flex-1 truncate text-xs font-semibold text-[var(--text-primary)]">{song.titulo}</span>
                                     {song.categoria && (
-                                      <span className="text-[9px] font-bold text-[#a89060] uppercase shrink-0">{song.categoria}</span>
+                                      <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase shrink-0">{song.categoria}</span>
                                     )}
                                   </button>
                                 ))}
@@ -827,7 +827,7 @@ function HojaCantos() {
                           </div>
 
                           {/* Estado de la búsqueda */}
-                          <div className="mt-2 min-h-[18px] text-[11px] text-[#a89060]">
+                          <div className="mt-2 min-h-[18px] text-[11px] text-[var(--text-secondary)]">
                             {result?.kind === "found" && result.matches?.length ? (
                               <div className="space-y-1">
                                 <div className="font-bold text-[#D4AF37]">{result.value} • {result.firstTitle}</div>
@@ -838,7 +838,7 @@ function HojaCantos() {
                                         key={`${section.key}-${item.numero}`}
                                         type="button"
                                         onClick={() => handleFieldChange(section.key, String(item.numero))}
-                                        className="rounded-full border border-[#D4AF37]/25 bg-[#221F18] px-2 py-0.5 text-[10px] font-bold text-[#F5E9C0] hover:border-[#D4AF37] cursor-pointer"
+                                        className="rounded-full border border-[var(--border-color)] bg-[var(--bg-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--text-primary)] hover:border-[#D4AF37] cursor-pointer"
                                       >
                                         {item.numero}
                                       </button>
@@ -849,9 +849,9 @@ function HojaCantos() {
                             ) : result?.kind === "title-search" ? (
                               <span className="text-[#D4AF37]">Selecciona un canto de la lista desplegable</span>
                             ) : result?.kind === "not-found" ? (
-                              <span className="text-amber-400">Canto no encontrado en el repertorio</span>
+                              <span className="text-amber-500 font-semibold">Canto no encontrado en el repertorio</span>
                             ) : result?.kind === "custom" ? (
-                              <span className="text-emerald-400">Texto libre listo para guardar</span>
+                              <span className="text-emerald-500 font-semibold">Texto libre listo para guardar</span>
                             ) : null}
                           </div>
                         </div>
@@ -872,25 +872,25 @@ function HojaCantos() {
 
               {/* VISTA PREVIA COMPACTA */}
               <div className={`${activeTab === "preview" ? "block" : "hidden"} lg:block`}>
-                <div className="rounded-2xl border border-[#D4AF37]/10 bg-[#221F18]/50 p-4 sticky top-4">
+                <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)]/50 p-4 sticky top-4">
                   <div className="flex items-center gap-2 text-[#D4AF37]">
                     <Sparkles size={16} />
                     <span className="text-[10px] font-bold uppercase tracking-wider">Vista previa compacta</span>
                   </div>
 
-                  <div className="mt-3 rounded-2xl border border-[#D4AF37]/15 bg-[#1A1710] p-4 shadow-inner">
-                    <div className="flex items-start justify-between gap-3 border-b border-[#D4AF37]/10 pb-3">
+                  <div className="mt-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3 border-b border-[var(--border-color)] pb-3">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">Celebración</p>
-                        <h3 className="title-professional text-lg font-bold text-[#F5E9C0]">{celebracion || "Misa"}</h3>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Celebración</p>
+                        <h3 className="title-professional text-lg font-bold text-[var(--text-primary)]">{celebracion || "Misa"}</h3>
                       </div>
-                      <div className="rounded-xl border border-[#D4AF37]/20 bg-[#221F18] px-2.5 py-1.5 text-right text-[11px] text-[#a89060]">
+                      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-muted)] px-2.5 py-1.5 text-right text-[11px] text-[var(--text-secondary)]">
                         <div>{formatDate(fecha) || "Fecha"}</div>
                         <div className="font-bold text-[#D4AF37]">{hora || "Hora"}</div>
                       </div>
                     </div>
 
-                    <div className="mt-3 space-y-1.5 text-xs text-[#F5E9C0]">
+                    <div className="mt-3 space-y-1.5 text-xs text-[var(--text-primary)]">
                       <div className="flex items-center gap-2"><CalendarDays size={13} className="text-[#D4AF37]" /> {formatDate(fecha) || "Fecha pendiente"}</div>
                       <div className="flex items-center gap-2"><Clock3 size={13} className="text-[#D4AF37]" /> {hora || "Hora pendiente"}</div>
                       <div className="flex items-center gap-2"><MapPin size={13} className="text-[#D4AF37]" /> {lugar || "Lugar pendiente"}</div>
@@ -899,9 +899,9 @@ function HojaCantos() {
 
                     <div className="mt-3.5 space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
                       {previewSections.filter((section) => section.value).map((section) => (
-                        <div key={section.key} className="flex items-center justify-between rounded-xl border border-[#D4AF37]/10 bg-[#221F18] px-3 py-2 text-xs">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">{section.label}</span>
-                          <span className="ml-2 truncate text-right font-semibold text-[#F5E9C0]">{section.value}</span>
+                        <div key={section.key} className="flex items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--bg-muted)] px-3 py-2 text-xs">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">{section.label}</span>
+                          <span className="ml-2 truncate text-right font-semibold text-[var(--text-primary)]">{section.value}</span>
                         </div>
                       ))}
                     </div>
@@ -913,23 +913,23 @@ function HojaCantos() {
         )}
 
         {/* HISTORIAL DE HOJAS GUARDADAS */}
-        <section className="bg-[#1A1710] rounded-[30px] p-4 sm:p-6 border border-[#D4AF37]/15 shadow-2xl">
-          <div className="flex flex-col gap-3 border-b border-[#D4AF37]/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="bg-[var(--bg-card)] rounded-[30px] p-4 sm:p-6 border border-[var(--border-color)] shadow-xl">
+          <div className="flex flex-col gap-3 border-b border-[var(--border-color)] pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#a89060]">Historial Litúrgico</p>
-              <h2 className="title-professional text-xl sm:text-2xl font-bold text-[#F5E9C0]">Hojas de Cantos Registradas</h2>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Historial Litúrgico</p>
+              <h2 className="title-professional text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Hojas de Cantos Registradas</h2>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <label className="flex items-center gap-2 rounded-xl border border-[#D4AF37]/15 bg-[#221F18] px-3 py-2 text-xs focus-within:border-[#D4AF37]">
+              <label className="flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-muted)] px-3 py-2 text-xs focus-within:border-[#D4AF37]">
                 <Search size={14} className="text-[#D4AF37]" />
-                <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar celebración o fecha..." className="w-full bg-transparent text-xs text-[#F5E9C0] outline-none placeholder-[#a89060]/50" />
+                <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar celebración o fecha..." className="w-full bg-transparent text-xs text-[var(--text-primary)] outline-none placeholder-[var(--text-muted)]" />
               </label>
-              <label className="flex items-center gap-2 rounded-xl border border-[#D4AF37]/15 bg-[#221F18] px-3 py-2 text-xs focus-within:border-[#D4AF37]">
+              <label className="flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-muted)] px-3 py-2 text-xs focus-within:border-[#D4AF37]">
                 <Filter size={14} className="text-[#D4AF37]" />
-                <select value={celebrationFilter} onChange={(e) => setCelebrationFilter(e.target.value)} className="bg-transparent text-xs text-[#F5E9C0] outline-none">
-                  <option value="todos" className="bg-[#1A1710]">Todas las celebraciones</option>
+                <select value={celebrationFilter} onChange={(e) => setCelebrationFilter(e.target.value)} className="bg-transparent text-xs text-[var(--text-primary)] outline-none">
+                  <option value="todos" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Todas las celebraciones</option>
                   {CELEBRATIONS.map((option) => (
-                    <option key={option} value={option} className="bg-[#1A1710] text-[#F5E9C0]">{option}</option>
+                    <option key={option} value={option} className="bg-[var(--bg-card)] text-[var(--text-primary)]">{option}</option>
                   ))}
                 </select>
               </label>
@@ -937,37 +937,37 @@ function HojaCantos() {
           </div>
 
           {filteredRecords.length === 0 ? (
-            <div className="mt-4 rounded-2xl border border-dashed border-[#D4AF37]/20 bg-[#221F18]/40 py-12 text-center text-sm text-[#a89060]">
+            <div className="mt-4 rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-muted)]/40 py-12 text-center text-sm text-[var(--text-secondary)]">
               <FileText size={32} className="mx-auto mb-2 text-[#D4AF37]" />
-              <p className="font-bold text-[#F5E9C0]">Todavía no hay hojas de cantos registradas.</p>
-              <p className="text-xs text-[#a89060]/60 mt-1">Crea una nueva hoja para comenzar la planificación litúrgica.</p>
+              <p className="font-bold text-[var(--text-primary)]">Todavía no hay hojas de cantos registradas.</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1">Crea una nueva hoja para comenzar la planificación litúrgica.</p>
             </div>
           ) : (
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {filteredRecords.map((item) => {
                 const details = detailMap[item.id] || []
                 return (
-                  <div key={item.id} className="rounded-2xl border border-[#D4AF37]/15 bg-[#221F18]/60 p-4 transition hover:border-[#D4AF37]/35 shadow-md">
+                  <div key={item.id} className="card-premium p-5 transition hover:border-[#D4AF37]/50 shadow-md">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 inline-block">
                           {item.celebracion || "Celebración"}
                         </span>
-                        <h3 className="title-professional text-lg font-bold text-[#F5E9C0] mt-1.5">
+                        <h3 className="title-professional text-lg font-bold text-[var(--text-primary)] mt-1.5">
                           {formatDate(item.fecha) || "Fecha pendiente"}
                         </h3>
-                        <p className="mt-1 text-xs text-[#a89060] flex items-center gap-1">
+                        <p className="mt-1 text-xs text-[var(--text-secondary)] flex items-center gap-1">
                           <MapPin size={12} className="text-[#D4AF37]" />
                           {item.lugar || "Lugar pendiente"}
                         </p>
                       </div>
-                      <div className="rounded-xl border border-[#D4AF37]/20 bg-[#1A1710] px-3 py-2 text-right text-xs text-[#a89060]">
-                        <div className="font-bold text-[#F5E9C0]">{item.hora || "--:--"}</div>
+                      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-muted)] px-3 py-2 text-right text-xs text-[var(--text-secondary)]">
+                        <div className="font-bold text-[var(--text-primary)]">{item.hora || "--:--"}</div>
                         <div className="font-bold text-[#D4AF37] text-[10px] uppercase mt-0.5">{details.length} cantos</div>
                       </div>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-[#D4AF37]/10">
+                    <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-[var(--border-color)]">
                       <button onClick={() => handleView(item)} className="btn-secondary flex-1 min-w-[95px] py-2 text-xs inline-flex items-center justify-center gap-1 cursor-pointer">
                         <Eye size={13} /> Ver
                       </button>
@@ -1001,26 +1001,26 @@ function HojaCantos() {
       {/* MODAL DETALLES DE HOJA */}
       {selectedRecord && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-md">
-          <div className="relative w-full max-w-2xl max-h-[90vh] rounded-[32px] border border-[#D4AF37]/25 bg-[#1A1710] shadow-2xl flex flex-col overflow-hidden">
+          <div className="relative w-full max-w-2xl max-h-[90vh] rounded-[32px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl flex flex-col overflow-hidden">
             <button
               type="button"
               onClick={() => setSelectedRecord(null)}
-              className="absolute right-4 top-4 z-50 rounded-full bg-[#221F18] p-2 text-[#a89060] hover:text-[#F5E9C0] border border-[#D4AF37]/20 cursor-pointer"
+              className="absolute right-4 top-4 z-50 rounded-full bg-[var(--bg-muted)] p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] cursor-pointer"
             >
               ✕
             </button>
 
             <div className="max-h-[90vh] overflow-y-auto p-5 sm:p-6 pt-14">
-              <div className="mb-4 border-b border-[#D4AF37]/10 pb-4">
+              <div className="mb-4 border-b border-[var(--border-color)] pb-4">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">
                   Vista de Cantoral
                 </span>
-                <h3 className="title-professional text-2xl font-bold text-[#F5E9C0] mt-1">
+                <h3 className="title-professional text-2xl font-bold text-[var(--text-primary)] mt-1">
                   {selectedRecord.celebracion || "Celebración"}
                 </h3>
               </div>
 
-              <div className="rounded-2xl border border-[#D4AF37]/15 bg-[#221F18] p-4 text-xs">
+              <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-4 text-xs">
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   <div><span className="font-bold text-[#D4AF37]">Fecha:</span> {formatDate(selectedRecord.fecha)}</div>
                   <div><span className="font-bold text-[#D4AF37]">Hora:</span> {selectedRecord.hora}</div>
@@ -1039,30 +1039,30 @@ function HojaCantos() {
                   const contentText = isNumeric ? (song?.letra_markdown || song?.letra || "") : (detail.texto_manual || "")
 
                   return (
-                    <div key={`${selectedRecord.id}-${index}`} className="rounded-2xl border border-[#D4AF37]/15 bg-[#221F18]/80 p-3.5 text-xs">
+                    <div key={`${selectedRecord.id}-${index}`} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-3.5 text-xs">
                       <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]">{sectionLabel}</p>
-                          <p className="mt-0.5 text-sm font-bold text-[#F5E9C0]">
+                          <p className="mt-0.5 text-sm font-bold text-[var(--text-primary)]">
                             {isNumeric ? `${rawValue}${song?.titulo ? ` • ${song.titulo}` : ''}` : rawValue || 'Texto libre'}
                           </p>
                         </div>
                         {isNumeric && song?.categoria ? (
-                          <span className="text-[10px] font-bold text-[#a89060] uppercase px-2 py-0.5 rounded-full bg-[#1A1710] border border-[#D4AF37]/15 self-start sm:self-auto">
+                          <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase px-2 py-0.5 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] self-start sm:self-auto">
                             {song.categoria}
                           </span>
                         ) : null}
                       </div>
 
-                      <div className="space-y-1 text-xs leading-5 text-[#F5E9C0]/90 mt-2 border-t border-[#D4AF37]/10 pt-2 font-mono">
+                      <div className="space-y-1 text-xs leading-5 text-[var(--text-primary)] mt-2 border-t border-[var(--border-color)] pt-2 font-mono">
                         {loadingLyrics[rawValue] ? (
-                          <div className="flex items-center gap-2 text-[#a89060]">
+                          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                             <Loader2 size={13} className="animate-spin text-[#D4AF37]" /> Cargando letra…
                           </div>
                         ) : contentText ? (
                           renderPreviewText(contentText)
                         ) : (
-                          <p className="text-[#a89060]/70 italic">No se encontró letra para este canto.</p>
+                          <p className="text-[var(--text-muted)] italic">No se encontró letra para este canto.</p>
                         )}
                       </div>
                     </div>
@@ -1070,7 +1070,7 @@ function HojaCantos() {
                 })}
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-[#D4AF37]/10">
+              <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-[var(--border-color)]">
                 <button
                   onClick={() => handleDownloadPdf(selectedRecord)}
                   className="btn-primary w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs cursor-pointer"

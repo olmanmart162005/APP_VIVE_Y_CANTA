@@ -331,7 +331,7 @@ function Activities() {
   const selectCls = "input-premium"
 
   return (
-    <div className="min-h-screen bg-[#0E0C09] p-4 md:p-8 pb-32 font-sans antialiased text-[#F5E9C0]">
+    <div className="min-h-screen bg-[var(--bg-app)] p-4 md:p-8 pb-32 font-sans antialiased text-[var(--text-primary)] transition-colors duration-200">
       {/* HEADER */}
       <div className="page-header-gold flex flex-col sm:flex-row sm:justify-between sm:items-start rounded-3xl px-4 py-4 gap-4">
         <div>
@@ -391,13 +391,13 @@ function Activities() {
       )}
 
       {/* SELECTOR MOBILE */}
-      <div className="flex mt-5 bg-[#1A1710] p-1.5 rounded-2xl border border-[#D4AF37]/15 md:hidden">
+      <div className="flex mt-5 bg-[var(--bg-card)] p-1.5 rounded-2xl border border-[var(--border-color)] md:hidden">
         <button
           onClick={() => setActiveTab("calendar")}
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeTab === "calendar"
-              ? "bg-[#D4AF37] text-black shadow-md"
-              : "text-[#a89060]/60"
+              ? "bg-[var(--gold)] text-black shadow-md"
+              : "text-[var(--text-secondary)]"
           }`}
         >
           Vista Calendario
@@ -406,8 +406,8 @@ function Activities() {
           onClick={() => setActiveTab("agenda")}
           className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeTab === "agenda"
-              ? "bg-[#D4AF37] text-black shadow-md"
-              : "text-[#a89060]/60"
+              ? "bg-[var(--gold)] text-black shadow-md"
+              : "text-[var(--text-secondary)]"
           }`}
         >
           Vista Agenda
@@ -416,15 +416,15 @@ function Activities() {
 
       {/* FORMULARIO CRUD */}
       {showForm && canManageActivities(user?.role) && (
-        <div className="bg-[#1A1710] rounded-[30px] p-6 mt-5 shadow-2xl border border-[#D4AF37]/15 max-w-2xl mx-auto transition-all">
-          <div className="flex justify-between items-center mb-5 border-b border-[#D4AF37]/10 pb-3">
-            <h2 className="font-extrabold text-[#F5E9C0] text-lg flex items-center gap-2">
-              <Layers className="text-[#D4AF37]" size={20} />
+        <div className="bg-[var(--bg-card)] rounded-[30px] p-6 mt-5 shadow-2xl border border-[var(--border-color)] max-w-2xl mx-auto transition-all">
+          <div className="flex justify-between items-center mb-5 border-b border-[var(--border-color)] pb-3">
+            <h2 className="font-extrabold text-[var(--text-primary)] text-lg flex items-center gap-2">
+              <Layers className="text-[var(--gold)]" size={20} />
               {editingId ? "Modificar Datos de Actividad" : "Planificar Nueva Actividad"}
             </h2>
             <button
               onClick={clearForm}
-              className="p-2 hover:bg-[#221F18] rounded-full text-[#a89060] transition cursor-pointer"
+              className="p-2 hover:bg-[var(--bg-muted)] rounded-full text-[var(--text-secondary)] transition cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -560,32 +560,32 @@ function Activities() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 items-start">
         {/* CALENDARIO MENSUAL */}
         <div
-          className={`lg:col-span-2 bg-[#1A1710] rounded-[30px] p-4 md:p-6 border border-[#D4AF37]/10 shadow-2xl ${
+          className={`lg:col-span-2 bg-[var(--bg-card)] rounded-[30px] p-4 md:p-6 border border-[var(--border-color)] shadow-2xl ${
             activeTab === "calendar" ? "block" : "hidden md:block"
           }`}
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-black text-[#F5E9C0] capitalize flex items-center gap-2 tracking-tight">
-              <CalendarIcon className="text-[#D4AF37]" size={20} />
+            <h2 className="text-lg font-black text-[var(--text-primary)] capitalize flex items-center gap-2 tracking-tight">
+              <CalendarIcon className="text-[var(--gold)]" size={20} />
               {format(currentMonth, "MMMM yyyy", { locale: es })}
             </h2>
-            <div className="flex gap-1 bg-[#221F18] border border-[#D4AF37]/15 p-1 rounded-xl">
+            <div className="flex gap-1 bg-[var(--bg-muted)] border border-[var(--border-color)] p-1 rounded-xl">
               <button
                 onClick={prevMonth}
-                className="p-2 hover:bg-[#1A1710] rounded-lg transition text-[#a89060] cursor-pointer"
+                className="p-2 hover:bg-[var(--bg-card)] rounded-lg transition text-[var(--text-secondary)] cursor-pointer"
               >
                 <ChevronLeft size={16} />
               </button>
               <button
                 onClick={nextMonth}
-                className="p-2 hover:bg-[#1A1710] rounded-lg transition text-[#a89060] cursor-pointer"
+                className="p-2 hover:bg-[var(--bg-card)] rounded-lg transition text-[var(--text-secondary)] cursor-pointer"
               >
                 <ChevronRight size={16} />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center font-bold text-xs text-[#a89060]/75 uppercase tracking-wider mb-2">
+          <div className="grid grid-cols-7 gap-1 text-center font-bold text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-2">
             <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
           </div>
 
@@ -593,7 +593,7 @@ function Activities() {
             {Array.from({ length: startOfMonth(currentMonth).getDay() }).map((_, idx) => (
               <div
                 key={`empty-${idx}`}
-                className="aspect-square bg-[#221F18]/20 rounded-xl md:rounded-2xl"
+                className="aspect-square bg-[var(--bg-muted)]/30 rounded-xl md:rounded-2xl"
               />
             ))}
 
@@ -610,10 +610,10 @@ function Activities() {
                   onClick={() => setSelectedDate(day)}
                   className={`aspect-square rounded-xl md:rounded-2xl p-1 flex flex-col justify-between items-center relative transition border cursor-pointer group ${
                     isSelected
-                      ? "bg-[#D4AF37] text-black border-[#D4AF37] shadow-md scale-102"
+                      ? "bg-[var(--gold)] text-black border-[var(--gold)] shadow-md scale-102"
                       : isTodayDay
-                        ? "bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/40 font-bold"
-                        : "bg-[#221F18] text-[#F5E9C0] hover:bg-[#221F18]/80 border-transparent"
+                        ? "bg-[var(--gold)]/10 text-[var(--gold)] border-[var(--gold)]/40 font-bold"
+                        : "bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-[var(--border-color)]/50 border-transparent"
                   }`}
                 >
                   <span className="text-xs md:text-sm font-bold mt-0.5">{format(day, "d")}</span>
@@ -625,7 +625,7 @@ function Activities() {
                       />
                     ))}
                     {matches.length > 3 && (
-                      <span className={`text-[8px] font-black leading-none ${isSelected ? "text-black" : "text-[#D4AF37]"}`}>+</span>
+                      <span className={`text-[8px] font-black leading-none ${isSelected ? "text-black" : "text-[var(--gold)]"}`}>+</span>
                     )}
                   </div>
                 </button>
@@ -634,13 +634,13 @@ function Activities() {
           </div>
 
           {/* AGENDA DIARIA */}
-          <div className="mt-6 border-t border-[#D4AF37]/10 pt-5">
-            <h3 className="text-xs font-bold uppercase text-[#a89060] tracking-wider mb-3">
+          <div className="mt-6 border-t border-[var(--border-color)] pt-5">
+            <h3 className="text-xs font-bold uppercase text-[var(--text-secondary)] tracking-wider mb-3">
               Eventos para el {format(selectedDate, "dd 'de' MMMM", { locale: es })}
             </h3>
 
             {selectedDayActivities.length === 0 ? (
-              <p className="text-xs text-[#a89060]/50 bg-[#221F18]/30 rounded-2xl p-4 text-center border border-dashed border-[#D4AF37]/10">
+              <p className="text-xs text-[var(--text-secondary)] bg-[var(--bg-muted)] rounded-2xl p-4 text-center border border-dashed border-[var(--border-color)]">
                 No hay actividades programadas para esta fecha.
               </p>
             ) : (
@@ -658,14 +658,14 @@ function Activities() {
                           <span className={`w-2 h-2 rounded-full ${colors.badge}`} />
                           <h4 className={`font-bold text-sm truncate ${colors.text}`}>{act.titulo}</h4>
                         </div>
-                        <p className="text-xs text-[#a89060]/60 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-medium">
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-medium">
                           <span className="flex items-center gap-1"><Clock size={12} /> {act.hora}</span>
                           <span className="flex items-center gap-1 truncate"><MapPin size={12} /> {act.lugar}</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-2 ml-2 shrink-0">
                         {renderTimeBadge(act.fecha)}
-                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#1A1710] border border-[#D4AF37]/15 shadow-2xs uppercase text-[#a89060]">
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xs uppercase text-[var(--text-secondary)]">
                           {act.tipo}
                         </span>
                       </div>
@@ -679,12 +679,12 @@ function Activities() {
 
         {/* PANEL AGENDA */}
         <div
-          className={`bg-[#1A1710] rounded-[30px] p-4 md:p-6 border border-[#D4AF37]/10 shadow-2xl ${
+          className={`bg-[var(--bg-card)] rounded-[30px] p-4 md:p-6 border border-[var(--border-color)] shadow-2xl ${
             activeTab === "agenda" ? "block" : "hidden lg:block"
           }`}
         >
           {/* Tabs de filtro */}
-          <div className="flex bg-[#221F18] border border-[#D4AF37]/15 p-1 rounded-xl mb-4 gap-1">
+          <div className="flex bg-[var(--bg-muted)] border border-[var(--border-color)] p-1 rounded-xl mb-4 gap-1">
             {agendaTabs.map(({ key, label }) => {
               const count = getFilteredRecords(key).length
               return (
@@ -693,8 +693,8 @@ function Activities() {
                   onClick={() => setAgendaFilter(key)}
                   className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                     agendaFilter === key
-                      ? "bg-[#D4AF37] text-black shadow-md"
-                      : "text-[#a89060]/60 hover:text-[#F5E9C0]"
+                      ? "bg-[var(--gold)] text-black shadow-md"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   {label}
@@ -702,7 +702,7 @@ function Activities() {
                     className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold leading-none ${
                       agendaFilter === key
                         ? "bg-black/20 text-black"
-                        : "bg-[#1A1710] text-[#a89060]/50"
+                        : "bg-[var(--bg-card)] text-[var(--text-secondary)]"
                     }`}
                   >
                     {count}
@@ -714,7 +714,7 @@ function Activities() {
 
           <div className="space-y-3 overflow-y-auto max-h-[540px] pr-1">
             {filteredRecords.length === 0 ? (
-              <div className="text-center py-8 text-[#a89060]/40 text-sm">
+              <div className="text-center py-8 text-[var(--text-secondary)] text-sm">
                 No hay actividades en esta categoría.
               </div>
             ) : (
@@ -728,7 +728,7 @@ function Activities() {
                     className={`rounded-2xl p-4 border transition-all cursor-pointer relative overflow-hidden group ${
                       vencida
                         ? "bg-amber-500/5 border-amber-500/15 hover:border-amber-500/35"
-                        : "bg-[#221F18]/50 border-[#D4AF37]/10 hover:border-[#D4AF37]/30"
+                        : "bg-[var(--bg-muted)]/50 border-[var(--border-color)] hover:border-[var(--gold)]/40"
                     }`}
                   >
                     <div
@@ -741,8 +741,8 @@ function Activities() {
                       <h4
                         className={`font-bold text-sm tracking-tight line-clamp-1 transition-colors ${
                           vencida
-                            ? "text-amber-300 group-hover:text-amber-200"
-                            : "text-[#F5E9C0] group-hover:text-[#D4AF37]"
+                            ? "text-amber-400 group-hover:text-amber-300"
+                            : "text-[var(--text-primary)] group-hover:text-[var(--gold)]"
                         }`}
                       >
                         {item.titulo}
@@ -758,9 +758,9 @@ function Activities() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-1 text-xs text-[#a89060]/60 font-medium">
-                      <div className="flex items-center gap-1.5 text-[#F5E9C0]/85 font-bold">
-                        <CalendarIcon size={13} className={vencida ? "text-amber-500" : "text-[#D4AF37]"} />
+                    <div className="grid grid-cols-1 gap-1 text-xs text-[var(--text-secondary)] font-medium">
+                      <div className="flex items-center gap-1.5 text-[var(--text-primary)] font-bold">
+                        <CalendarIcon size={13} className={vencida ? "text-amber-500" : "text-[var(--gold)]"} />
                         <span>
                           {format(parseISO(item.fecha + "T00:00:00"), "dd 'de' MMMM", { locale: es })}
                         </span>
@@ -775,8 +775,8 @@ function Activities() {
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-[#D4AF37]/10">
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#a89060]/40">
+                    <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-[var(--border-color)]">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                         {item.tipo}
                       </span>
                       <div className="flex items-center gap-2">

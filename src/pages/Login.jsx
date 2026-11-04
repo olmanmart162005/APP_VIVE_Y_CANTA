@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Lock, User, Loader2, Eye, EyeOff } from "lucide-react"
+import { Lock, User, Loader2, Eye, EyeOff, Sun, Moon } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 import logo from "../assets/logo.png"
 import { supabase } from "../lib/supabase"
+import { useTheme } from "../context/ThemeContext"
 
 function Login({ user }) {
+  const { theme, toggleTheme } = useTheme()
   const [usuario, setUsuario] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -422,7 +424,24 @@ function Login({ user }) {
         }
       `}</style>
 
-      <div className="login-root">
+      <div className="login-root relative">
+        {/* Selector de tema flotante */}
+        <div className="absolute top-4 right-4 z-20">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] shadow-lg hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold"
+            title={theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+          >
+            {theme === "dark" ? (
+              <Sun size={17} className="text-amber-400" />
+            ) : (
+              <Moon size={17} className="text-indigo-600" />
+            )}
+            <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Oscuro"}</span>
+          </button>
+        </div>
+
         <div className="login-card">
           <div className="card-topline" />
 

@@ -37,9 +37,9 @@ function BottomNav() {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-3 pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center px-3 pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="w-full max-w-[430px] px-4 pb-4">
-        <div className="bg-[#1A1710]/80 backdrop-blur-xl rounded-[28px] shadow-2xl border border-borderTheme px-3 py-3 flex items-center justify-between">
+        <div className="bg-[var(--bg-card)]/90 backdrop-blur-xl rounded-[28px] shadow-2xl border border-[var(--border-color)] px-3 py-3 flex items-center justify-between transition-colors">
           {navItems.map((item, index) => {
             const Icon = item.icon
 
@@ -50,8 +50,8 @@ function BottomNav() {
                 className={({ isActive }) =>
                   `flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 ${
                     isActive
-                      ? "bg-[#D4AF37] text-[#0E0C09] scale-105 shadow-lg shadow-[#D4AF37]/25"
-                      : "text-[#a89060]/50 hover:text-[#D4AF37]"
+                      ? "bg-[var(--gold)] text-black scale-105 shadow-lg shadow-[var(--gold)]/25"
+                      : "text-[var(--text-secondary)] hover:text-[var(--gold)]"
                   }`
                 }
               >

@@ -26,8 +26,8 @@ const CATS_GASTO = ["Transporte", "Alimentación", "Sonido", "Uniformes", "Instr
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[#1A1710]/95 backdrop-blur-md border border-[#D4AF37]/20 rounded-2xl p-4 shadow-2xl">
-      <p className="text-xs font-bold mb-2 text-[#a89060]">{label}</p>
+    <div className="bg-[var(--bg-card)]/95 backdrop-blur-md border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl">
+      <p className="text-xs font-bold mb-2 text-[var(--text-secondary)]">{label}</p>
       {payload.map((p) => (
         <p key={p.name} className="text-sm font-extrabold" style={{ color: p.color }}>
           {p.name}: L {Number(p.value).toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -373,7 +373,7 @@ function Finance() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0C09] text-[#F5E9C0] pb-32 antialiased">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] pb-32 antialiased transition-colors duration-200">
       {showModal && (
         <ModalForm
           item={modalItem}
@@ -419,35 +419,35 @@ function Finance() {
               <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none" />
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#D4AF37]/10 border border-[#D4AF37]/10 text-lg">
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[var(--gold)]/10 border border-[var(--gold)]/20 text-lg">
                     {emoji}
                   </div>
                   <div>
-                    <p className="text-[9px] uppercase tracking-[0.3em] text-[#a89060]">{label}</p>
-                    <p className="text-[10px] text-[#a89060]/70 mt-1">Saldo actual</p>
+                    <p className="text-[9px] uppercase tracking-[0.3em] text-[var(--text-secondary)]">{label}</p>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-1">Saldo actual</p>
                   </div>
                 </div>
                 <div className={`text-[9px] font-bold px-3 py-1 rounded-full uppercase ${
                   stats.balance >= 0
-                    ? "bg-green-500/10 text-[#4ADE80] border border-green-500/20"
-                    : "bg-red-500/10 text-[#F87171] border border-red-500/20"
+                    ? "bg-green-500/10 text-emerald-500 border border-green-500/20"
+                    : "bg-red-500/10 text-red-500 border border-red-500/20"
                 }`}>
                   {stats.balance >= 0 ? "Positivo" : "Déficit"}
                 </div>
               </div>
 
               <div className="mt-5">
-                <p className="text-4xl sm:text-5xl font-black text-[#D4AF37] tracking-tight">L {stats.balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
+                <p className="text-4xl sm:text-5xl font-black text-[var(--gold)] tracking-tight">L {stats.balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[#16120E] border border-[#D4AF37]/10 p-3">
-                  <p className="text-[9px] uppercase tracking-[0.28em] text-[#a89060]">Ingresos</p>
-                  <p className="mt-2 text-sm font-bold text-[#4ADE80]">L {stats.ingresos.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
+                <div className="rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-color)] p-3">
+                  <p className="text-[9px] uppercase tracking-[0.28em] text-[var(--text-secondary)]">Ingresos</p>
+                  <p className="mt-2 text-sm font-bold text-emerald-500">L {stats.ingresos.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
                 </div>
-                <div className="rounded-2xl bg-[#16120E] border border-[#D4AF37]/10 p-3">
-                  <p className="text-[9px] uppercase tracking-[0.28em] text-[#a89060]">Egresos</p>
-                  <p className="mt-2 text-sm font-bold text-[#F87171]">L {stats.gastos.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
+                <div className="rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-color)] p-3">
+                  <p className="text-[9px] uppercase tracking-[0.28em] text-[var(--text-secondary)]">Egresos</p>
+                  <p className="mt-2 text-sm font-bold text-red-500">L {stats.gastos.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
@@ -458,8 +458,8 @@ function Finance() {
         <div className="card-premium p-5">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
-              <p className="text-[#a89060] text-[9px] font-bold uppercase tracking-widest mb-0.5">Visualización</p>
-              <h3 className="text-[#F5E9C0] font-extrabold text-base">Ingresos y Costos</h3>
+              <p className="text-[var(--text-secondary)] text-[9px] font-bold uppercase tracking-widest mb-0.5">Visualización</p>
+              <h3 className="text-[var(--text-primary)] font-extrabold text-base">Ingresos y Costos</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               <select value={chartCaja} onChange={e => setChartCaja(e.target.value)}
@@ -479,11 +479,11 @@ function Finance() {
           </div>
 
           {chartData.length === 0 ? (
-            <div className="h-52 flex items-center justify-center rounded-3xl border border-[#D4AF37]/10 bg-[#16120E]">
-              <p className="text-[#a89060]/60 text-sm font-semibold">Sin datos para graficar.</p>
+            <div className="h-52 flex items-center justify-center rounded-3xl border border-[var(--border-color)] bg-[var(--bg-muted)]">
+              <p className="text-[var(--text-secondary)] text-sm font-semibold">Sin datos para graficar.</p>
             </div>
           ) : (
-            <div className="h-56 rounded-[28px] border border-[#D4AF37]/10 bg-[#16120E] p-3">
+            <div className="h-56 rounded-[28px] border border-[var(--border-color)] bg-[var(--bg-muted)] p-3">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(212, 175, 55, 0.08)" vertical={false} />
@@ -513,19 +513,19 @@ function Finance() {
         {/* Historial */}
         <div className="card-premium !p-0 overflow-hidden">
           {/* Barra de filtros */}
-          <div className="p-4 flex flex-wrap gap-3 items-center border-b border-[#D4AF37]/15">
-            <h3 className="text-[#F5E9C0] font-black text-sm flex-1 min-w-[140px]">
+          <div className="p-4 flex flex-wrap gap-3 items-center border-b border-[var(--border-color)]">
+            <h3 className="text-[var(--text-primary)] font-black text-sm flex-1 min-w-[140px]">
               Movimientos recientes
             </h3>
 
             {/* Búsqueda */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl flex-1 min-w-[150px] max-w-[220px] bg-[#221F18] border border-[#D4AF37]/15">
-              <Search size={14} className="text-[#a89060]" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl flex-1 min-w-[150px] max-w-[220px] bg-[var(--bg-muted)] border border-[var(--border-color)]">
+              <Search size={14} className="text-[var(--text-secondary)]" />
               <input type="text" placeholder="Buscar..."
                 value={search} onChange={e => setSearch(e.target.value)}
-                style={{ background: "transparent", color: "#F5E9C0", outline: "none", width: "100%" }}
-                className="text-xs font-semibold placeholder-[#a89060]/30" />
-              {search && <button onClick={() => setSearch("")}><X size={11} className="text-[#a89060]" /></button>}
+                style={{ background: "transparent", color: "var(--text-primary)", outline: "none", width: "100%" }}
+                className="text-xs font-semibold placeholder-[var(--text-muted)]" />
+              {search && <button onClick={() => setSearch("")}><X size={11} className="text-[var(--text-secondary)]" /></button>}
             </div>
 
             {/* Filtros */}
@@ -552,7 +552,7 @@ function Finance() {
             </select>
 
             <button onClick={loadRecords}
-              className="p-2 bg-[#221F18] border border-[#D4AF37]/15 text-[#D4AF37] rounded-xl hover:bg-[#D4AF37]/10 transition-colors"
+              className="p-2 bg-[var(--bg-muted)] border border-[var(--border-color)] text-[var(--gold)] rounded-xl hover:bg-[var(--gold)]/10 transition-colors cursor-pointer"
               title="Actualizar">
               <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
             </button>
@@ -561,12 +561,12 @@ function Finance() {
           {/* Tabla (desktop) / Cards (mobile) */}
           {loading ? (
             <div className="py-16 flex justify-center">
-              <Loader2 size={24} className="animate-spin text-[#D4AF37]" />
+              <Loader2 size={24} className="animate-spin text-[var(--gold)]" />
             </div>
           ) : filteredRecords.length === 0 ? (
             <div className="py-16 text-center">
-              <Layers size={32} className="mx-auto mb-3 text-[#a89060]/30" />
-              <p className="text-[#a89060]/60 text-sm font-semibold">Sin movimientos financieros.</p>
+              <Layers size={32} className="mx-auto mb-3 text-[var(--text-muted)]" />
+              <p className="text-[var(--text-secondary)] text-sm font-semibold">Sin movimientos financieros.</p>
             </div>
           ) : (
             <>
@@ -574,9 +574,9 @@ function Finance() {
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#D4AF37]/15">
+                    <tr className="border-b border-[var(--border-color)]">
                       {["Fecha", "Descripción", "Caja", "Tipo", "Categoría", "Monto", "Acciones"].map(h => (
-                        <th key={h} className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[#a89060] whitespace-nowrap">
+                        <th key={h} className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] whitespace-nowrap">
                           {h}
                         </th>
                       ))}
@@ -585,20 +585,20 @@ function Finance() {
                   <tbody>
                     {filteredRecords.map((r, i) => (
                       <tr key={r.id}
-                        className={`border-b border-[#D4AF37]/15 transition hover:bg-[#D4AF37]/2 ${
-                          i % 2 === 0 ? "bg-transparent" : "bg-[#1E1A12]/30"
+                        className={`border-b border-[var(--border-color)] transition hover:bg-[var(--border-color)]/30 ${
+                          i % 2 === 0 ? "bg-transparent" : "bg-[var(--bg-muted)]/40"
                         }`}>
-                        <td className="px-5 py-3.5 text-xs font-mono whitespace-nowrap text-[#a89060]">
+                        <td className="px-5 py-3.5 text-xs font-mono whitespace-nowrap text-[var(--text-secondary)]">
                           {new Date(r.created_at).toLocaleDateString("es-HN")}
                         </td>
-                        <td className="px-5 py-3.5 text-xs font-bold max-w-[160px] truncate text-[#F5E9C0]">
+                        <td className="px-5 py-3.5 text-xs font-bold max-w-[160px] truncate text-[var(--text-primary)]">
                           {r.descripcion || "Sin descripción"}
                         </td>
                         <td className="px-5 py-3.5">
                           <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-lg border whitespace-nowrap ${
                             r.caja === "operativa"
-                              ? "bg-[#D4AF37]/5 text-[#D4AF37] border-[#D4AF37]/20"
-                              : "bg-blue-500/5 text-[#60C8F5] border-[#60C8F5]/20"
+                              ? "bg-[var(--gold)]/10 text-[var(--gold)] border-[var(--gold)]/30"
+                              : "bg-blue-500/10 text-blue-400 border-blue-500/30"
                           }`}>
                             {r.caja === "operativa" ? "Caja 1 · Operativa" : "Caja 2 · Inversiones"}
                           </span>
@@ -606,17 +606,17 @@ function Finance() {
                         <td className="px-5 py-3.5">
                           <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-lg border uppercase whitespace-nowrap ${
                             r.tipo === "ingreso"
-                              ? "bg-green-500/5 text-[#4ADE80] border-green-500/20"
-                              : "bg-red-500/5 text-[#F87171] border-red-500/20"
+                              ? "bg-green-500/10 text-emerald-500 border-green-500/30"
+                              : "bg-red-500/10 text-red-500 border-red-500/30"
                           }`}>
                             {r.tipo}
                           </span>
                         </td>
-                        <td className="px-5 py-3.5 text-xs font-bold text-[#a89060]">
+                        <td className="px-5 py-3.5 text-xs font-bold text-[var(--text-secondary)]">
                           {r.actividad || r.categoria || "General"}
                         </td>
                         <td className={`px-5 py-3.5 font-bold text-sm text-right whitespace-nowrap ${
-                          r.tipo === "ingreso" ? "text-[#4ADE80]" : "text-[#F87171]"
+                          r.tipo === "ingreso" ? "text-emerald-500" : "text-red-500"
                         }`}>
                           {r.tipo === "ingreso" ? "+" : "-"} L {Number(r.monto).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </td>
@@ -624,11 +624,11 @@ function Finance() {
                           {canManageFinance(user?.role) && (
                             <div className="flex gap-1.5">
                               <button onClick={() => { setModalItem(r); setShowModal(true) }}
-                                className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all">
+                                className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer">
                                 <Edit3 size={12} />
                               </button>
                               <button onClick={() => handleDelete(r.id)}
-                                className="p-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">
+                                className="p-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all cursor-pointer">
                                 <Trash2 size={12} />
                               </button>
                             </div>
@@ -641,45 +641,45 @@ function Finance() {
               </div>
 
               {/* Mobile cards */}
-              <div className="md:hidden divide-y divide-[#D4AF37]/15">
+              <div className="md:hidden divide-y divide-[var(--border-color)]">
                 {filteredRecords.map(r => (
                   <div key={r.id} className="p-4 flex items-center gap-3 bg-transparent">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
                       r.tipo === "ingreso"
-                        ? "bg-green-500/10 text-[#4ADE80] border-green-500/20"
-                        : "bg-red-500/10 text-[#F87171] border-red-500/20"
+                        ? "bg-green-500/10 text-emerald-500 border-green-500/20"
+                        : "bg-red-500/10 text-red-500 border-red-500/20"
                     }`}>
                       {r.tipo === "ingreso" ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-[#F5E9C0] truncate">
+                      <p className="text-sm font-bold text-[var(--text-primary)] truncate">
                         {r.descripcion || r.actividad || r.categoria}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`text-[9px] font-bold uppercase ${
-                          r.caja === "operativa" ? "text-[#D4AF37]" : "text-[#60C8F5]"
+                          r.caja === "operativa" ? "text-[var(--gold)]" : "text-blue-400"
                         }`}>
                           {r.caja === "operativa" ? "Caja 1" : "Caja 2"}
                         </span>
-                        <span className="text-[#a89060]/60 text-[9px]">
+                        <span className="text-[var(--text-secondary)] text-[9px]">
                           {new Date(r.created_at).toLocaleDateString("es-HN")}
                         </span>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
                       <p className={`font-black text-sm ${
-                        r.tipo === "ingreso" ? "text-[#4ADE80]" : "text-[#F87171]"
+                        r.tipo === "ingreso" ? "text-emerald-500" : "text-red-500"
                       }`}>
                         {r.tipo === "ingreso" ? "+" : "-"}L {Number(r.monto).toLocaleString("en-US")}
                       </p>
                       {canManageFinance(user?.role) && (
                         <div className="flex gap-1 mt-1 justify-end">
                           <button onClick={() => { setModalItem(r); setShowModal(true) }}
-                            className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all">
+                            className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer">
                             <Edit3 size={11} />
                           </button>
                           <button onClick={() => handleDelete(r.id)}
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all">
+                            className="p-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all cursor-pointer">
                             <Trash2 size={11} />
                           </button>
                         </div>

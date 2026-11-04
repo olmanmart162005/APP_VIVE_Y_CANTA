@@ -198,10 +198,10 @@ function MemberCard() {
   const fotoSrc = fotoBase64 || member.foto || hero
 
   return (
-    <div className="min-h-screen bg-[#0E0C09] pb-24 text-[#F5E9C0]">
+    <div className="min-h-screen bg-[var(--bg-app)] pb-24 text-[var(--text-primary)] transition-colors duration-200">
       {/* Topbar */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#D4AF37]/15 bg-[#1A1710]/95 sticky top-0 z-45">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-[#221F18] transition text-[#D4AF37]">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-color)] bg-[var(--bg-card)]/95 backdrop-blur-md sticky top-0 z-45">
+        <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-[var(--bg-muted)] transition text-[#D4AF37] cursor-pointer">
           <ArrowLeft size={20} />
         </button>
         <h1 className="title-professional title-gold-black font-bold tracking-[0.15em] text-sm uppercase">

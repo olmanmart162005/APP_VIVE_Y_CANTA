@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -12,13 +13,14 @@ export default {
         dark: "#1E1E1E",
         light: "#FFFFFF",
         accent: "#B8860B",
-        bgMain: "#0E0C09",
-        bgCard: "#1A1710",
-        bgInput: "#221F18",
+        accentCyan: "#38BDF8",
+        bgMain: "var(--bg-app)",
+        bgCard: "var(--bg-card)",
+        bgInput: "var(--bg-input)",
         gold: "#D4AF37",
         goldDark: "#B8860B",
-        textClear: "#F5E9C0",
-        borderTheme: "rgba(212, 175, 55, 0.15)",
+        textClear: "var(--text-primary)",
+        borderTheme: "var(--border-color)",
         successTheme: "#4ADE80",
         errorTheme: "#F87171",
       },

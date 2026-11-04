@@ -387,7 +387,7 @@ function Members() {
   }, [members, search])
 
   return (
-    <div className="min-h-screen bg-[#0E0C09] pb-32 antialiased text-[#F5E9C0]">
+    <div className="min-h-screen bg-[var(--bg-app)] pb-32 antialiased text-[var(--text-primary)] transition-colors duration-200">
       <div className="page-header-gold relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/5" />
         <div className="absolute top-8 -right-4 w-28 h-28 rounded-full bg-white/5" />
@@ -418,45 +418,42 @@ function Members() {
 
       <div className="p-4 md:p-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-5">
         <div className="space-y-4 lg:col-span-1">
-          <div className="bg-[#16120E] rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-[#D4AF37]/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-within:border-[#D4AF37]/50 focus-within:shadow-[0_0_0_2px_rgba(212,175,55,0.14)] transition-all">
-            <Search className="text-[#D4AF37] shrink-0" size={17} />
+          <div className="bg-[var(--bg-card)] rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-[var(--border-color)] shadow-sm focus-within:border-[var(--gold)]/50 transition-all">
+            <Search className="text-[var(--gold)] shrink-0" size={17} />
             <input
               type="text"
               placeholder="Buscar miembro..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="members-search-input w-full outline-none bg-transparent text-[15px] md:text-sm font-semibold tracking-[0.01em] placeholder:text-[#c7b178] placeholder:opacity-95 text-[#F7EBC4] caret-[#D4AF37]"
+              className="members-search-input w-full outline-none bg-transparent text-[15px] md:text-sm font-semibold tracking-[0.01em] placeholder:text-[var(--text-muted)] text-[var(--text-primary)] caret-[var(--gold)]"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="text-[#a89060] hover:text-[#D4AF37] transition-colors">
+              <button onClick={() => setSearch("")} className="text-[var(--text-secondary)] hover:text-[var(--gold)] transition-colors">
                 <X size={15} />
               </button>
             )}
           </div>
 
-          <div className="bg-[#1A1710] rounded-2xl overflow-hidden border border-[#D4AF37]/15">
+          <div className="bg-[var(--bg-card)] rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-md">
             <div className="bg-gradient-to-r from-[#D4AF37] to-[#B8860B] px-4 py-3 flex items-center gap-2 text-black">
               <span className="text-lg">🎂</span>
               <h3 className="text-black text-xs font-black uppercase tracking-wider">Cumpleaños del mes</h3>
             </div>
             <div className="p-3 space-y-2 max-h-[300px] overflow-y-auto">
               {cumpleaniosMes.length === 0 ? (
-                <p className="text-xs text-[#a89060]/50 text-center py-6 italic">Ningún cumpleaños registrado este mes.</p>
+                <p className="text-xs text-[var(--text-secondary)] text-center py-6 italic">Ningún cumpleaños registrado este mes.</p>
               ) : (
                 cumpleaniosMes.map(m => (
-                  <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-[#221F18] border border-[#D4AF37]/15">
+                  <div key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-color)]">
                     <div className="shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#9A7209] flex items-center justify-center text-black">
                       <p className="text-[10px] font-black">{m.diaMes}</p>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-[#F5E9C0] truncate">{m.nombre_completo}</p>
-                      <p className="text-[10px] text-[#a89060] font-bold">
-                        {m.diasFaltantes === 0 ? "¡Hoy!" : `Faltan ${m.diasFaltantes} días`}
+                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">{m.nombre_completo}</p>
+                      <p className="text-[10px] text-[var(--text-secondary)] font-medium">
+                        {m.diasFaltantes === 0 ? "🎉 ¡Hoy cumple años!" : `Faltan ${m.diasFaltantes} días`}
                       </p>
                     </div>
-                    {m.diasFaltantes === 0 && (
-                      <span className="text-[8px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full animate-pulse shrink-0">HOY</span>
-                    )}
                   </div>
                 ))
               )}
@@ -464,9 +461,9 @@ function Members() {
           </div>
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="space-y-4 lg:col-span-3">
           {search && (
-            <p className="text-xs text-[#a89060] font-semibold mb-3 px-1">
+            <p className="text-xs font-bold text-[var(--text-secondary)] px-1">
               {filteredMembers.length} resultado{filteredMembers.length !== 1 ? "s" : ""} para "{search}"
             </p>
           )}
@@ -478,13 +475,13 @@ function Members() {
                 <div
                   key={member.id}
                   onClick={() => setSelectedMember(member)}
-                  className="bg-[#1A1710] rounded-[22px] p-4 border border-[#D4AF37]/15 hover:border-[#D4AF37]/50 hover:shadow-2xl transition-all duration-200 cursor-pointer group relative overflow-hidden active:scale-[0.985]"
+                  className="bg-[var(--bg-card)] rounded-[22px] p-4 border border-[var(--border-color)] hover:border-[var(--gold)]/50 hover:shadow-xl transition-all duration-200 cursor-pointer group relative overflow-hidden active:scale-[0.985]"
                 >
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="flex items-center gap-3.5">
                     <div className="shrink-0 relative">
                       <div className="p-0.5 rounded-2xl bg-gradient-to-tr from-[#9A7209] via-[#EEDC82] to-[#D4AF37]">
-                        <div className="rounded-[14px] overflow-hidden bg-[#0E0C09] p-px">
+                        <div className="rounded-[14px] overflow-hidden bg-[var(--bg-card)] p-px">
                           {member.foto || member.foto_url ? (
                             <img
                               src={member.foto || member.foto_url}
@@ -492,14 +489,14 @@ function Members() {
                               className="w-14 h-14 rounded-[13px] object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
-                            <Avatar name={member.nombre_completo} size="56" round="13px" color="#221F18" textColor="#D4AF37" />
+                            <Avatar name={member.nombre_completo} size="56" round="13px" color="#1E293B" textColor="#D4AF37" />
                           )}
                         </div>
                       </div>
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#1A1710]" />
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[var(--bg-card)]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h2 className="font-bold text-[#F5E9C0] text-sm leading-snug truncate group-hover:text-[#D4AF37] transition-colors">
+                      <h2 className="font-bold text-[var(--text-primary)] text-sm leading-snug truncate group-hover:text-[var(--gold)] transition-colors">
                         {member.nombre_completo}
                       </h2>
                       <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -507,19 +504,19 @@ function Members() {
                           {getRoleName(member.role)}
                         </span>
                         {member.ministerio && (
-                          <span className="text-[9px] px-2 py-0.5 bg-[#221F18] border border-[#D4AF37]/10 rounded-md font-bold text-[#a89060]">
+                          <span className="text-[9px] px-2 py-0.5 bg-[var(--bg-muted)] border border-[var(--border-color)] rounded-md font-bold text-[var(--text-secondary)]">
                             {member.ministerio}
                           </span>
                         )}
                       </div>
                     </div>
-                    <ChevronRight size={16} className="text-[#a89060]/40 group-hover:text-[#D4AF37] transition-colors shrink-0" />
+                    <ChevronRight size={16} className="text-[var(--text-muted)] group-hover:text-[var(--gold)] transition-colors shrink-0" />
                   </div>
                   {(edad || antiguedad) && (
-                    <div className="mt-3 pt-2.5 border-t border-[#D4AF37]/10 flex items-center justify-between">
-                      <span className="text-[11px] text-[#a89060]">{edad ? `${edad} años` : ""}</span>
+                    <div className="mt-3 pt-2.5 border-t border-[var(--border-color)] flex items-center justify-between">
+                      <span className="text-[11px] text-[var(--text-secondary)]">{edad ? `${edad} años` : ""}</span>
                       {antiguedad && (
-                        <span className="text-[10px] font-semibold text-[#a89060]/70 bg-[#221F18] px-2 py-0.5 rounded-lg border border-[#D4AF37]/10">{antiguedad} en el coro</span>
+                        <span className="text-[10px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-muted)] px-2 py-0.5 rounded-lg border border-[var(--border-color)]">{antiguedad} en el coro</span>
                       )}
                     </div>
                   )}
@@ -528,10 +525,10 @@ function Members() {
             })}
           </div>
           {filteredMembers.length === 0 && (
-            <div className="bg-[#1A1710] rounded-3xl text-center py-20 border border-dashed border-[#D4AF37]/15">
-              <Layers className="mx-auto text-[#a89060]/20 mb-3" size={36} />
-              <p className="text-sm font-semibold text-[#a89060]/60">Sin resultados</p>
-              <p className="text-xs text-[#a89060]/40 mt-1">Intenta con otro nombre o usuario</p>
+            <div className="bg-[var(--bg-card)] rounded-3xl text-center py-20 border border-dashed border-[var(--border-color)]">
+              <Layers className="mx-auto text-[var(--text-muted)] mb-3" size={36} />
+              <p className="text-sm font-semibold text-[var(--text-secondary)]">Sin resultados</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Intenta con otro nombre o usuario</p>
             </div>
           )}
         </div>

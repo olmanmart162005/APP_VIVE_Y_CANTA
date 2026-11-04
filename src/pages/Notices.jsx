@@ -145,7 +145,7 @@ function Notices() {
   const canManage = canManageNotices(user?.role)
 
   return (
-    <div className="min-h-screen bg-[#0E0C09] pb-32 antialiased text-[#F5E9C0]">
+    <div className="min-h-screen bg-[var(--bg-app)] pb-32 antialiased text-[var(--text-primary)] transition-colors duration-200">
       {/* HEADER */}
       <div className="page-header-gold relative overflow-hidden">
         <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5" />
@@ -174,7 +174,7 @@ function Notices() {
         {canManage && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="btn-primary w-full py-4 text-xs font-extrabold flex items-center justify-center gap-2"
+            className="btn-primary w-full py-4 text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer"
           >
             <Plus size={16} strokeWidth={3} />
             Nuevo Aviso
@@ -183,14 +183,14 @@ function Notices() {
 
         {/* FORMULARIO */}
         {canManage && showForm && (
-          <div className="bg-[#1A1710] border border-[#D4AF37]/20 rounded-[28px] shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#D4AF37]/15">
-              <h2 className="font-bold text-[#F5E9C0] text-sm">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[28px] shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-color)]">
+              <h2 className="font-bold text-[var(--text-primary)] text-sm">
                 {editingId ? "Editar aviso" : "Nuevo aviso"}
               </h2>
               <button
                 onClick={clearForm}
-                className="p-1.5 rounded-full hover:bg-[#221F18] text-[#a89060] transition-colors"
+                className="p-1.5 rounded-full hover:bg-[var(--bg-muted)] text-[var(--text-secondary)] transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -198,7 +198,7 @@ function Notices() {
 
             <div className="p-5 space-y-4">
               <div>
-                <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">Título</label>
+                <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider block ml-1 mb-1.5">Título</label>
                 <input
                   type="text"
                   placeholder="Título del aviso"
@@ -209,7 +209,7 @@ function Notices() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">Mensaje</label>
+                <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider block ml-1 mb-1.5">Mensaje</label>
                 <textarea
                   placeholder="Escribe el mensaje aquí..."
                   value={mensaje}
@@ -220,7 +220,7 @@ function Notices() {
 
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">Prioridad</label>
+                  <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider block ml-1 mb-1.5">Prioridad</label>
                   <select
                     value={prioridad}
                     onChange={(e) => setPrioridad(e.target.value)}
@@ -233,13 +233,13 @@ function Notices() {
                 </div>
 
                 <div className="flex-initial">
-                  <label className="text-[10px] font-bold text-[#a89060] uppercase tracking-wider block ml-1 mb-1.5">Destacar</label>
+                  <label className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider block ml-1 mb-1.5">Destacar</label>
                   <button
                     onClick={() => setFijado(f => !f)}
-                    className={`flex items-center justify-center gap-2 h-12 px-4 rounded-xl text-xs font-bold border transition-colors ${
+                    className={`flex items-center justify-center gap-2 h-12 px-4 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                       fijado
                         ? "bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]"
-                        : "bg-[#221F18] border-[#D4AF37]/15 text-[#a89060]/50"
+                        : "bg-[var(--bg-muted)] border-[var(--border-color)] text-[var(--text-secondary)]"
                     }`}
                   >
                     <Pin size={14} />
@@ -251,7 +251,7 @@ function Notices() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="btn-primary w-full py-4 text-xs font-bold"
+                className="btn-primary w-full py-4 text-xs font-bold cursor-pointer"
               >
                 {saving ? "Guardando..." : editingId ? "Actualizar aviso" : "Publicar aviso"}
               </button>
@@ -261,9 +261,9 @@ function Notices() {
 
         {/* LISTA DE AVISOS */}
         {records.length === 0 && (
-          <div className="bg-[#1A1710] rounded-3xl text-center py-16 border border-dashed border-[#D4AF37]/15">
-            <Bell className="mx-auto text-[#a89060]/20 mb-3" size={36} />
-            <p className="text-sm font-semibold text-[#a89060]/60">Sin avisos publicados</p>
+          <div className="bg-[var(--bg-card)] rounded-3xl text-center py-16 border border-dashed border-[var(--border-color)]">
+            <Bell className="mx-auto text-[var(--text-muted)] mb-3" size={36} />
+            <p className="text-sm font-semibold text-[var(--text-secondary)]">Sin avisos publicados</p>
           </div>
         )}
 
@@ -272,8 +272,8 @@ function Notices() {
           return (
             <div
               key={item.id}
-              className={`bg-[#1A1710] rounded-[24px] overflow-hidden shadow-xl border ${
-                item.fijado ? "border-[#D4AF37]/45" : "border-[#D4AF37]/10"
+              className={`bg-[var(--bg-card)] rounded-[24px] overflow-hidden shadow-md border ${
+                item.fijado ? "border-[var(--gold)]/50" : "border-[var(--border-color)]"
               }`}
             >
               <div className="flex">
@@ -284,16 +284,16 @@ function Notices() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         {item.fijado && (
-                          <Pin size={14} className="text-[#D4AF37] shrink-0" />
+                          <Pin size={14} className="text-[var(--gold)] shrink-0" />
                         )}
-                        <h2 className="font-extrabold text-[#F5E9C0] text-base leading-snug break-words">
+                        <h2 className="font-extrabold text-[var(--text-primary)] text-base leading-snug break-words">
                           {item.titulo}
                         </h2>
                       </div>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <PriorityBadge prioridad={item.prioridad} />
                         {item.created_at && (
-                          <span className="text-[11px] text-[#a89060]/60 font-semibold">
+                          <span className="text-[11px] text-[var(--text-secondary)] font-semibold">
                             {formatDate(item.created_at)}
                           </span>
                         )}
@@ -301,12 +301,12 @@ function Notices() {
                     </div>
                   </div>
 
-                  <p className="mt-3.5 text-sm text-[#F5E9C0]/80 leading-relaxed break-words whitespace-pre-line">
+                  <p className="mt-3.5 text-sm text-[var(--text-primary)]/85 leading-relaxed break-words whitespace-pre-line">
                     {item.mensaje}
                   </p>
 
                   {canManage && (
-                    <div className="flex gap-2 mt-4 pt-3 border-t border-[#D4AF37]/10">
+                    <div className="flex gap-2 mt-4 pt-3 border-t border-[var(--border-color)]">
                       <button
                         onClick={() => handleEdit(item)}
                         className="flex items-center gap-1.5 text-xs font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3.5 py-2 rounded-xl hover:bg-blue-500/20 transition-all"
