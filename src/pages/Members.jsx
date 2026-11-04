@@ -313,12 +313,12 @@ function Members() {
 
   const getRoleColor = (role) => {
     switch (role) {
-      case "admin": return "bg-purple-500/10 text-purple-300 border-purple-500/20"
-      case "director": return "bg-blue-500/10 text-blue-300 border-blue-500/20"
-      case "secretaria": return "bg-rose-500/10 text-rose-300 border-rose-500/20"
-      case "tesorero": return "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-      case "parroco": return "bg-indigo-500/10 text-indigo-300 border-indigo-500/20"
-      default: return "bg-amber-500/5 text-[#D4AF37] border-[#D4AF37]/20"
+      case "admin": return "bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/30"
+      case "director": return "bg-[#BFA15A]/15 text-[#BFA15A] border-[#BFA15A]/30"
+      case "secretaria": return "bg-amber-500/10 text-amber-300 border-amber-500/20"
+      case "tesorero": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+      case "parroco": return "bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/40"
+      default: return "bg-[var(--bg-muted)] text-[var(--text-secondary)] border-[var(--border-color)]"
     }
   }
 
@@ -489,7 +489,7 @@ function Members() {
                               className="w-14 h-14 rounded-[13px] object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
-                            <Avatar name={member.nombre_completo} size="56" round="13px" color="#1E293B" textColor="#D4AF37" />
+                            <Avatar name={member.nombre_completo} size="56" round="13px" color="#252525" textColor="#D4AF37" />
                           )}
                         </div>
                       </div>
@@ -662,7 +662,7 @@ function Members() {
                   <>
                     <a
                       href={`tel:${selectedMember.telefono}`}
-                      className="flex-1 h-11 text-xs px-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                      className="flex-1 h-11 text-xs px-3 bg-[var(--bg-muted)] hover:border-[var(--gold)]/40 text-[var(--gold)] border border-[var(--border-color)] rounded-xl flex items-center justify-center gap-1.5 transition-all"
                     >
                       <Phone size={14} />
                       <span>Llamar</span>

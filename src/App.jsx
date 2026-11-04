@@ -152,26 +152,26 @@ function AppContent() {
         position="top-center"
         toastOptions={{
           style: {
-            background: isDark ? "#182235" : "#FFFFFF",
-            color: isDark ? "#F1F5F9" : "#0F172A",
-            border: isDark ? "1px solid #293548" : "1px solid #E2E8F0",
+            background: isDark ? "#252525" : "#FFFFFF",
+            color: isDark ? "#F5F0E6" : "#111111",
+            border: isDark ? "1px solid rgba(212, 175, 55, 0.25)" : "1px solid #DDD6CA",
             borderRadius: "16px",
             fontSize: "13px",
             fontWeight: "600",
             boxShadow: isDark
-              ? "0 10px 40px rgba(0,0,0,0.5)"
-              : "0 10px 30px rgba(0,0,0,0.08)",
+              ? "0 10px 40px rgba(0,0,0,0.6)"
+              : "0 10px 30px rgba(17,17,17,0.06)",
           },
           success: {
             iconTheme: {
-              primary: "#22C55E",
-              secondary: isDark ? "#182235" : "#FFFFFF",
+              primary: "#D4AF37",
+              secondary: isDark ? "#252525" : "#FFFFFF",
             },
           },
           error: {
             iconTheme: {
-              primary: "#EF4444",
-              secondary: isDark ? "#182235" : "#FFFFFF",
+              primary: "#DC2626",
+              secondary: isDark ? "#252525" : "#FFFFFF",
             },
           },
         }}

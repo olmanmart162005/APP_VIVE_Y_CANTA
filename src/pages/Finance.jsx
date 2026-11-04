@@ -598,7 +598,7 @@ function Finance() {
                           <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-lg border whitespace-nowrap ${
                             r.caja === "operativa"
                               ? "bg-[var(--gold)]/10 text-[var(--gold)] border-[var(--gold)]/30"
-                              : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                              : "bg-[#BFA15A]/15 text-[#BFA15A] border-[#BFA15A]/30"
                           }`}>
                             {r.caja === "operativa" ? "Caja 1 · Operativa" : "Caja 2 · Inversiones"}
                           </span>
@@ -624,7 +624,7 @@ function Finance() {
                           {canManageFinance(user?.role) && (
                             <div className="flex gap-1.5">
                               <button onClick={() => { setModalItem(r); setShowModal(true) }}
-                                className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer">
+                                className="p-2 rounded-lg bg-[var(--bg-muted)] text-[var(--gold)] border border-[var(--border-color)] hover:border-[var(--gold)]/50 transition-all cursor-pointer">
                                 <Edit3 size={12} />
                               </button>
                               <button onClick={() => handleDelete(r.id)}
@@ -657,7 +657,7 @@ function Finance() {
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`text-[9px] font-bold uppercase ${
-                          r.caja === "operativa" ? "text-[var(--gold)]" : "text-blue-400"
+                          r.caja === "operativa" ? "text-[var(--gold)]" : "text-[#BFA15A]"
                         }`}>
                           {r.caja === "operativa" ? "Caja 1" : "Caja 2"}
                         </span>
@@ -675,7 +675,7 @@ function Finance() {
                       {canManageFinance(user?.role) && (
                         <div className="flex gap-1 mt-1 justify-end">
                           <button onClick={() => { setModalItem(r); setShowModal(true) }}
-                            className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-all cursor-pointer">
+                            className="p-1.5 rounded-lg bg-[var(--bg-muted)] text-[var(--gold)] border border-[var(--border-color)] hover:border-[var(--gold)]/50 transition-all cursor-pointer">
                             <Edit3 size={11} />
                           </button>
                           <button onClick={() => handleDelete(r.id)}

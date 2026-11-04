@@ -211,10 +211,10 @@ function Dashboard() {
   }, [])
 
   // Chart theme styling tokens
-  const chartTextColor = isDark ? "#94A3B8" : "#64748B"
-  const chartGridColor = isDark ? "#293548" : "#E2E8F0"
-  const chartTooltipBg = isDark ? "#182235" : "#FFFFFF"
-  const chartTooltipBorder = isDark ? "#293548" : "#E2E8F0"
+  const chartTextColor = isDark ? "#A69F93" : "#5C564D"
+  const chartGridColor = isDark ? "rgba(212, 175, 55, 0.15)" : "#DDD6CA"
+  const chartTooltipBg = isDark ? "#252525" : "#FFFFFF"
+  const chartTooltipBorder = isDark ? "rgba(212, 175, 55, 0.3)" : "#DDD6CA"
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -266,7 +266,7 @@ function Dashboard() {
                 src={user?.foto}
                 size="44"
                 round={true}
-                color="#1E293B"
+                color="#252525"
                 textColor="#D4AF37"
                 className="font-bold text-xs"
               />
@@ -354,7 +354,7 @@ function Dashboard() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                 Integrantes
               </span>
-              <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center border border-blue-500/30">
+              <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center border border-[#D4AF37]/30">
                 <Users size={17} />
               </div>
             </div>
@@ -522,7 +522,7 @@ function Dashboard() {
                   onClick={() => navigate("/hojas-cantos")}
                   className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--gold)]/50 hover:bg-[var(--bg-muted)] transition-all duration-200 text-center gap-2 group cursor-pointer shadow-sm"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform border border-blue-500/30">
+                  <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center text-[#D4AF37] group-hover:scale-105 transition-transform border border-[#D4AF37]/30">
                     <Music4 size={18} />
                   </div>
                   <span className="text-xs font-bold text-[var(--text-primary)]">Hoja de Cantos</span>

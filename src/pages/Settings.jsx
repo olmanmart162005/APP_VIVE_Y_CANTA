@@ -66,7 +66,7 @@ function Settings() {
           {/* INFORMACIÓN DE LA VERSIÓN */}
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-muted)] p-4 sm:p-5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center border border-blue-500/30 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center border border-[#D4AF37]/30 shrink-0">
                 <Info size={20} />
               </div>
               <div>

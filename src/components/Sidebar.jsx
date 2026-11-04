@@ -44,7 +44,7 @@ const MENU_CATEGORIES = [
 function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
   return (
     <aside
-      className={`h-full flex flex-col bg-[var(--bg-card)] border-r border-[var(--border-color)] transition-all duration-300 z-50 ${
+      className={`h-full flex flex-col bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] transition-all duration-300 z-50 ${
         isMobile
           ? "w-72 shadow-2xl"
           : isCollapsed
@@ -61,7 +61,7 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
               alt="Coro Vive y Canta"
               className="w-9 h-9 rounded-full object-cover border border-[var(--gold)]/40 shadow-sm"
             />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-card)]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-sidebar)]" />
           </div>
 
           {(!isCollapsed || isMobile) && (
@@ -108,14 +108,14 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 group relative ${
                       isActive
-                        ? "bg-[var(--gold)] text-black shadow-md font-extrabold"
+                        ? "bg-[var(--gold)] text-[#111111] shadow-md font-extrabold"
                         : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-muted)]"
                     } ${isCollapsed && !isMobile ? "justify-center px-0" : ""}`
                   }
                 >
                   <Icon
                     size={18}
-                    className="shrink-0 transition-transform group-hover:scale-110"
+                    className="shrink-0 transition-transform group-hover:scale-110 text-[var(--gold)]"
                   />
                   {(!isCollapsed || isMobile) && (
                     <span className="truncate">{item.name}</span>

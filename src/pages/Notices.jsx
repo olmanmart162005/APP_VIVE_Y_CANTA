@@ -309,7 +309,7 @@ function Notices() {
                     <div className="flex gap-2 mt-4 pt-3 border-t border-[var(--border-color)]">
                       <button
                         onClick={() => handleEdit(item)}
-                        className="flex items-center gap-1.5 text-xs font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3.5 py-2 rounded-xl hover:bg-blue-500/20 transition-all"
+                        className="flex items-center gap-1.5 text-xs font-bold text-[var(--gold)] bg-[var(--bg-muted)] border border-[var(--border-color)] px-3.5 py-2 rounded-xl hover:border-[var(--gold)]/40 transition-all cursor-pointer"
                       >
                         <Pencil size={12} />
                         Editar

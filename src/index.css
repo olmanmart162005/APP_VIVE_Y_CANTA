@@ -8,60 +8,74 @@ html.light,
 :root[data-theme="light"] {
   color-scheme: light;
 
-  /* Modo Claro - SaaS Ejecutivo */
-  --bg-app: #F8FAFC;
-  --bg-surface: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-muted: #F1F5F9;
-  --bg-input: #FFFFFF;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
-  --gold: #B8860B;
-  --gold-soft: #D4AF37;
-  --gold-dark: #8C6608;
-  --accent-cyan: #0284C7;
-  --border-color: #E2E8F0;
+  /* Modo Claro - Identidad Oficial: Marfil, Blanco, Dorado y Negro Carbón */
+  --bg-app: #F5F0E6;          /* Marfil */
+  --bg-surface: #EDE7DC;      /* Marfil tonal */
+  --bg-sidebar: #FFFFFF;      /* Sidebar blanco */
+  --bg-navbar: #FFFFFF;       /* Barra superior blanca */
+  --bg-card: #FFFFFF;         /* Tarjetas blancas */
+  --bg-muted: #EAE3D5;        /* Marfil suave para agrupadores y chips */
+  --bg-input: #FFFFFF;        /* Campos blancos */
+  --text-primary: #111111;    /* Textos principales negro carbón */
+  --text-secondary: #5C564D;  /* Textos secundarios gris oscuro cálido */
+  --text-muted: #8C8477;      /* Gris cálido */
+  --gold: #D4AF37;            /* Dorado principal */
+  --gold-soft: #BFA15A;       /* Dorado suave */
+  --gold-dark: #9E7F25;
+  --border-color: #DDD6CA;    /* Bordes gris cálido */
+  --border-subtle: #E8E2D6;
   --success: #16A34A;
   --error: #DC2626;
-  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-  --header-gold-from: #E6C665;
-  --header-gold-to: #CA9E28;
-  --header-text-primary: #0F172A;
-  --header-text-secondary: rgba(15, 23, 42, 0.8);
-  --header-border: rgba(184, 134, 11, 0.25);
-  --header-chip-bg: rgba(255, 255, 255, 0.75);
-  --header-chip-border: rgba(184, 134, 11, 0.3);
+  --card-shadow: 0 4px 20px -2px rgba(17, 17, 17, 0.05), 0 2px 6px -1px rgba(17, 17, 17, 0.03);
+
+  --header-gold-from: #D4AF37;
+  --header-gold-to: #BFA15A;
+  --header-text-primary: #111111;
+  --header-text-secondary: #252525;
+  --header-border: rgba(212, 175, 55, 0.35);
+  --header-chip-bg: rgba(245, 240, 230, 0.85);
+  --header-chip-border: rgba(212, 175, 55, 0.4);
+
+  --btn-secondary-bg: #FFFFFF;
+  --btn-secondary-text: #111111;
+  --btn-secondary-border: #DDD6CA;
 }
 
 html.dark,
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* Modo Oscuro - Paleta Solicitada SaaS */
-  --bg-app: #0B1120;
-  --bg-surface: #111827;
-  --bg-card: #182235;
-  --bg-muted: #1E293B;
-  --bg-input: #131C2D;
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --gold: #D4AF37;
-  --gold-soft: #F5E9C0;
-  --gold-dark: #B8860B;
-  --accent-cyan: #38BDF8;
-  --border-color: #293548;
+  /* Modo Oscuro - Identidad Oficial: Negro Carbón, Grafito y Dorado */
+  --bg-app: #111111;          /* Fondo principal negro carbón */
+  --bg-surface: #191919;      /* Superficie negra neutra */
+  --bg-sidebar: #111111;      /* Sidebar negro carbón */
+  --bg-navbar: #111111;       /* Barra superior negro carbón */
+  --bg-card: #252525;         /* Tarjetas grafito */
+  --bg-muted: #1C1C1C;        /* Contenedor grafito oscuro */
+  --bg-input: #181818;        /* Input fondo oscuro */
+  --text-primary: #FFFFFF;    /* Textos principales blancos */
+  --text-secondary: #A69F93;  /* Textos secundarios en gris cálido */
+  --text-muted: #736C61;      /* Gris cálido suave */
+  --gold: #D4AF37;            /* Dorado principal */
+  --gold-soft: #BFA15A;       /* Dorado suave */
+  --gold-dark: #8F7524;
+  --border-color: rgba(212, 175, 55, 0.2);  /* Bordes discretos en tonos dorados oscuros */
+  --border-subtle: #333333;
   --success: #4ADE80;
   --error: #F87171;
-  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.35), 0 4px 10px -2px rgba(0, 0, 0, 0.25);
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 4px 10px -2px rgba(0, 0, 0, 0.4);
+
   --header-gold-from: #D4AF37;
-  --header-gold-to: #9A7B1C;
-  --header-text-primary: #0B1120;
-  --header-text-secondary: rgba(11, 17, 32, 0.85);
-  --header-border: rgba(212, 175, 55, 0.25);
-  --header-chip-bg: rgba(11, 17, 32, 0.22);
-  --header-chip-border: rgba(11, 17, 32, 0.28);
+  --header-gold-to: #967A20;
+  --header-text-primary: #111111;
+  --header-text-secondary: #252525;
+  --header-border: rgba(212, 175, 55, 0.3);
+  --header-chip-bg: rgba(17, 17, 17, 0.35);
+  --header-chip-border: rgba(212, 175, 55, 0.35);
+
+  --btn-secondary-bg: #252525;
+  --btn-secondary-text: #F5F0E6;
+  --btn-secondary-border: rgba(212, 175, 55, 0.25);
 }
 
 * {
@@ -103,7 +117,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-dark);
+  background: var(--gold);
 }
 
 .safe-bottom {
@@ -126,6 +140,8 @@ body {
 .bg-theme-app { background-color: var(--bg-app); }
 .bg-theme-surface { background-color: var(--bg-surface); }
 .bg-theme-card { background-color: var(--bg-card); }
+.bg-theme-sidebar { background-color: var(--bg-sidebar); }
+.bg-theme-navbar { background-color: var(--bg-navbar); }
 .bg-theme-muted { background-color: var(--bg-muted); }
 .bg-theme-input { background-color: var(--bg-input); }
 .border-theme-border { border-color: var(--border-color); }
@@ -133,6 +149,7 @@ body {
 .text-theme-secondary { color: var(--text-secondary); }
 .text-theme-muted { color: var(--text-muted); }
 
+/* BOTONES PRINCIPALES: Dorados con texto negro carbón */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -140,19 +157,18 @@ body {
   gap: 0.45rem;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold) 48%, var(--gold-dark) 100%);
-  color: var(--bg-app);
+  background: linear-gradient(135deg, #D4AF37 0%, #BFA15A 100%);
+  color: #111111;
   font-size: 1rem; /* 16px */
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 0.8rem 1.1rem;
-  box-shadow: 0 8px 20px rgb(212 175 55 / 20%);
+  padding: 0.8rem 1.2rem;
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   cursor: pointer;
 }
 
-/* disabled state intentionally placed before hover to avoid descending specificity issues */
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -160,35 +176,37 @@ body {
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgb(212 175 55 / 25%);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+  opacity: 0.96;
 }
 
 .btn-primary:active:not(:disabled) {
   transform: scale(0.98);
 }
 
+/* BOTONES SECUNDARIOS: Grafito con texto marfil en oscuro, blanco en claro */
 .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--btn-secondary-border);
   border-radius: 999px;
-  background: var(--bg-muted);
-  color: var(--text-primary);
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
   font-size: 1rem; /* 16px */
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 0.8rem 1rem;
-  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  padding: 0.8rem 1.1rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
   cursor: pointer;
 }
 
 .btn-secondary:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: rgb(212 175 55 / 30%);
-  background: rgb(212 175 55 / 8%);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 .btn-danger {
@@ -225,7 +243,7 @@ body {
 
 .input-premium:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgb(212 175 55 / 12%);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
   background-color: var(--bg-surface);
 }
 
@@ -235,8 +253,6 @@ body {
 
 .glass-premium {
   background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
-
-  /* backdrop-filter appears twice for broader browser support — keep single declaration and vendor-free version for stylelint */
   backdrop-filter: blur(12px) saturate(140%);
   border: 1px solid var(--border-color);
   box-shadow: 0 16px 60px rgb(0 0 0 / 12%);
@@ -244,7 +260,7 @@ body {
 
 select.input-premium {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a89060'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23D4AF37'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.9rem center;
   background-size: 1rem;
@@ -252,11 +268,11 @@ select.input-premium {
 }
 
 option {
-  background-color: var(--bg-surface);
+  background-color: var(--bg-card);
   color: var(--text-primary);
 }
 
-/* Typography utilities and global overrides (Inter) */
+/* Typography utilities */
 .h1, .typo-h1, h1 {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 2rem; /* 32px */
@@ -310,8 +326,8 @@ option {
 .members-search-input:-webkit-autofill,
 .members-search-input:-webkit-autofill:hover,
 .members-search-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #F7EBC4;
-  box-shadow: 0 0 0 1000px #16120E inset;
+  -webkit-text-fill-color: var(--text-primary);
+  box-shadow: 0 0 0 1000px var(--bg-card) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -347,7 +363,7 @@ option {
   background: linear-gradient(135deg, var(--header-gold-from) 0%, var(--header-gold-to) 100%);
   color: var(--header-text-primary);
   border: 1px solid var(--header-border);
-  box-shadow: 0 10px 24px rgb(0 0 0 / 20%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
 }
 
 .header-text-primary {

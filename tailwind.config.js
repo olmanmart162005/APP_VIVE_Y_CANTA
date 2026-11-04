@@ -9,16 +9,20 @@ export default {
     extend: {
       colors: {
         primary: "#D4AF37",
-        secondary: "#a89060",
-        dark: "#1E1E1E",
+        gold: "#D4AF37",
+        goldSoft: "#BFA15A",
+        goldDark: "#9E7F25",
+        carbon: "#111111",
+        graphite: "#252525",
+        ivory: "#F5F0E6",
         light: "#FFFFFF",
-        accent: "#B8860B",
-        accentCyan: "#38BDF8",
+        secondary: "#A69F93",
         bgMain: "var(--bg-app)",
         bgCard: "var(--bg-card)",
+        bgSidebar: "var(--bg-sidebar)",
+        bgNavbar: "var(--bg-navbar)",
         bgInput: "var(--bg-input)",
-        gold: "#D4AF37",
-        goldDark: "#B8860B",
+        bgMuted: "var(--bg-muted)",
         textClear: "var(--text-primary)",
         borderTheme: "var(--border-color)",
         successTheme: "#4ADE80",
@@ -26,7 +30,7 @@ export default {
       },
 
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Cormorant Garamond", "Georgia", "serif"],
       },
 
       fontSize: {
@@ -40,7 +44,7 @@ export default {
 
       boxShadow: {
         card: "0 8px 25px rgba(0,0,0,0.08)",
-        premium: "0 8px 32px rgba(0, 0, 0, 0.5)",
+        premium: "0 8px 32px rgba(0, 0, 0, 0.45)",
       },
 
       borderRadius: {

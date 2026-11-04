@@ -50,7 +50,7 @@ function BottomNav() {
                 className={({ isActive }) =>
                   `flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-200 ${
                     isActive
-                      ? "bg-[var(--gold)] text-black scale-105 shadow-lg shadow-[var(--gold)]/25"
+                      ? "bg-[var(--gold)] text-[#111111] scale-105 shadow-lg shadow-[var(--gold)]/25"
                       : "text-[var(--text-secondary)] hover:text-[var(--gold)]"
                   }`
                 }

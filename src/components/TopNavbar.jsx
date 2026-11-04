@@ -80,7 +80,7 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[var(--bg-card)]/90 backdrop-blur-md border-b border-[var(--border-color)] transition-colors duration-200">
+    <header className="sticky top-0 z-40 w-full bg-[var(--bg-navbar)] border-b border-[var(--border-color)] transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Hamburger (mobile) or Collapse Toggle (desktop) + Brand/Section */}
         <div className="flex items-center gap-3">
@@ -135,12 +135,12 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
               {theme === "dark" ? (
                 <Sun
                   size={19}
-                  className="text-amber-400 group-hover:rotate-45 transition-transform duration-300"
+                  className="text-[#D4AF37] group-hover:rotate-45 transition-transform duration-300"
                 />
               ) : (
                 <Moon
                   size={19}
-                  className="text-indigo-600 group-hover:-rotate-12 transition-transform duration-300"
+                  className="text-[#BFA15A] group-hover:-rotate-12 transition-transform duration-300"
                 />
               )}
             </div>
@@ -156,7 +156,7 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
           >
             <Bell size={19} />
             {unreadNotices > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--gold)] ring-2 ring-[var(--bg-card)]" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--gold)] ring-2 ring-[var(--bg-navbar)]" />
             )}
           </button>
 
@@ -179,7 +179,7 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
                     name={user?.nombre_completo || "Usuario"}
                     size="28"
                     round={true}
-                    color="#1E293B"
+                    color="#252525"
                     textColor="#D4AF37"
                     className="font-bold text-xs"
                   />

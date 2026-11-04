@@ -114,7 +114,7 @@ function Login({ user }) {
           font-family: "Cormorant Garamond", Georgia, serif;
           position: relative;
           overflow: hidden;
-          background-color: #0E0C09;
+          background-color: var(--bg-app);
         }
 
         .login-root::before {
@@ -149,12 +149,9 @@ function Login({ user }) {
           border-radius: 28px;
           overflow: hidden;
           animation: cardIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-          background: linear-gradient(160deg, #1A1710 0%, #110F0A 100%);
-          border: 1px solid rgba(212,175,55,0.15);
-          box-shadow:
-            0 0 0 1px rgba(212,175,55,0.03),
-            0 25px 60px rgba(0,0,0,0.8),
-            inset 0 1px 0 rgba(212,175,55,0.1);
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          box-shadow: var(--card-shadow);
         }
 
         @keyframes cardIn {
@@ -270,7 +267,7 @@ function Login({ user }) {
           text-transform: uppercase;
           font-weight: 500;
           margin-bottom: 0.45rem;
-          color: rgba(212,175,55,0.75);
+          color: var(--gold);
         }
 
         .field-inner {
@@ -280,24 +277,23 @@ function Login({ user }) {
           border-radius: 12px;
           padding: 0 1rem;
           transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(212,175,55,0.15);
+          background: var(--bg-input);
+          border: 1px solid var(--border-color);
         }
 
         .field-inner.focused {
-          border-color: rgba(212,175,55,0.6);
-          box-shadow: 0 0 0 3px rgba(212,175,55,0.08);
-          background: rgba(212,175,55,0.04);
+          border-color: var(--gold);
+          box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
         }
 
         .field-icon {
-          color: rgba(212,175,55,0.4);
+          color: var(--gold);
           flex-shrink: 0;
           transition: color 0.2s;
         }
 
         .field-inner.focused .field-icon {
-          color: #D4AF37;
+          color: var(--gold);
         }
 
         .field-input {
@@ -310,17 +306,17 @@ function Login({ user }) {
           font-family: "Cormorant Garamond", Georgia, serif;
           font-weight: 400;
           letter-spacing: 0.03em;
-          color: #F5E9C0;
+          color: var(--text-primary);
         }
 
         .field-input::placeholder {
-          color: rgba(245,233,192,0.2);
+          color: var(--text-muted);
         }
 
         .toggle-password-btn {
           background: transparent;
           border: none;
-          color: rgba(212,175,55,0.45);
+          color: var(--text-muted);
           cursor: pointer;
           display: inline-flex;
           align-items: center;
@@ -332,7 +328,7 @@ function Login({ user }) {
         }
 
         .toggle-password-btn:hover {
-          color: #D4AF37;
+          color: var(--gold);
           background-color: rgba(212,175,55,0.08);
           transform: scale(1.05);
         }
@@ -354,12 +350,12 @@ function Login({ user }) {
           user-select: none;
           font-family: "Cormorant Garamond", Georgia, serif;
           font-size: 0.95rem;
-          color: rgba(245,233,192,0.8);
+          color: var(--text-secondary);
           transition: color 0.2s;
         }
 
         .remember-label:hover {
-          color: #F5E9C0;
+          color: var(--text-primary);
         }
 
         .remember-checkbox {
@@ -374,16 +370,16 @@ function Login({ user }) {
         .btn-login {
           width: 100%;
           position: relative;
-          background: linear-gradient(135deg, #C9A227 0%, #D4AF37 40%, #E8C84A 70%, #B8860B 100%);
+          background: linear-gradient(135deg, #D4AF37 0%, #BFA15A 100%);
           border: none;
           border-radius: 12px;
           padding: 1rem;
           font-family: "Cormorant Garamond", Georgia, serif;
           font-size: 1rem; /* 16px */
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #0E0C09;
+          color: #111111;
           cursor: pointer;
           transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
           box-shadow: 0 4px 20px rgba(212,175,55,0.3);
@@ -420,7 +416,7 @@ function Login({ user }) {
         .footer-note {
           font-size: 0.65rem;
           letter-spacing: 0.08em;
-          color: rgba(245,233,192,0.2);
+          color: var(--text-muted);
         }
       `}</style>
 
@@ -434,9 +430,9 @@ function Login({ user }) {
             title={theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
           >
             {theme === "dark" ? (
-              <Sun size={17} className="text-amber-400" />
+              <Sun size={17} className="text-[#D4AF37]" />
             ) : (
-              <Moon size={17} className="text-indigo-600" />
+              <Moon size={17} className="text-[#BFA15A]" />
             )}
             <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Oscuro"}</span>
           </button>

@@ -148,7 +148,7 @@ function MemberDetails() {
                   name={member?.nombre_completo || "Usuario"}
                   size="120"
                   round={true}
-                  color="#1E293B"
+                  color="#252525"
                   textColor="#D4AF37"
                   className="font-bold"
                 />

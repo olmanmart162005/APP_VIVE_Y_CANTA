@@ -188,10 +188,10 @@ function Activities() {
     switch (tipoActividad) {
       case "Ensayo":
         return {
-          bg: "bg-blue-500/10",
-          text: "text-blue-300",
-          border: "border-blue-500/20",
-          badge: "bg-blue-500",
+          bg: "bg-[#BFA15A]/15",
+          text: "text-[#BFA15A]",
+          border: "border-[#BFA15A]/30",
+          badge: "bg-[#BFA15A]",
         }
       case "Misa":
         return {
@@ -236,7 +236,7 @@ function Activities() {
       case "pendiente":
         return "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20"
       case "confirmada":
-        return "bg-sky-500/10 text-sky-300 border border-sky-500/20"
+        return "bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30"
       case "realizada":
         return "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold"
       case "cancelada":
@@ -903,7 +903,7 @@ function Activities() {
                 )}
                 <button
                   onClick={() => handleEdit(selectedActivity)}
-                  className="btn-secondary flex-1 py-2 text-xs text-blue-400 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/25 transition-all"
+                  className="btn-secondary flex-1 py-2 text-xs"
                 >
                   Editar
                 </button>
