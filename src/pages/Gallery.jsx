@@ -232,15 +232,6 @@ function Gallery() {
             <p className="text-[var(--text-secondary)] text-xs mt-2 max-w-md mx-auto leading-relaxed">
               Las fotografías y grabaciones de presentaciones, ensayos y convivios del Coro Vive y Canta se exhibirán aquí.
             </p>
-            {isAuthorizedToUpload && (
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="btn-primary mt-6 inline-flex items-center gap-2 text-xs cursor-pointer"
-              >
-                <Upload size={15} />
-                <span>Subir la primera fotografía</span>
-              </button>
-            )}
           </div>
         ) : (
           /* CUADRÍCULA DE FOTOGRAFÍAS */
