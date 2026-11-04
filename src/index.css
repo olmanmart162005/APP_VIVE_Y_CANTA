@@ -384,3 +384,41 @@ option {
   color: var(--header-text-primary);
   border: 1px solid var(--header-chip-border);
 }
+
+
+/* ==========================================================================
+   OPTIMIZACIONES PWA Y SOPORTE SAFE AREAS iOS (iPhone 13 - 17, iPad & Android)
+   ========================================================================== */
+
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* Modo Standalone (PWA Instalada en Pantalla de Inicio) */
+@media all and (display-mode: standalone) {
+  body {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior-y: none;
+  }
+}
+
+/* Utilidades para Safe Areas */
+.pt-safe {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

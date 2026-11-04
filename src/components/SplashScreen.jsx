@@ -78,8 +78,8 @@ function SplashScreen() {
         justifyContent: "center",
         overflow: "hidden",
         zIndex: 100,
-        background: "radial-gradient(circle at center, #1E1A12 0%, #0E0C09 100%)",
-        fontFamily: "'Inter', sans-serif",
+        background: "radial-gradient(circle at center, #252525 0%, #111111 100%)",
+        fontFamily: "'Cormorant Garamond', Georgia, serif",
       }}
     >
       {/* Malla de brillo superior */}

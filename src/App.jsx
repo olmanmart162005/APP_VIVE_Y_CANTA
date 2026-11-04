@@ -6,6 +6,9 @@ import { AnimatePresence, motion } from "framer-motion"
 import SplashScreen from "./components/SplashScreen"
 import MainLayout from "./components/MainLayout"
 import { ThemeProvider, useTheme } from "./context/ThemeContext"
+import { PwaProvider } from "./context/PwaContext"
+import InstallModal from "./components/pwa/InstallModal"
+import OfflineBanner from "./components/pwa/OfflineBanner"
 
 import EditProfile from "./pages/EditProfile"
 import Login from "./pages/Login"
@@ -24,15 +27,22 @@ import { supabase } from "./lib/supabase"
 
 function AppContent() {
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  // Pantalla de bienvenida se muestra una vez por sesión o al iniciar la app
+  const [loading, setLoading] = useState(() => {
+    return !sessionStorage.getItem("pwa_splash_seen")
+  })
   const { theme } = useTheme()
   const location = useLocation()
   const isDark = theme === "dark"
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1800)
+    let timer = null
+    if (loading) {
+      timer = setTimeout(() => {
+        setLoading(false)
+        sessionStorage.setItem("pwa_splash_seen", "true")
+      }, 1600)
+    }
 
     const syncUserProfile = (authUser) => {
       if (!authUser) return
@@ -93,10 +103,10 @@ function AppContent() {
     })
 
     return () => {
-      clearTimeout(timer)
+      if (timer) clearTimeout(timer)
       subscription.unsubscribe()
     }
-  }, [])
+  }, [loading])
 
   if (loading) {
     return <SplashScreen />
@@ -148,6 +158,8 @@ function AppContent() {
 
   return (
     <>
+      <OfflineBanner />
+      <InstallModal />
       <Toaster
         position="top-center"
         toastOptions={{
@@ -184,7 +196,9 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <PwaProvider>
+        <AppContent />
+      </PwaProvider>
     </ThemeProvider>
   )
 }

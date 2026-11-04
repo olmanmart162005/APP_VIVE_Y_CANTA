@@ -10,15 +10,18 @@ import {
   Shield,
   PanelLeftClose,
   PanelLeftOpen,
+  Download,
 } from "lucide-react"
 import Avatar from "react-avatar"
 import { useTheme } from "../context/ThemeContext"
+import { usePwa } from "../context/PwaContext"
 import { getCurrentUser } from "../services/authService"
 import { supabase } from "../lib/supabase"
 import logoImg from "../assets/logo.png"
 
 function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
   const { theme, toggleTheme } = useTheme()
+  const { promptInstall, isInstalled } = usePwa()
   const navigate = useNavigate()
   const location = useLocation()
   const [user, setUser] = useState(null)
@@ -64,7 +67,7 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[var(--bg-navbar)] border-b border-[var(--border-color)] transition-colors duration-200 shadow-xs">
+    <header className="sticky top-0 z-50 w-full bg-[var(--bg-navbar)] border-b border-[var(--border-color)] transition-colors duration-200 shadow-xs pt-[env(safe-area-inset-top,0px)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Hamburger (mobile) or Collapse Toggle (desktop) + Brand/Section */}
         <div className="flex items-center gap-3">
@@ -105,8 +108,21 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
           </div>
         </div>
 
-        {/* Right: Theme Toggle, Notifications, User Profile */}
+        {/* Right: Install Button, Theme Toggle, User Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* BOTÓN INSTALAR PWA SI NO ESTÁ INSTALADA */}
+          {!isInstalled && (
+            <button
+              onClick={promptInstall}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-[var(--gold)]/15 text-[var(--gold)] hover:bg-[var(--gold)]/25 border border-[var(--gold)]/35 text-xs font-bold transition-all shadow-xs cursor-pointer group"
+              title="Instalar Coro Vive y Canta"
+            >
+              <Download size={14} className="text-[var(--gold)] group-hover:scale-110 transition-transform" />
+              <span className="hidden sm:inline">Instalar App</span>
+              <span className="sm:hidden">Instalar</span>
+            </button>
+          )}
+
           {/* THEME TOGGLE BUTTON (SOL / LUNA) */}
           <button
             type="button"
@@ -208,6 +224,19 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
                     <Shield size={15} className="text-[var(--gold)]" />
                     Configuración
                   </button>
+
+                  {!isInstalled && (
+                    <button
+                      onClick={() => {
+                        setProfileDropdownOpen(false)
+                        promptInstall()
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-xl text-[var(--gold)] hover:bg-[var(--gold)]/10 transition-colors text-left cursor-pointer"
+                    >
+                      <Download size={15} className="text-[var(--gold)]" />
+                      Instalar Aplicación
+                    </button>
+                  )}
 
                   <div className="my-1 border-t border-[var(--border-color)]" />
 

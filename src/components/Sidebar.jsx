@@ -10,8 +10,10 @@ import {
   Settings as SettingsIcon,
   X,
   Sparkles,
+  Download,
 } from "lucide-react"
 import logoImg from "../assets/logo.png"
+import { usePwa } from "../context/PwaContext"
 
 const MENU_CATEGORIES = [
   {
@@ -40,6 +42,8 @@ const MENU_CATEGORIES = [
 ]
 
 function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
+  const { promptInstall, isInstalled } = usePwa()
+
   return (
     <aside
       className={`h-full flex flex-col bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] transition-all duration-300 z-50 ${
@@ -85,7 +89,7 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
         )}
       </div>
 
-      {/* Navigation list */}
+      {/* Navigation Categories */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {MENU_CATEGORIES.map((cat, idx) => (
           <div key={idx} className="space-y-1.5">
@@ -125,15 +129,36 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
         ))}
       </nav>
 
+      {/* Botón Instalar Aplicación */}
+      {!isInstalled && (
+        <div className="px-3 py-2">
+          <button
+            onClick={() => {
+              if (isMobile) onCloseMobile()
+              promptInstall()
+            }}
+            title={isCollapsed && !isMobile ? "Instalar Aplicación" : undefined}
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer bg-[var(--gold)]/10 text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[#111111] border border-[var(--gold)]/30 shadow-xs group ${
+              isCollapsed && !isMobile ? "justify-center px-0" : ""
+            }`}
+          >
+            <Download size={18} className="shrink-0 transition-transform group-hover:scale-110" />
+            {(!isCollapsed || isMobile) && (
+              <span className="truncate">Instalar Aplicación</span>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Footer info badge */}
       {(!isCollapsed || isMobile) && (
-        <div className="p-3.5 m-3 rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-color)] text-center">
+        <div className="p-3.5 m-3 mt-1 rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-color)] text-center">
           <div className="flex items-center justify-center gap-1.5 text-[var(--gold)] mb-1">
             <Sparkles size={13} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Edición 2026</span>
           </div>
           <p className="text-[10px] text-[var(--text-secondary)]">
-            Coro Vive y Canta • SaaS
+            Coro Vive y Canta • PWA
           </p>
         </div>
       )}
