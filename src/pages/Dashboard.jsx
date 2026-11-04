@@ -529,18 +529,6 @@ function Dashboard() {
                 </button>
               )}
 
-              {canManageNotices(user.role) && (
-                <button
-                  onClick={() => navigate("/notices")}
-                  className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--gold)]/50 hover:bg-[var(--bg-muted)] transition-all duration-200 text-center gap-2 group cursor-pointer shadow-sm"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/15 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform border border-purple-500/30">
-                    <FileText size={18} />
-                  </div>
-                  <span className="text-xs font-bold text-[var(--text-primary)]">Publicar Aviso</span>
-                </button>
-              )}
-
               {canManageMembers(user.role) && (
                 <button
                   onClick={() => navigate("/members")}

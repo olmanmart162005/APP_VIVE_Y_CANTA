@@ -5,7 +5,6 @@ import {
   CalendarDays,
   DollarSign,
   Users,
-  Bell,
   Image,
   User,
   Settings as SettingsIcon,
@@ -28,7 +27,6 @@ const MENU_CATEGORIES = [
     items: [
       { name: "Finanzas", path: "/finance", icon: DollarSign },
       { name: "Integrantes", path: "/members", icon: Users },
-      { name: "Avisos", path: "/notices", icon: Bell },
     ],
   },
   {

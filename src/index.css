@@ -84,9 +84,7 @@ html.dark,
   padding: 0;
 }
 
-html,
-body,
-#root {
+html {
   width: 100%;
   min-height: 100%;
   background-color: var(--bg-app);
@@ -94,11 +92,18 @@ body,
   font-family: "Cormorant Garamond", Georgia, serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
 }
 
 body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: clip;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+#root {
+  width: 100%;
+  min-height: 100%;
 }
 
 ::-webkit-scrollbar {

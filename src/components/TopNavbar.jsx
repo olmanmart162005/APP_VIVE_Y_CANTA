@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom"
 import {
   Sun,
   Moon,
-  Bell,
   Menu,
   ChevronDown,
   User,
@@ -24,7 +23,6 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
   const location = useLocation()
   const [user, setUser] = useState(null)
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
-  const [unreadNotices, setUnreadNotices] = useState(0)
 
   useEffect(() => {
     let isMounted = true
@@ -37,20 +35,6 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
       }
     }
     fetchUser()
-
-    const fetchNotices = async () => {
-      try {
-        const { count, error } = await supabase
-          .from("notices")
-          .select("*", { count: "exact", head: true })
-        if (!error && count && isMounted) {
-          setUnreadNotices(count)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    fetchNotices()
 
     return () => {
       isMounted = false
@@ -80,7 +64,7 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[var(--bg-navbar)] border-b border-[var(--border-color)] transition-colors duration-200">
+    <header className="sticky top-0 z-50 w-full bg-[var(--bg-navbar)] border-b border-[var(--border-color)] transition-colors duration-200 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Hamburger (mobile) or Collapse Toggle (desktop) + Brand/Section */}
         <div className="flex items-center gap-3">
@@ -145,19 +129,6 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
               )}
             </div>
             <span className="sr-only">Cambiar tema</span>
-          </button>
-
-          {/* NOTICES BELL */}
-          <button
-            onClick={() => navigate("/notices")}
-            className="relative p-2.5 rounded-2xl bg-[var(--bg-muted)] hover:bg-[var(--border-color)]/50 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] transition-all duration-200 shadow-sm cursor-pointer"
-            title="Avisos y comunicados"
-            aria-label="Ver avisos"
-          >
-            <Bell size={19} />
-            {unreadNotices > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--gold)] ring-2 ring-[var(--bg-navbar)]" />
-            )}
           </button>
 
           {/* USER AVATAR & DROPDOWN */}

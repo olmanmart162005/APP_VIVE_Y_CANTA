@@ -384,7 +384,7 @@ function Finance() {
       )}
 
       {/* Top Header */}
-      <div className="page-header-gold mx-4 mt-4 rounded-3xl px-5 py-5 flex items-center justify-between sticky top-2 z-40">
+      <div className="page-header-gold mx-4 mt-4 rounded-3xl px-5 py-5 flex items-center justify-between">
         <div>
           <p className="header-text-secondary text-[9px] font-bold uppercase tracking-widest mb-0.5">Coro Vive y Canta</p>
           <h1 className="title-professional title-gold-black text-2xl tracking-tight flex items-center gap-2">
