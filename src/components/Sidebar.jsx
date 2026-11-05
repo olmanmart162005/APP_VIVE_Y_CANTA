@@ -46,16 +46,16 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
 
   return (
     <aside
-      className={`h-full flex flex-col bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] transition-all duration-300 z-50 ${
+      className={`h-full flex flex-col bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] transition-all duration-300 ${
         isMobile
-          ? "w-72 shadow-2xl"
+          ? "w-72 sm:w-80 shadow-2xl pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]"
           : isCollapsed
           ? "w-20"
           : "w-64"
       }`}
     >
-      {/* Brand Header */}
-      <div className="p-4 h-16 flex items-center justify-between border-b border-[var(--border-color)]">
+      {/* Brand Header con logo, título y botón de cierre en móvil */}
+      <div className="px-4 h-16 shrink-0 flex items-center justify-between border-b border-[var(--border-color)]">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative shrink-0">
             <img
@@ -81,10 +81,11 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
         {isMobile && (
           <button
             onClick={onCloseMobile}
-            className="p-1.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors cursor-pointer"
             aria-label="Cerrar menú"
+            title="Cerrar menú lateral"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         )}
       </div>
@@ -131,7 +132,7 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
 
       {/* Botón Instalar Aplicación */}
       {!isInstalled && (
-        <div className="px-3 py-2">
+        <div className="px-3 py-2 shrink-0">
           <button
             onClick={() => {
               if (isMobile) onCloseMobile()
@@ -152,7 +153,7 @@ function Sidebar({ isCollapsed, isMobile, onCloseMobile }) {
 
       {/* Footer info badge */}
       {(!isCollapsed || isMobile) && (
-        <div className="p-3.5 m-3 mt-1 rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-color)] text-center">
+        <div className="p-3 m-3 mt-1 shrink-0 rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-color)] text-center">
           <div className="flex items-center justify-center gap-1.5 text-[var(--gold)] mb-1">
             <Sparkles size={13} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Edición 2026</span>

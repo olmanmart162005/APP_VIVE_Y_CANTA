@@ -91,14 +91,14 @@ function TopNavbar({ onToggleMobileMenu, isCollapsed, onToggleCollapse }) {
           </button>
 
           {/* Logo on mobile / Title on desktop */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <img
               src={logoImg}
               alt="Logo"
-              className="w-8 h-8 rounded-full object-cover lg:hidden border border-[var(--gold)]/30"
+              className="w-8 h-8 rounded-full object-cover lg:hidden border border-[var(--gold)]/30 shrink-0"
             />
-            <div>
-              <h2 className="title-professional text-base sm:text-lg font-bold text-[var(--text-primary)] leading-tight tracking-tight">
+            <div className="min-w-0">
+              <h2 className="title-professional text-base sm:text-lg font-bold text-[var(--text-primary)] leading-tight tracking-tight truncate max-w-[140px] xs:max-w-[200px] sm:max-w-none">
                 {getSectionTitle()}
               </h2>
               <p className="hidden sm:block text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">

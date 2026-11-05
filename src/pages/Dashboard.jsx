@@ -241,7 +241,7 @@ function Dashboard() {
             <h1 className="title-professional title-gold-black text-2xl sm:text-4xl mt-1 tracking-tight break-words">
               ¡Hola, {user?.nombre_completo?.split(" ")[0] || "Bienvenido"}!
             </h1>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center gap-2 mt-2">
               <span className="header-chip text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full backdrop-blur-xs">
                 {getRoleName()}
               </span>

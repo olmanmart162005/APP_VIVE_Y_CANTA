@@ -32,23 +32,6 @@ function MainLayout({ children }) {
         />
       </div>
 
-      {/* Mobile Drawer Backdrop and Sidebar */}
-      {isMobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
-            onClick={() => setIsMobileOpen(false)}
-          />
-          <div className="relative z-50 h-full animate-in slide-in-from-left duration-200">
-            <Sidebar
-              isCollapsed={false}
-              isMobile={true}
-              onCloseMobile={() => setIsMobileOpen(false)}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <TopNavbar
@@ -60,6 +43,26 @@ function MainLayout({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Mobile Drawer Backdrop and Sidebar (z-[100] para estar siempre por encima de TopNavbar y contenido) */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-[100] lg:hidden flex">
+          {/* Fondo oscuro semi-transparente para cerrar tocando afuera */}
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileOpen(false)}
+            aria-hidden="true"
+          />
+          {/* Panel lateral que se desliza desde la izquierda */}
+          <div className="relative z-[101] h-full max-w-[85vw] animate-in slide-in-from-left duration-200">
+            <Sidebar
+              isCollapsed={false}
+              isMobile={true}
+              onCloseMobile={() => setIsMobileOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
