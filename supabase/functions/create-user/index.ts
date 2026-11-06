@@ -7,11 +7,8 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS Preflight OPTIONS Request
   if (req.method === "OPTIONS") {
-    return new Response("ok", {
-      headers: corsHeaders,
-    })
+    return new Response("ok", { headers: corsHeaders })
   }
 
   try {
@@ -19,92 +16,163 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error("Missing Supabase URL or Service Role Key env variables")
+      throw new Error("Configuración incompleta en el servidor (SUPABASE_URL / SERVICE_ROLE_KEY).")
     }
 
-    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Parse request body
-    const { usuario, nombre, email, role, password } = await req.json()
-
-    if (!usuario || !nombre || !email || !role || !password) {
-      throw new Error("Missing required fields: usuario, nombre, email, role, password")
+    // 1. Verificar en el servidor que el solicitante sea un Administrador autenticado
+    const authHeader = req.headers.get("Authorization")
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "No autorizado: falta token de sesión." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      )
     }
 
-    console.log(`Creating user in auth: ${email}`)
+    const token = authHeader.replace(/^Bearer\s+/i, "")
+    const { data: callerAuth, error: callerErr } = await supabaseAdmin.auth.getUser(token)
+    if (callerErr || !callerAuth?.user) {
+      return new Response(
+        JSON.stringify({ error: "Sesión inválida o expirada." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
+      )
+    }
 
-    // 1. Create user in Supabase Auth using the admin client
-    const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
-      email: email,
+    const { data: callerProfile, error: callerProfileErr } = await supabaseAdmin
+      .from("profiles")
+      .select("role, estado")
+      .eq("id", callerAuth.user.id)
+      .single()
+
+    if (
+      callerProfileErr ||
+      !callerProfile ||
+      callerProfile.role !== "admin" ||
+      callerProfile.estado === "retirado"
+    ) {
+      return new Response(
+        JSON.stringify({ error: "Acceso denegado: solo un administrador activo puede crear cuentas." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+      )
+    }
+
+    // 2. Leer y validar datos del nuevo integrante (NUNCA registrar la contraseña en logs)
+    const body = await req.json()
+    const cleanUsuario = String(body.usuario || "").trim().toLowerCase()
+    const nombreCompleto = String(body.nombre || body.nombre_completo || "").trim()
+    const role = String(body.role || "integrante").trim().toLowerCase()
+    const password = String(body.password || "")
+    const authEmail = `${cleanUsuario}@viveycanta.app`
+    const profileEmail = String(body.correo_personal || body.email || authEmail).trim().toLowerCase()
+
+    if (!cleanUsuario || !nombreCompleto || !role || !password) {
+      throw new Error("Faltan campos obligatorios: nombre, usuario, rol o contraseña temporal.")
+    }
+
+    if (password.length < 8) {
+      throw new Error("La contraseña temporal debe tener al menos 8 caracteres.")
+    }
+
+    // 3. Verificar unicidad de nombre de usuario y correo electrónico
+    const { data: existingUser } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .ilike("usuario", cleanUsuario)
+      .maybeSingle()
+
+    if (existingUser) {
+      throw new Error(`El nombre de usuario "${cleanUsuario}" ya está registrado.`)
+    }
+
+    if (profileEmail) {
+      const { data: existingEmail } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .ilike("email", profileEmail)
+        .maybeSingle()
+
+      if (existingEmail) {
+        throw new Error(`El correo electrónico "${profileEmail}" ya está asociado a otro integrante.`)
+      }
+    }
+
+    // 4. Crear cuenta en Supabase Auth conservando el mecanismo usuario@viveycanta.app
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: authEmail,
       password: password,
       email_confirm: true,
       user_metadata: {
-        nombre_completo: nombre,
+        nombre_completo: nombreCompleto,
+        usuario: cleanUsuario,
         role: role,
-      }
+      },
     })
 
     if (authError) {
       throw authError
     }
 
-    const user = authData.user
-    if (!user) {
-      throw new Error("Failed to create auth user")
+    const createdAuthUser = authData.user
+    if (!createdAuthUser) {
+      throw new Error("No se pudo crear el usuario en Supabase Auth.")
     }
 
-    console.log(`User created in auth with ID: ${user.id}. Inserting profile...`)
+    // 5. Insertar perfil completo en public.profiles con debe_cambiar_password = true
+    const profilePayload: Record<string, unknown> = {
+      id: createdAuthUser.id,
+      nombre_completo: nombreCompleto,
+      usuario: cleanUsuario,
+      email: profileEmail,
+      role: role,
+      estado: body.estado || "activo",
+      debe_cambiar_password: true,
+      fecha_ingreso: new Date().toISOString().split("T")[0],
+    }
 
-    // 2. Insert user profile into the profiles table
-    const { error: profileError } = await supabaseClient
+    if (body.telefono !== undefined) profilePayload.telefono = body.telefono || null
+    if (body.fecha_nacimiento !== undefined) profilePayload.fecha_nacimiento = body.fecha_nacimiento || null
+    if (body.edad !== undefined && body.edad !== null && body.edad !== "") {
+      profilePayload.edad = Number(body.edad)
+    }
+    if (body.tipo_sangre !== undefined) profilePayload.tipo_sangre = body.tipo_sangre || null
+    if (body.dni !== undefined) profilePayload.dni = body.dni || null
+    if (body.foto !== undefined) {
+      profilePayload.foto = body.foto || null
+      profilePayload.foto_url = body.foto || null
+    }
+
+    const { error: profileError } = await supabaseAdmin
       .from("profiles")
-      .insert({
-        id: user.id,
-        nombre_completo: nombre,
-        usuario: usuario,
-        email: email,
-        role: role,
-        estado: "activo",
-        fecha_ingreso: new Date().toISOString().split("T")[0],
-      })
+      .upsert(profilePayload, { onConflict: "id" })
 
     if (profileError) {
-      console.error("Error creating profile, rolling back auth user:", profileError)
-      // Rollback: delete the created auth user
-      await supabaseClient.auth.admin.deleteUser(user.id)
+      // Revertir usuario en Auth si falló la creación del perfil
+      await supabaseAdmin.auth.admin.deleteUser(createdAuthUser.id)
       throw profileError
     }
-
-    console.log(`Profile created successfully for user ID: ${user.id}`)
 
     return new Response(
       JSON.stringify({
         success: true,
         user: {
-          id: user.id,
-          email: user.email,
-        }
+          id: createdAuthUser.id,
+          usuario: cleanUsuario,
+          email: profileEmail,
+          auth_email: authEmail,
+        },
       }),
       {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       }
     )
-
   } catch (error) {
-    console.error("Error in create-user function:", error.message)
+    const message = error instanceof Error ? error.message : "Error interno al crear integrante"
     return new Response(
-      JSON.stringify({
-        error: error.message,
-      }),
+      JSON.stringify({ error: message }),
       {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       }
     )

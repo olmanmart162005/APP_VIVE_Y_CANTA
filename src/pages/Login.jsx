@@ -20,8 +20,12 @@ function Login({ user }) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (user) {
-      navigate("/dashboard", { replace: true })
+    if (user && user.profileLoaded) {
+      if (user.debe_cambiar_password !== false) {
+        navigate("/actualizar-password", { replace: true })
+      } else {
+        navigate("/dashboard", { replace: true })
+      }
     }
   }, [user, navigate])
 
@@ -80,6 +84,25 @@ function Login({ user }) {
         }
       } catch (storageErr) {
         console.warn("No se pudo persistir en localStorage:", storageErr)
+      }
+
+      // Verificar el estado de la cuenta y si tiene pendiente el cambio obligatorio de contraseña
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id, usuario, nombre_completo, role, estado, debe_cambiar_password")
+        .eq("id", data.user.id)
+        .maybeSingle()
+
+      if (profileData?.estado === "retirado") {
+        await supabase.auth.signOut()
+        toast.error("Esta cuenta se encuentra desactivada. Consulta con la administración del coro.")
+        return
+      }
+
+      if (!profileData || profileData.debe_cambiar_password !== false) {
+        toast("Por seguridad, establece tu contraseña personal para continuar.", { icon: "🔐" })
+        navigate("/actualizar-password", { replace: true })
+        return
       }
 
       toast.success("¡Bienvenido al sistema!")

@@ -1190,3 +1190,276 @@ export async function moveLegacyPhotosToAlbum({ photos = [], targetAlbum, userId
     }
   }
 }
+
+/**
+ * Detecta el entorno móvil para optimizar el guardado en Galería / Fotos
+ */
+export function detectMobilePlatform() {
+  if (typeof navigator === "undefined") {
+    return { isIOS: false, isAndroid: false, isPWA: false }
+  }
+  const ua = navigator.userAgent || navigator.vendor || ""
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  const isAndroid = /Android/i.test(ua)
+  const isPWA =
+    (typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(display-mode: standalone)").matches) ||
+    Boolean(navigator.standalone)
+
+  return { isIOS, isAndroid, isPWA }
+}
+
+/**
+ * Normaliza el tipo MIME y la extensión para que Android (MediaScanner / Google Fotos)
+ * y iPhone (App Fotos) reconozcan siempre el archivo como una fotografía real de alta resolución.
+ */
+function resolveImageMimeAndExtension(blobType = "", fileName = "", imageUrl = "") {
+  const cleanType = String(blobType || "").toLowerCase().trim()
+  const lowerName = String(fileName || "").toLowerCase()
+  const lowerUrl = String(imageUrl || "").toLowerCase().split("?")[0]
+
+  if (cleanType === "image/png" || lowerName.endsWith(".png") || lowerUrl.endsWith(".png")) {
+    return { mimeType: "image/png", ext: "png" }
+  }
+  if (cleanType === "image/webp" || lowerName.endsWith(".webp") || lowerUrl.endsWith(".webp")) {
+    return { mimeType: "image/webp", ext: "webp" }
+  }
+  if (cleanType === "image/heic" || lowerName.endsWith(".heic") || lowerUrl.endsWith(".heic")) {
+    return { mimeType: "image/heic", ext: "heic" }
+  }
+  // Por defecto JPEG estándar compatible con 100% de galerías móviles
+  return { mimeType: "image/jpeg", ext: "jpg" }
+}
+
+/**
+ * Construye un nombre de archivo limpio con la extensión correcta
+ */
+function buildCleanPhotoFileName(photo, albumName = "", ext = "jpg") {
+  const rawName = String(photo?.nombre_archivo || "").trim()
+  const baseWithoutExt = rawName
+    ? rawName.replace(/\.[a-zA-Z0-9]{2,5}$/, "")
+    : `${slugifyAlbumName(albumName || "vive-y-canta")}-foto-${photo?.orden || shortUid()}`
+
+  const safeBase = baseWithoutExt
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 60) || `ViveYCanta-foto-${shortUid()}`
+
+  return `${safeBase}.${ext}`
+}
+
+/**
+ * Descarga el archivo binario ORIGINAL en máxima resolución desde Supabase Storage
+ * sin abrir pestañas externas ni perder calidad.
+ */
+export async function fetchOriginalPhotoBlob(photo) {
+  if (!photo?.imagen_url && !photo?.ruta_storage) {
+    throw new Error("No se encontró la dirección de la fotografía.")
+  }
+
+  let rawBlob = null
+  const storagePath = photo.ruta_storage || extractStoragePathFromUrl(photo.imagen_url)
+
+  // 1. Intentar descarga directa del objeto original desde el bucket de Supabase Storage
+  if (storagePath) {
+    try {
+      const { data, error } = await supabase.storage.from(BUCKET_NAME).download(storagePath)
+      if (!error && data && data.size > 0) {
+        rawBlob = data
+      }
+    } catch (storageErr) {
+      console.warn("Aviso al descargar binario directo de Storage, usando URL pública:", storageErr)
+    }
+  }
+
+  // 2. Respaldo mediante fetch CORS directo a la URL pública de Supabase Storage
+  if (!rawBlob && photo.imagen_url) {
+    const response = await fetch(photo.imagen_url, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-cache",
+    })
+    if (!response.ok) {
+      throw new Error(`No se pudo descargar la imagen original (HTTP ${response.status}).`)
+    }
+    rawBlob = await response.blob()
+  }
+
+  if (!rawBlob || rawBlob.size === 0) {
+    throw new Error("El archivo de la fotografía está vacío o no pudo descargarse.")
+  }
+
+  const { mimeType, ext } = resolveImageMimeAndExtension(
+    rawBlob.type,
+    photo.nombre_archivo,
+    photo.imagen_url
+  )
+
+  // Garantizar que el Blob tenga el MIME de imagen explícito (evita application/octet-stream)
+  const normalizedBlob =
+    rawBlob.type === mimeType ? rawBlob : new Blob([rawBlob], { type: mimeType })
+
+  return { blob: normalizedBlob, mimeType, ext }
+}
+
+/**
+ * Ejecuta el menú nativo de iOS / Android para guardar un objeto File directamente en la app Fotos / Galería.
+ */
+export async function triggerNativePhotoShare(file, title = "Fotografía Vive y Canta") {
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.share === "function" &&
+    typeof navigator.canShare === "function" &&
+    navigator.canShare({ files: [file] })
+  ) {
+    // En iOS Safari y PWA, pasar únicamente `files` habilita de forma directa "Guardar imagen" en Fotos
+    await navigator.share({
+      files: [file],
+      title,
+    })
+    return true
+  }
+  return false
+}
+
+/**
+ * Dispara una descarga local mediante ObjectURL en el mismo origen (Android / Escritorio)
+ * para que nunca se abra en una pestaña nueva del navegador.
+ */
+function triggerSameOriginBlobDownload(blob, fileName) {
+  const blobUrl = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = blobUrl
+  link.download = fileName
+  link.rel = "noopener"
+  link.style.display = "none"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  // Liberar memoria después de que el gestor de descargas del dispositivo tome el archivo
+  setTimeout(() => {
+    URL.revokeObjectURL(blobUrl)
+  }, 60000)
+}
+
+/**
+ * Descarga y guarda una fotografía en el dispositivo en su calidad y resolución original:
+ * - iPhone / iPad (Safari y PWA): Abre el menú nativo con «Guardar imagen» hacia la app Fotos,
+ *   o entrega el archivo listo en memoria para guardarlo con un toque / «Guardar en Fotos».
+ * - Android (Chrome y PWA): Descarga el archivo binario con MIME de imagen real directamente al
+ *   dispositivo (indexado en Galería / Fotos sin abrir otra pestaña) y permite compartir a Fotos.
+ * - Escritorio: Descarga directa del archivo original.
+ */
+export async function downloadPhotoToDevice({
+  photo,
+  albumName = "Vive y Canta",
+  preferShareSheet = false,
+}) {
+  const { blob, mimeType, ext } = await fetchOriginalPhotoBlob(photo)
+  const fileName = buildCleanPhotoFileName(photo, albumName, ext)
+  const imageFile = new File([blob], fileName, {
+    type: mimeType,
+    lastModified: Date.now(),
+  })
+
+  const { isIOS, isAndroid } = detectMobilePlatform()
+
+  // 1. FLUJO PARA iPHONE / iPAD (Safari y PWA instalada)
+  if (isIOS) {
+    const canUseWebShareFiles =
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: [imageFile] })
+
+    if (canUseWebShareFiles) {
+      try {
+        await navigator.share({
+          files: [imageFile],
+        })
+        return {
+          status: "saved_ios_share",
+          fileName,
+          file: imageFile,
+        }
+      } catch (shareErr) {
+        // Si el usuario cerró voluntariamente la hoja de compartir de iOS
+        if (shareErr?.name === "AbortError") {
+          return {
+            status: "cancelled",
+            fileName,
+          }
+        }
+        // Si expiró la activación de usuario porque la foto era pesada y tardó en bajar,
+        // abrimos el modal instantáneo con el archivo ya en memoria para guardar con 1 toque
+        const blobUrl = URL.createObjectURL(blob)
+        return {
+          status: "ios_manual_fallback",
+          fileName,
+          file: imageFile,
+          blobUrl,
+          canShareFile: true,
+        }
+      }
+    }
+
+    // Si el navegador en iOS no soporta navigator.canShare({ files }), mostrar visor directo para «Guardar en Fotos»
+    const blobUrl = URL.createObjectURL(blob)
+    return {
+      status: "ios_manual_fallback",
+      fileName,
+      file: imageFile,
+      blobUrl,
+      canShareFile: false,
+    }
+  }
+
+  // 2. FLUJO PARA ANDROID (Chrome, navegadores móviles y PWA instalada)
+  if (isAndroid) {
+    if (preferShareSheet) {
+      try {
+        const shared = await triggerNativePhotoShare(imageFile, fileName)
+        if (shared) {
+          return {
+            status: "shared_android",
+            fileName,
+            file: imageFile,
+          }
+        }
+      } catch (err) {
+        if (err?.name === "AbortError") {
+          return { status: "cancelled", fileName }
+        }
+      }
+    }
+
+    // Descarga binaria directa en el dispositivo (no abre pestaña nueva y conserva resolución original)
+    triggerSameOriginBlobDownload(blob, fileName)
+    const canShareToPhotos =
+      typeof navigator !== "undefined" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: [imageFile] })
+
+    return {
+      status: "downloaded_android",
+      fileName,
+      file: imageFile,
+      canShareToPhotos,
+    }
+  }
+
+  // 3. FLUJO PARA COMPUTADORA / ESCRITORIO
+  triggerSameOriginBlobDownload(blob, fileName)
+  return {
+    status: "downloaded_desktop",
+    fileName,
+    file: imageFile,
+  }
+}
+

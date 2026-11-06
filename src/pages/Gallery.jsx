@@ -39,6 +39,9 @@ import {
   deleteCompleteAlbum,
   moveLegacyPhotosToAlbum,
   validateImageFile,
+  downloadPhotoToDevice,
+  triggerNativePhotoShare,
+  detectMobilePlatform,
 } from "../services/galleryService"
 
 /**
@@ -110,6 +113,12 @@ function Gallery() {
   const [lightboxIndex, setLightboxIndex] = useState(null)
   const touchStartXRef = useRef(null)
   const touchEndXRef = useRef(null)
+
+  // Estados de descarga de fotografías (Android / iPhone / PWA / Escritorio)
+  const [downloadingPhotoId, setDownloadingPhotoId] = useState(null)
+  const [downloadingAlbum, setDownloadingAlbum] = useState(false)
+  const [albumDownloadProgress, setAlbumDownloadProgress] = useState({ current: 0, total: 0 })
+  const [iosSaveModalData, setIosSaveModalData] = useState(null)
 
   // Formulario para Crear Álbum
   const [createForm, setCreateForm] = useState({
@@ -653,6 +662,170 @@ function Gallery() {
   }
 
   // ---------------------------------------------------------------------------
+  // DESCARGA DE FOTOGRAFÍAS EN RESOLUCIÓN ORIGINAL (ANDROID / IPHONE / PWA)
+  // ---------------------------------------------------------------------------
+  const closeIosSaveModal = useCallback(() => {
+    setIosSaveModalData((prev) => {
+      if (prev?.blobUrl) {
+        URL.revokeObjectURL(prev.blobUrl)
+      }
+      return null
+    })
+  }, [])
+
+  const handleDownloadPhoto = async (photo, e = null, preferShareSheet = false) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    if (!photo) return
+
+    const photoKey = photo.id || photo.imagen_url
+    if (downloadingPhotoId === photoKey) return
+
+    try {
+      setDownloadingPhotoId(photoKey)
+      const result = await downloadPhotoToDevice({
+        photo,
+        albumName: activeAlbum?.nombre || "Vive y Canta",
+        preferShareSheet,
+      })
+
+      if (result.status === "cancelled") {
+        return
+      }
+
+      if (result.status === "saved_ios_share") {
+        toast.success("¡Fotografía guardada exitosamente en Fotos!")
+        return
+      }
+
+      if (result.status === "ios_manual_fallback") {
+        setIosSaveModalData({
+          photo,
+          blobUrl: result.blobUrl,
+          file: result.file,
+          fileName: result.fileName,
+          canShareFile: result.canShareFile,
+        })
+        return
+      }
+
+      if (result.status === "shared_android") {
+        toast.success("¡Fotografía enviada a Galería / Fotos en calidad original!")
+        return
+      }
+
+      if (result.status === "downloaded_android") {
+        if (result.canShareToPhotos && result.file) {
+          toast.success(
+            (t) => (
+              <div className="flex flex-col gap-2">
+                <span className="font-bold text-xs">
+                  ¡Fotografía descargada en resolución original!
+                </span>
+                <span className="text-[11px] opacity-85">
+                  Guardada en tu dispositivo ({result.fileName}).
+                </span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    toast.dismiss(t.id)
+                    try {
+                      await triggerNativePhotoShare(result.file, result.fileName)
+                    } catch {
+                      // Cancelado por el usuario
+                    }
+                  }}
+                  className="mt-1 px-3 py-1.5 rounded-lg bg-[#D4AF37] text-[#111111] font-extrabold text-[11px] uppercase tracking-wider text-center cursor-pointer"
+                >
+                  Abrir / Guardar en Google Fotos
+                </button>
+              </div>
+            ),
+            { duration: 6000 }
+          )
+        } else {
+          toast.success("¡Fotografía guardada en tu dispositivo en máxima calidad!")
+        }
+        return
+      }
+
+      toast.success("¡Fotografía descargada en resolución original!")
+    } catch (err) {
+      console.error("Error al descargar fotografía:", err)
+      toast.error(err.message || "No se pudo descargar la fotografía. Intenta nuevamente.")
+    } finally {
+      setDownloadingPhotoId(null)
+    }
+  }
+
+  const handleIosShareFromModal = async () => {
+    if (!iosSaveModalData?.file) return
+    try {
+      const shared = await triggerNativePhotoShare(
+        iosSaveModalData.file,
+        iosSaveModalData.fileName
+      )
+      if (shared) {
+        toast.success("¡Fotografía guardada exitosamente en Fotos!")
+        closeIosSaveModal()
+      }
+    } catch (err) {
+      if (err?.name !== "AbortError") {
+        toast.error(
+          "Mantén presionada la imagen de abajo durante 1 segundo y elige «Guardar en Fotos»."
+        )
+      }
+    }
+  }
+
+  // Descargar múltiples fotografías desde el álbum actual
+  const handleDownloadAlbum = async (albumToDownload = activeAlbum, e = null) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    const photosList = albumToDownload?.fotos || []
+    if (!photosList.length || downloadingAlbum) return
+
+    const { isIOS } = detectMobilePlatform()
+    if (isIOS) {
+      // En iOS, iniciar con la primera fotografía (o la foto activa) para guardar en Fotos
+      await handleDownloadPhoto(photosList[0])
+      return
+    }
+
+    try {
+      setDownloadingAlbum(true)
+      setAlbumDownloadProgress({ current: 0, total: photosList.length })
+
+      for (let i = 0; i < photosList.length; i++) {
+        setAlbumDownloadProgress({ current: i + 1, total: photosList.length })
+        await downloadPhotoToDevice({
+          photo: photosList[i],
+          albumName: albumToDownload.nombre || "Vive y Canta",
+          preferShareSheet: false,
+        })
+        // Pausa breve para que el navegador móvil procese cada descarga sin bloquearlas
+        if (i < photosList.length - 1) {
+          await new Promise((r) => setTimeout(r, 450))
+        }
+      }
+
+      toast.success(
+        `¡Se descargaron las ${photosList.length} fotografías del álbum "${albumToDownload.nombre}" en calidad original!`
+      )
+    } catch (err) {
+      console.error("Error al descargar álbum:", err)
+      toast.error(err.message || "Ocurrió un error al descargar las fotografías del álbum")
+    } finally {
+      setDownloadingAlbum(false)
+      setAlbumDownloadProgress({ current: 0, total: 0 })
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // NAVEGACIÓN DEL VISOR LIGHTBOX (TECLADO Y GESTOS SWIPE MÓVIL)
   // ---------------------------------------------------------------------------
   const activePhotos = activeAlbum?.fotos || []
@@ -736,8 +909,32 @@ function Gallery() {
                   <span>Volver a Álbumes</span>
                 </button>
 
-                {/* Botones de administración del álbum */}
+                {/* Botones de administración y descarga del álbum */}
                 <div className="flex flex-wrap items-center gap-2">
+                  {activePhotos.length > 0 && (
+                    <button
+                      type="button"
+                      disabled={downloadingAlbum}
+                      onClick={(e) => handleDownloadAlbum(activeAlbum, e)}
+                      className="px-3.5 py-2 rounded-2xl bg-[#111111]/85 hover:bg-[#111111] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-md disabled:opacity-60"
+                      title="Descargar fotografías de este álbum en calidad original"
+                    >
+                      {downloadingAlbum ? (
+                        <>
+                          <Loader2 size={15} className="animate-spin text-[#D4AF37]" />
+                          <span>
+                            Descargando ({albumDownloadProgress.current}/{albumDownloadProgress.total})…
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Download size={15} />
+                          <span>Descargar Álbum</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
                   {activeAlbum.isLegacyGroup && isAuthorizedToManage && albums.length > 1 && (
                     <button
                       onClick={() => {
@@ -964,6 +1161,21 @@ function Gallery() {
                         </span>
 
                         <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            disabled={downloadingPhotoId === (photo.id || photo.imagen_url)}
+                            onClick={(e) => handleDownloadPhoto(photo, e)}
+                            className="px-2 py-1.5 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#111111] transition-colors inline-flex items-center gap-1 text-[10px] font-bold cursor-pointer disabled:opacity-60"
+                            title="Descargar foto en resolución original a Galería / Fotos"
+                          >
+                            {downloadingPhotoId === (photo.id || photo.imagen_url) ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <Download size={13} />
+                            )}
+                            <span className="hidden xs:inline">Descargar</span>
+                          </button>
+
                           {isAuthorizedToManage && !isCurrentCover && !activeAlbum.isLegacyGroup && (
                             <button
                               onClick={(e) => {
@@ -2213,16 +2425,29 @@ function Gallery() {
                   </button>
                 )}
 
-              <a
-                href={currentLightboxPhoto.imagen_url}
-                target="_blank"
-                rel="noreferrer"
-                download
-                className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all"
+              <button
+                type="button"
+                disabled={
+                  downloadingPhotoId ===
+                  (currentLightboxPhoto.id || currentLightboxPhoto.imagen_url)
+                }
+                onClick={(e) => handleDownloadPhoto(currentLightboxPhoto, e)}
+                className="px-4 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#BFA15A] text-[#111111] text-xs font-extrabold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-lg disabled:opacity-60"
+                title="Guardar fotografía en Galería / Fotos en calidad original"
               >
-                <Download size={14} />
-                <span>Descargar</span>
-              </a>
+                {downloadingPhotoId ===
+                (currentLightboxPhoto.id || currentLightboxPhoto.imagen_url) ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin text-[#111111]" />
+                    <span>Descargando…</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={14} strokeWidth={2.4} />
+                    <span>Descargar Foto</span>
+                  </>
+                )}
+              </button>
 
               {isAuthorizedToDelete && (
                 <button
@@ -2235,6 +2460,76 @@ function Gallery() {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          MODAL 7: GUARDAR FOTOGRAFÍA EN APP «FOTOS» (iPHONE / iPAD SAFARI & PWA)
+         ===================================================================== */}
+      {iosSaveModalData && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className="bg-[#111111] border border-[#D4AF37]/40 w-full max-w-md rounded-[28px] p-5 sm:p-6 shadow-2xl space-y-4 text-center animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between">
+              <span className="px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-[10px] font-extrabold uppercase tracking-wider">
+                Calidad Original • Fotos iOS
+              </span>
+              <button
+                type="button"
+                onClick={closeIosSaveModal}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <h3 className="title-professional text-lg sm:text-xl font-bold text-[#F5F0E6]">
+              Guardar en «Fotos» de tu iPhone
+            </h3>
+
+            {iosSaveModalData.canShareFile && (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={handleIosShareFromModal}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-[#D4AF37] hover:bg-[#BFA15A] text-[#111111] font-extrabold text-xs sm:text-sm uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-xl cursor-pointer"
+                >
+                  <Download size={17} strokeWidth={2.5} />
+                  <span> Abrir menú y tocar «Guardar imagen»</span>
+                </button>
+                <p className="text-[11px] text-[#F5F0E6]/70">
+                  Al tocar el botón superior, selecciona <strong>«Guardar imagen»</strong> para guardarla directamente en tu aplicación <strong>Fotos</strong>.
+                </p>
+              </div>
+            )}
+
+            <div className="rounded-2xl overflow-hidden bg-black border border-white/15 p-2">
+              <img
+                src={iosSaveModalData.blobUrl || iosSaveModalData.photo?.imagen_url}
+                alt={iosSaveModalData.fileName}
+                className="max-h-[46vh] w-auto mx-auto object-contain rounded-xl select-auto"
+              />
+            </div>
+
+            <div className="p-3 rounded-2xl bg-[#252525]/90 border border-[#D4AF37]/25 text-left space-y-1">
+              <p className="text-xs font-bold text-[#D4AF37] flex items-center gap-1.5">
+                <CheckCircle2 size={14} />
+                <span>Opción directa en Safari / PWA:</span>
+              </p>
+              <p className="text-[11px] text-[#F5F0E6]/85 leading-relaxed">
+                Mantén presionada la fotografía de arriba durante 1 segundo y selecciona{" "}
+                <strong className="text-[#D4AF37]">«Guardar en Fotos»</strong> (o{" "}
+                <strong className="text-[#D4AF37]">«Añadir a Fotos»</strong>).
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={closeIosSaveModal}
+              className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-[#F5F0E6] text-xs font-bold cursor-pointer"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
       )}
